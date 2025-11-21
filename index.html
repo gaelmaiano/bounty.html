@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -549,7 +548,7 @@
 </head>
 <body>
     <div class="app-container">
-        <div id="mobile-overlay" class="mobile-overlay" onclick="toggleMobileMenu()"></div>
+        <div id="mobile-overlay" class="mobile-overlay"></div>
 
         <nav id="sidebar" class="sidebar">
             <div class="sidebar-header">
@@ -572,22 +571,22 @@
             </div>
 
             <div class="nav-section">
-                <button onclick="app.navigate('dashboard')" class="nav-btn active" data-view="dashboard">
+                <button class="nav-btn active" data-view="dashboard">
                     <i class="fa-solid fa-chart-line"></i> Tableau de bord
                 </button>
                 
                 <div class="nav-divider">Modules</div>
                 
-                <button onclick="app.navigate('module-intro')" class="nav-btn" data-view="module-intro">
+                <button class="nav-btn" data-view="module-intro">
                     <i class="fa-solid fa-book-open"></i> Introduction
                 </button>
-                <button onclick="app.navigate('module-xss')" class="nav-btn" data-view="module-xss">
+                <button class="nav-btn" data-view="module-xss">
                     <i class="fa-solid fa-code"></i> XSS
                 </button>
-                <button onclick="app.navigate('module-idor')" class="nav-btn" data-view="module-idor">
+                <button class="nav-btn" data-view="module-idor">
                     <i class="fa-solid fa-id-card"></i> IDOR
                 </button>
-                <button onclick="app.navigate('module-sqli')" class="nav-btn" data-view="module-sqli">
+                <button class="nav-btn" data-view="module-sqli">
                     <i class="fa-solid fa-database"></i> SQL Injection
                 </button>
             </div>
@@ -600,21 +599,18 @@
         <main class="main-content">
             <div class="mobile-header">
                 <span style="font-weight: bold; color: white;">BountyAcademy</span>
-                <button style="color: white; background: none; border: none; font-size: 1.25rem; cursor: pointer;" onclick="toggleMobileMenu()">
+                <button id="mobile-menu-btn" style="color: white; background: none; border: none; font-size: 1.25rem; cursor: pointer;">
                     <i class="fa-solid fa-bars"></i>
                 </button>
             </div>
 
-            <div id="content-area" class="content-area">
-                <!-- Le contenu sera chargé ici -->
-            </div>
+            <div id="content-area" class="content-area"></div>
         </main>
     </div>
 
     <div id="toast-container" class="toast-container"></div>
 
     <script>
-        // État de l'application
         const appState = {
             xp: 0,
             level: 1,
@@ -622,7 +618,6 @@
             currentView: 'dashboard'
         };
 
-        // Définition des modules
         const modules = {
             'module-intro': {
                 title: "Introduction au Bug Bounty",
@@ -630,7 +625,7 @@
                 xp: 100,
                 content: `
                     <div style="max-width: 48rem; margin: 0 auto;">
-                        <button onclick="app.navigate('dashboard')" class="back-btn">
+                        <button onclick="navigateTo('dashboard')" class="back-btn">
                             <i class="fa-solid fa-arrow-left"></i> Retour au tableau de bord
                         </button>
                         
@@ -639,6 +634,7 @@
                                 <i class="fa-solid fa-book-open"></i>
                                 Introduction au Bug Bounty
                             </h2>
+                            <span id="badge-intro"></span>
                         </div>
                         
                         <hr style="border-color: #475569; margin-bottom: 2rem;">
@@ -670,7 +666,7 @@
                             </ul>
                         </div>
 
-                        <button onclick="app.completeModule('module-intro', 100)" class="action-btn">
+                        <button onclick="completeModule('module-intro', 100)" class="action-btn" id="btn-intro">
                             <i class="fa-solid fa-check" style="margin-right: 0.5rem;"></i> Marquer comme terminé (+100 XP)
                         </button>
                     </div>
@@ -682,7 +678,7 @@
                 xp: 150,
                 content: `
                     <div style="max-width: 48rem; margin: 0 auto;">
-                        <button onclick="app.navigate('dashboard')" class="back-btn">
+                        <button onclick="navigateTo('dashboard')" class="back-btn">
                             <i class="fa-solid fa-arrow-left"></i> Retour au tableau de bord
                         </button>
                         
@@ -691,6 +687,7 @@
                                 <i class="fa-solid fa-code"></i>
                                 XSS (Cross-Site Scripting)
                             </h2>
+                            <span id="badge-xss"></span>
                         </div>
                         
                         <hr style="border-color: #475569; margin-bottom: 2rem;">
@@ -716,23 +713,23 @@
                             <h2 class="section-title">Exemple de payload</h2>
                             <p class="section-text">Voici un exemple basique de payload XSS :</p>
                             <div style="background-color: #000; border-radius: 0.375rem; padding: 1rem; border: 1px solid #334155; overflow-x: auto; font-family: monospace; font-size: 0.875rem;">
-                                <span style="color: #e06c75;">&lt;script&gt;</span><span style="color: #61afef;">alert</span>(<span style="color: #98c379;">'XSS Vulnerability!'</span>)<span style="color: #e06c75;">&lt;/script&gt;</span>
+                                <span style="color: #e06c75;">&lt;script&gt;</span><span style="color: #61afef;">alert</span>(<span style="color: #98c379;">'XSS!'</span>)<span style="color: #e06c75;">&lt;/script&gt;</span>
                             </div>
                         </div>
 
-                        <button onclick="app.completeModule('module-xss', 150)" class="action-btn">
+                        <button onclick="completeModule('module-xss', 150)" class="action-btn" id="btn-xss">
                             <i class="fa-solid fa-check" style="margin-right: 0.5rem;"></i> Marquer comme terminé (+150 XP)
                         </button>
                     </div>
                 `
             },
             'module-idor': {
-                title: "IDOR (Insecure Direct Object Reference)",
+                title: "IDOR",
                 icon: "fa-id-card",
                 xp: 150,
                 content: `
                     <div style="max-width: 48rem; margin: 0 auto;">
-                        <button onclick="app.navigate('dashboard')" class="back-btn">
+                        <button onclick="navigateTo('dashboard')" class="back-btn">
                             <i class="fa-solid fa-arrow-left"></i> Retour au tableau de bord
                         </button>
                         
@@ -741,6 +738,7 @@
                                 <i class="fa-solid fa-id-card"></i>
                                 IDOR
                             </h2>
+                            <span id="badge-idor"></span>
                         </div>
                         
                         <hr style="border-color: #475569; margin-bottom: 2rem;">
@@ -761,11 +759,11 @@
                                 <li>Cherchez des paramètres d'ID dans les URLs</li>
                                 <li>Essayez de modifier ces IDs</li>
                                 <li>Vérifiez si vous pouvez accéder aux données d'autres utilisateurs</li>
-                                <li>Testez avec différents types d'objets (profils, documents, commandes)</li>
+                                <li>Testez avec différents types d'objets</li>
                             </ul>
                         </div>
 
-                        <button onclick="app.completeModule('module-idor', 150)" class="action-btn">
+                        <button onclick="completeModule('module-idor', 150)" class="action-btn" id="btn-idor">
                             <i class="fa-solid fa-check" style="margin-right: 0.5rem;"></i> Marquer comme terminé (+150 XP)
                         </button>
                     </div>
@@ -777,7 +775,7 @@
                 xp: 200,
                 content: `
                     <div style="max-width: 48rem; margin: 0 auto;">
-                        <button onclick="app.navigate('dashboard')" class="back-btn">
+                        <button onclick="navigateTo('dashboard')" class="back-btn">
                             <i class="fa-solid fa-arrow-left"></i> Retour au tableau de bord
                         </button>
                         
@@ -786,6 +784,7 @@
                                 <i class="fa-solid fa-database"></i>
                                 SQL Injection
                             </h2>
+                            <span id="badge-sqli"></span>
                         </div>
                         
                         <hr style="border-color: #475569; margin-bottom: 2rem;">
@@ -809,5 +808,221 @@
                             </div>
                         </div>
 
-                        <button onclick="app.completeModule('module-sqli', 200)" class="action-btn">
+                        <button onclick="completeModule('module-sqli', 200)" class="action-btn" id="btn-sqli">
                             <i class="fa-solid fa-check" style="margin-right: 0.5rem;"></i> Marquer comme terminé (+200 XP)
+                        </button>
+                    </div>
+                `
+            }
+        };
+
+        function loadState() {
+            const saved = localStorage.getItem('bountyAcademyState');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                appState.xp = parsed.xp || 0;
+                appState.level = parsed.level || 1;
+                appState.completedModules = parsed.completedModules || [];
+            }
+        }
+
+        function saveState() {
+            localStorage.setItem('bountyAcademyState', JSON.stringify(appState));
+        }
+
+        function updateUI() {
+            const nextLevel = appState.level * 1000;
+            const percentage = (appState.xp / nextLevel) * 100;
+            document.getElementById('xp-bar').style.width = `${Math.min(percentage, 100)}%`;
+            document.getElementById('current-xp').innerText = `${appState.xp} XP`;
+            document.getElementById('next-level-xp').innerText = `${nextLevel} XP`;
+
+            const ranks = ["Script Kiddie", "Novice", "Hunter", "Pro Hunter", "Elite"];
+            const rankIndex = Math.min(Math.floor(appState.level / 2), ranks.length - 1);
+            document.getElementById('user-level').innerText = `${ranks[rankIndex]} (Lvl ${appState.level})`;
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.getAttribute('data-view') === appState.currentView) {
+                    btn.classList.add('active');
+                }
+            });
+        }
+
+        function navigateTo(view) {
+            appState.currentView = view;
+            updateUI();
+            
+            if (window.innerWidth < 768) {
+                toggleMobileMenu();
+            }
+            
+            if (view === 'dashboard') {
+                renderDashboard();
+            } else if (modules[view]) {
+                renderModule(view);
+            }
+        }
+
+        function renderDashboard() {
+            const completedCount = appState.completedModules.length;
+            const totalModules = 4;
+            const progress = Math.round((completedCount / totalModules) * 100);
+
+            const content = `
+                <div class="fade-in">
+                    <h2 class="dashboard-title">Tableau de bord</h2>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-label">Progression Globale</div>
+                            <div class="stat-value">${progress}%</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${progress}%"></div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Modules Terminés</div>
+                            <div class="stat-value">${completedCount} <span style="color: #64748b; font-size: 1.125rem">/ ${totalModules}</span></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Total XP</div>
+                            <div class="stat-value" style="color: #34d399">${appState.xp}</div>
+                        </div>
+                    </div>
+
+                    <h3 class="modules-title">Parcours d'apprentissage</h3>
+                    <div class="modules-grid">
+                        ${renderModulesList()}
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('content-area').innerHTML = content;
+        }
+
+        function renderModulesList() {
+            return Object.keys(modules).map(key => {
+                const m = modules[key];
+                const isDone = appState.completedModules.includes(key);
+                return `
+                    <div onclick="navigateTo('${key}')" class="module-card ${isDone ? 'completed' : ''}">
+                        <div class="module-left">
+                            <div class="module-icon">
+                                <i class="fa-solid ${m.icon}"></i>
+                            </div>
+                            <div class="module-info">
+                                <h4>${m.title}</h4>
+                                <p>Module Théorique • ${m.xp} XP</p>
+                            </div>
+                        </div>
+                        <div class="module-status">
+                            ${isDone ? '<i class="fa-solid fa-circle-check" style="color: #10b981; font-size: 1.25rem;"></i>' : '<i class="fa-solid fa-chevron-right" style="color: #64748b;"></i>'}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderModule(moduleKey) {
+            const module = modules[moduleKey];
+            const isDone = appState.completedModules.includes(moduleKey);
+            
+            document.getElementById('content-area').innerHTML = `<div class="fade-in">${module.content}</div>`;
+            
+            if (isDone) {
+                const badgeId = 'badge-' + moduleKey.replace('module-', '');
+                const badgeEl = document.getElementById(badgeId);
+                if (badgeEl) {
+                    badgeEl.innerHTML = '<span class="completion-badge"><i class="fa-solid fa-check"></i> Terminé</span>';
+                }
+                
+                const btnId = 'btn-' + moduleKey.replace('module-', '');
+                const btnEl = document.getElementById(btnId);
+                if (btnEl) {
+                    btnEl.disabled = true;
+                    btnEl.innerHTML = '<i class="fa-solid fa-check" style="margin-right: 0.5rem;"></i> Déjà terminé';
+                }
+            }
+        }
+
+        function completeModule(moduleKey, xpGain) {
+            if (appState.completedModules.includes(moduleKey)) {
+                showToast('Module déjà terminé !', 'info');
+                return;
+            }
+
+            appState.completedModules.push(moduleKey);
+            appState.xp += xpGain;
+
+            const nextLevel = appState.level * 1000;
+            if (appState.xp >= nextLevel) {
+                appState.level++;
+                showToast(`Niveau ${appState.level} atteint ! 🎉`, 'success');
+            }
+
+            saveState();
+            updateUI();
+            showToast(`+${xpGain} XP ! Module terminé avec succès !`, 'success');
+            
+            renderModule(moduleKey);
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            
+            const icon = type === 'success' ? 'fa-check-circle' : 'fa-info-circle';
+            toast.innerHTML = `
+                <i class="fa-solid ${icon}" style="color: #10b981;"></i>
+                <span>${message}</span>
+            `;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 10);
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    container.removeChild(toast);
+                }, 300);
+            }, 3000);
+        }
+
+        function toggleMobileMenu() {
+            const nav = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobile-overlay');
+            
+            nav.classList.toggle('mobile-open');
+            overlay.classList.toggle('active');
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadState();
+            updateUI();
+            renderDashboard();
+            
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const view = this.getAttribute('data-view');
+                    navigateTo(view);
+                });
+            });
+            
+            const mobileBtn = document.getElementById('mobile-menu-btn');
+            if (mobileBtn) {
+                mobileBtn.addEventListener('click', toggleMobileMenu);
+            }
+            
+            const overlay = document.getElementById('mobile-overlay');
+            if (overlay) {
+                overlay.addEventListener('click', toggleMobileMenu);
+            }
+        });
+    </script>
+</body>
+</html>

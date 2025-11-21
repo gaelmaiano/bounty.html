@@ -1,4 +1,5 @@
-        <!DOCTYPE html>
+
+<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
@@ -6,7 +7,6 @@
     <title>BountyAcademy - Apprenez le Bug Bounty</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        /* Reset et base */
         * {
             margin: 0;
             padding: 0;
@@ -16,18 +16,16 @@
         body {
             background-color: #0f172a;
             color: #e2e8f0;
-            font-family: 'Inter', sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             height: 100vh;
             overflow: hidden;
         }
 
-        /* Layout principal */
         .app-container {
             display: flex;
             height: 100vh;
         }
 
-        /* Sidebar */
         .sidebar {
             width: 16rem;
             background-color: #1e293b;
@@ -61,7 +59,6 @@
             color: #10b981;
         }
 
-        /* XP Panel */
         .xp-panel {
             padding: 1rem;
             background-color: rgba(30, 41, 59, 0.5);
@@ -115,7 +112,6 @@
             color: #94a3b8;
         }
 
-        /* Navigation */
         .nav-section {
             flex: 1;
             overflow-y: auto;
@@ -171,7 +167,6 @@
             border-top: 1px solid #334155;
         }
 
-        /* Main content */
         .main-content {
             flex: 1;
             overflow-y: auto;
@@ -188,20 +183,12 @@
         }
 
         .content-area {
-            padding: 1rem;
+            padding: 2rem;
             max-width: 64rem;
             margin: 0 auto;
             min-height: 100%;
-            padding-bottom: 5rem;
         }
 
-        @media (min-width: 768px) {
-            .content-area {
-                padding: 2rem;
-            }
-        }
-
-        /* Dashboard */
         .dashboard-title {
             font-size: 1.875rem;
             font-weight: bold;
@@ -254,6 +241,7 @@
             background-color: #10b981;
             height: 100%;
             border-radius: 9999px;
+            transition: width 0.5s;
         }
 
         .modules-title {
@@ -283,6 +271,7 @@
 
         .module-card:hover {
             border-color: #10b981;
+            transform: translateX(4px);
         }
 
         .module-card.completed {
@@ -305,6 +294,7 @@
             justify-content: center;
             color: #10b981;
             transition: all 0.15s;
+            font-size: 1.25rem;
         }
 
         .module-card:hover .module-icon {
@@ -321,6 +311,7 @@
             color: white;
             font-weight: bold;
             transition: color 0.15s;
+            margin-bottom: 0.25rem;
         }
 
         .module-card:hover .module-info h4 {
@@ -334,16 +325,11 @@
 
         .module-status {
             color: #475569;
+            font-size: 1.25rem;
         }
 
         .module-card.completed .module-status {
             color: #10b981;
-        }
-
-        /* Module content */
-        .module-container {
-            max-width: 48rem;
-            margin: 0 auto;
         }
 
         .back-btn {
@@ -353,6 +339,10 @@
             color: #94a3b8;
             margin-bottom: 1.5rem;
             cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 1rem;
+            padding: 0.5rem 0;
         }
 
         .back-btn:hover {
@@ -364,6 +354,8 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 0.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
         }
 
         .module-title {
@@ -387,11 +379,6 @@
             font-size: 0.875rem;
         }
 
-        .module-divider {
-            border-color: #475569;
-            margin-bottom: 2rem;
-        }
-
         .content-section {
             background-color: #1e293b;
             padding: 1.5rem;
@@ -410,6 +397,7 @@
         .section-text {
             color: #cbd5e1;
             margin-bottom: 1rem;
+            line-height: 1.6;
         }
 
         .features-grid {
@@ -444,87 +432,7 @@
         .feature-text {
             font-size: 0.875rem;
             color: #94a3b8;
-        }
-
-        .vulnerability-types {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-            margin-top: 1rem;
-        }
-
-        .vuln-item {
-            padding: 0.75rem;
-            background-color: #0f172a;
-            border-left: 4px solid;
-            border-radius: 0.25rem;
-        }
-
-        .vuln-item.blue {
-            border-left-color: #3b82f6;
-        }
-
-        .vuln-item.purple {
-            border-left-color: #a855f7;
-        }
-
-        .vuln-item.orange {
-            border-left-color: #f97316;
-        }
-
-        .vuln-title {
-            color: white;
-            font-weight: bold;
-            display: block;
-            margin-bottom: 0.25rem;
-        }
-
-        .vuln-desc {
-            font-size: 0.875rem;
-            color: #94a3b8;
-        }
-
-        .code-block {
-            background-color: #000;
-            border-radius: 0.375rem;
-            padding: 1rem;
-            border: 1px solid #334155;
-            overflow-x: auto;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.875rem;
-            margin: 1rem 0;
-        }
-
-        .kw { color: #c678dd; }
-        .str { color: #98c379; }
-        .fn { color: #61afef; }
-        .com { color: #5c6370; font-style: italic; }
-
-        .warning-box {
-            background-color: rgba(113, 63, 18, 0.3);
-            border: 1px solid rgba(217, 119, 6, 0.5);
-            padding: 1rem;
-            border-radius: 0.5rem;
-            display: flex;
-            gap: 1rem;
-            align-items: flex-start;
-            margin: 1rem 0;
-        }
-
-        .warning-icon {
-            color: #f59e0b;
-            margin-top: 0.25rem;
-        }
-
-        .warning-content h4 {
-            font-weight: bold;
-            color: #fbbf24;
-            margin-bottom: 0.25rem;
-        }
-
-        .warning-content p {
-            font-size: 0.875rem;
-            color: rgba(254, 243, 199, 0.8);
+            line-height: 1.5;
         }
 
         .action-btn {
@@ -538,260 +446,18 @@
             cursor: pointer;
             transition: background-color 0.15s;
             margin-top: 1rem;
+            font-size: 1rem;
         }
 
         .action-btn:hover {
             background-color: #10b981;
         }
 
-        .secondary-btn {
+        .action-btn:disabled {
             background-color: #334155;
-            border: 1px solid #475569;
+            cursor: not-allowed;
         }
 
-        .secondary-btn:hover {
-            background-color: #475569;
-        }
-
-        /* Labs */
-        .lab-container {
-            max-width: 48rem;
-            margin: 0 auto;
-        }
-
-        .lab-title {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: white;
-            margin-bottom: 0.5rem;
-        }
-
-        .lab-description {
-            color: #94a3b8;
-            margin-bottom: 1.5rem;
-        }
-
-        .browser-window {
-            background-color: white;
-            border-radius: 0.5rem;
-            overflow: hidden;
-            border: 1px solid #475569;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-        }
-
-        .browser-header {
-            background-color: #f3f4f6;
-            border-bottom: 1px solid #d1d5db;
-            padding: 0.5rem 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .browser-dots {
-            display: flex;
-            gap: 0.25rem;
-        }
-
-        .browser-dot {
-            width: 0.75rem;
-            height: 0.75rem;
-            border-radius: 9999px;
-        }
-
-        .browser-dot.red { background-color: #f87171; }
-        .browser-dot.yellow { background-color: #fbbf24; }
-        .browser-dot.green { background-color: #34d399; }
-
-        .browser-url {
-            flex: 1;
-            background-color: white;
-            border: 1px solid #d1d5db;
-            border-radius: 0.25rem;
-            padding: 0.25rem 0.75rem;
-            font-size: 0.75rem;
-            color: #6b7280;
-            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-            text-align: center;
-        }
-
-        .browser-content {
-            padding: 2rem;
-            min-height: 300px;
-            font-family: sans-serif;
-            color: #1f2937;
-        }
-
-        .lab-content h1 {
-            font-size: 1.875rem;
-            margin-bottom: 1rem;
-        }
-
-        .search-form {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .search-input {
-            border: 1px solid #d1d5db;
-            padding: 0.5rem;
-            width: 100%;
-            border-radius: 0.25rem;
-        }
-
-        .search-btn {
-            background-color: #2563eb;
-            color: white;
-            padding: 0.5rem 1.5rem;
-            border: none;
-            border-radius: 0.25rem;
-            cursor: pointer;
-        }
-
-        .search-btn:hover {
-            background-color: #1d4ed8;
-        }
-
-        .result-area {
-            padding: 1rem;
-            background-color: #f9fafb;
-            border-radius: 0.25rem;
-            border: 1px dashed #d1d5db;
-        }
-
-        .idor-lab {
-            display: flex;
-            gap: 1.5rem;
-        }
-
-        .controls-panel {
-            width: 33.333333%;
-            border-right: 1px solid #d1d5db;
-            padding-right: 1rem;
-        }
-
-        .controls-title {
-            font-weight: bold;
-            margin-bottom: 1rem;
-            font-size: 0.875rem;
-            text-transform: uppercase;
-            color: #6b7280;
-        }
-
-        .idor-input-group {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .idor-input {
-            border: 1px solid #d1d5db;
-            padding: 0.25rem;
-            width: 100%;
-            border-radius: 0.25rem;
-            font-size: 0.875rem;
-        }
-
-        .idor-btn {
-            background-color: #1e293b;
-            color: white;
-            padding: 0.25rem 0.75rem;
-            border: none;
-            border-radius: 0.25rem;
-            cursor: pointer;
-            font-size: 0.875rem;
-        }
-
-        .idor-btn:hover {
-            background-color: #334155;
-        }
-
-        .hints {
-            margin-top: 1rem;
-            font-size: 0.75rem;
-            color: #6b7280;
-        }
-
-        .profile-panel {
-            width: 66.666667%;
-            padding-left: 0.5rem;
-        }
-
-        .profile-header {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .profile-avatar {
-            width: 4rem;
-            height: 4rem;
-            border-radius: 9999px;
-            background-color: #3b82f6;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.5rem;
-        }
-
-        .profile-avatar.admin {
-            background-color: #dc2626;
-        }
-
-        .profile-info h2 {
-            font-size: 1.25rem;
-            font-weight: bold;
-        }
-
-        .profile-info.admin h2 {
-            color: #dc2626;
-        }
-
-        .profile-info p {
-            color: #6b7280;
-        }
-
-        .profile-details {
-            background-color: white;
-            padding: 1rem;
-            border-radius: 0.25rem;
-            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            border: 1px solid #e5e7eb;
-        }
-
-        .profile-details.admin {
-            background-color: #fef2f2;
-            border: 1px solid #fecaca;
-        }
-
-        .admin-alert {
-            color: #991b1b;
-            font-weight: bold;
-            margin-bottom: 0.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .info-box {
-            background-color: #1e293b;
-            padding: 1rem;
-            border-radius: 0.25rem;
-            border: 1px solid #475569;
-            font-size: 0.875rem;
-            color: #94a3b8;
-            margin-top: 1.5rem;
-        }
-
-        .info-box i {
-            color: #60a5fa;
-            margin-right: 0.5rem;
-        }
-
-        /* Toast notifications */
         .toast-container {
             position: fixed;
             bottom: 20px;
@@ -818,7 +484,6 @@
             transform: translateX(0);
         }
 
-        /* Mobile styles */
         @media (max-width: 768px) {
             .sidebar {
                 position: fixed;
@@ -850,30 +515,11 @@
                 display: flex;
             }
             
-            .app-container {
-                flex-direction: column;
-            }
-            
-            .main-content {
-                margin-left: 0;
-            }
-            
-            .idor-lab {
-                flex-direction: column;
-            }
-            
-            .controls-panel, .profile-panel {
-                width: 100%;
-                border-right: none;
-                padding: 0;
-            }
-            
-            .controls-panel {
-                margin-bottom: 1rem;
+            .content-area {
+                padding: 1rem;
             }
         }
 
-        /* Animations */
         .fade-in {
             animation: fadeIn 0.3s ease-in-out;
         }
@@ -883,7 +529,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
         }
@@ -904,10 +549,8 @@
 </head>
 <body>
     <div class="app-container">
-        <!-- Mobile Overlay -->
         <div id="mobile-overlay" class="mobile-overlay" onclick="toggleMobileMenu()"></div>
 
-        <!-- Sidebar -->
         <nav id="sidebar" class="sidebar">
             <div class="sidebar-header">
                 <i class="fa-solid fa-bug"></i>
@@ -929,32 +572,23 @@
             </div>
 
             <div class="nav-section">
-                <button onclick="app.navigate('dashboard')" class="nav-btn active">
+                <button onclick="app.navigate('dashboard')" class="nav-btn active" data-view="dashboard">
                     <i class="fa-solid fa-chart-line"></i> Tableau de bord
                 </button>
                 
                 <div class="nav-divider">Modules</div>
                 
-                <button onclick="app.navigate('module-intro')" class="nav-btn">
+                <button onclick="app.navigate('module-intro')" class="nav-btn" data-view="module-intro">
                     <i class="fa-solid fa-book-open"></i> Introduction
                 </button>
-                <button onclick="app.navigate('module-xss')" class="nav-btn">
-                    <i class="fa-solid fa-code"></i> XSS (Cross-Site Scripting)
+                <button onclick="app.navigate('module-xss')" class="nav-btn" data-view="module-xss">
+                    <i class="fa-solid fa-code"></i> XSS
                 </button>
-                <button onclick="app.navigate('module-idor')" class="nav-btn">
+                <button onclick="app.navigate('module-idor')" class="nav-btn" data-view="module-idor">
                     <i class="fa-solid fa-id-card"></i> IDOR
                 </button>
-                <button onclick="app.navigate('module-sqli')" class="nav-btn">
+                <button onclick="app.navigate('module-sqli')" class="nav-btn" data-view="module-sqli">
                     <i class="fa-solid fa-database"></i> SQL Injection
-                </button>
-
-                <div class="nav-divider">Pratique</div>
-                
-                <button onclick="app.navigate('lab-xss')" class="nav-btn">
-                    <i class="fa-solid fa-flask"></i> Laboratoire XSS
-                </button>
-                <button onclick="app.navigate('lab-idor')" class="nav-btn">
-                    <i class="fa-solid fa-server"></i> Laboratoire IDOR
                 </button>
             </div>
 
@@ -963,41 +597,16 @@
             </div>
         </nav>
 
-        <!-- Main Content -->
         <main class="main-content">
             <div class="mobile-header">
-                <span class="font-bold text-white">BountyAcademy</span>
-                <button class="text-white" onclick="toggleMobileMenu()"><i class="fa-solid fa-bars"></i></button>
+                <span style="font-weight: bold; color: white;">BountyAcademy</span>
+                <button style="color: white; background: none; border: none; font-size: 1.25rem; cursor: pointer;" onclick="toggleMobileMenu()">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
             </div>
 
             <div id="content-area" class="content-area">
-                <!-- Le contenu sera chargé ici dynamiquement -->
-                <div class="fade-in">
-                    <h2 class="dashboard-title">Tableau de bord</h2>
-                    
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="stat-label">Progression Globale</div>
-                            <div class="stat-value" id="progress-percent">0%</div>
-                            <div class="progress-bar">
-                                <div class="progress-fill" id="progress-bar" style="width: 0%"></div>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-label">Modules Terminés</div>
-                            <div class="stat-value" id="completed-count">0 <span class="text-slate-500 text-lg">/ 4</span></div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-label">Total XP</div>
-                            <div class="stat-value text-emerald-400" id="total-xp">0</div>
-                        </div>
-                    </div>
-
-                    <h3 class="modules-title">Parcours d'apprentissage</h3>
-                    <div class="modules-grid" id="modules-list">
-                        <!-- Les modules seront chargés ici -->
-                    </div>
-                </div>
+                <!-- Le contenu sera chargé ici -->
             </div>
         </main>
     </div>
@@ -1005,8 +614,7 @@
     <div id="toast-container" class="toast-container"></div>
 
     <script>
-        // Le code JavaScript reste exactement le même que dans la version précédente
-        // Il n'a pas été modifié car il fonctionnait correctement
+        // État de l'application
         const appState = {
             xp: 0,
             level: 1,
@@ -1014,12 +622,27 @@
             currentView: 'dashboard'
         };
 
+        // Définition des modules
         const modules = {
             'module-intro': {
                 title: "Introduction au Bug Bounty",
                 icon: "fa-book-open",
+                xp: 100,
                 content: `
-                    <div class="space-y-6 fade-in">
+                    <div style="max-width: 48rem; margin: 0 auto;">
+                        <button onclick="app.navigate('dashboard')" class="back-btn">
+                            <i class="fa-solid fa-arrow-left"></i> Retour au tableau de bord
+                        </button>
+                        
+                        <div class="module-header">
+                            <h2 class="module-title">
+                                <i class="fa-solid fa-book-open"></i>
+                                Introduction au Bug Bounty
+                            </h2>
+                        </div>
+                        
+                        <hr style="border-color: #475569; margin-bottom: 2rem;">
+                        
                         <div class="content-section">
                             <h2 class="section-title">Qu'est-ce que le Bug Bounty ?</h2>
                             <p class="section-text">
@@ -1027,11 +650,11 @@
                             </p>
                             <div class="features-grid">
                                 <div class="feature-card">
-                                    <h3 class="feature-title"><i class="fa-solid fa-user-shield"></i>White Hat</h3>
+                                    <h3 class="feature-title"><i class="fa-solid fa-user-shield"></i> White Hat</h3>
                                     <p class="feature-text">Hackers éthiques qui utilisent leurs compétences pour améliorer la sécurité. Ils demandent la permission et rapportent les failles.</p>
                                 </div>
                                 <div class="feature-card">
-                                    <h3 class="feature-title"><i class="fa-solid fa-user-ninja"></i>Black Hat</h3>
+                                    <h3 class="feature-title"><i class="fa-solid fa-user-ninja"></i> Black Hat</h3>
                                     <p class="feature-text">Hackers malveillants qui exploitent les failles pour un gain personnel ou pour nuire, sans autorisation.</p>
                                 </div>
                             </div>
@@ -1039,120 +662,152 @@
 
                         <div class="content-section">
                             <h2 class="section-title">Les plateformes principales</h2>
-                            <ul class="section-text list-disc list-inside space-y-2">
-                                <li><strong class="text-white">HackerOne</strong> : La plus grosse plateforme mondiale.</li>
-                                <li><strong class="text-white">Bugcrowd</strong> : Très populaire avec beaucoup de programmes privés.</li>
-                                <li><strong class="text-white">Intigriti</strong> : Plateforme européenne en pleine croissance.</li>
-                                <li><strong class="text-white">YesWeHack</strong> : Leader européen, excellent pour débuter.</li>
+                            <ul class="section-text" style="list-style: disc; padding-left: 2rem; line-height: 2;">
+                                <li><strong style="color: white;">HackerOne</strong> : La plus grosse plateforme mondiale.</li>
+                                <li><strong style="color: white;">Bugcrowd</strong> : Très populaire avec beaucoup de programmes privés.</li>
+                                <li><strong style="color: white;">Intigriti</strong> : Plateforme européenne en pleine croissance.</li>
+                                <li><strong style="color: white;">YesWeHack</strong> : Leader européen, excellent pour débuter.</li>
                             </ul>
                         </div>
 
                         <button onclick="app.completeModule('module-intro', 100)" class="action-btn">
-                            <i class="fa-solid fa-check mr-2"></i> Marquer comme terminé (+100 XP)
+                            <i class="fa-solid fa-check" style="margin-right: 0.5rem;"></i> Marquer comme terminé (+100 XP)
                         </button>
                     </div>
                 `
             },
-            // ... le reste des modules reste identique
-        };
-
-        const app = {
-            init: function() {
-                this.loadState();
-                this.updateUI();
-                this.renderDashboard();
-            },
-
-            loadState: function() {
-                const saved = localStorage.getItem('bountyAcademyState');
-                if (saved) {
-                    const parsed = JSON.parse(saved);
-                    appState.xp = parsed.xp;
-                    appState.level = parsed.level;
-                    appState.completedModules = parsed.completedModules || [];
-                }
-            },
-
-            saveState: function() {
-                localStorage.setItem('bountyAcademyState', JSON.stringify(appState));
-            },
-
-            updateUI: function() {
-                // Mise à jour de l'interface utilisateur
-                const nextLevel = appState.level * 1000;
-                const percentage = (appState.xp / nextLevel) * 100;
-                document.getElementById('xp-bar').style.width = `${Math.min(percentage, 100)}%`;
-                document.getElementById('current-xp').innerText = `${appState.xp} XP`;
-                document.getElementById('next-level-xp').innerText = `${nextLevel} XP`;
-
-                const ranks = ["Script Kiddie", "Novice", "Hunter", "Pro Hunter", "Elite"];
-                const rankIndex = Math.min(Math.floor(appState.level / 2), ranks.length - 1);
-                document.getElementById('user-level').innerText = `${ranks[rankIndex]} (Lvl ${appState.level})`;
-            },
-
-            navigate: function(view) {
-                appState.currentView = view;
-                this.updateUI();
-                
-                if (window.innerWidth < 768) {
-                    toggleMobileMenu();
-                }
-                
-                if (view === 'dashboard') {
-                    this.renderDashboard();
-                }
-                // ... le reste de la navigation
-            },
-
-            renderDashboard: function() {
-                const completedCount = appState.completedModules.length;
-                const totalModules = 4; // Modules fixes
-                const progress = Math.round((completedCount / totalModules) * 100);
-
-                document.getElementById('progress-percent').innerText = `${progress}%`;
-                document.getElementById('progress-bar').style.width = `${progress}%`;
-                document.getElementById('completed-count').innerHTML = `${completedCount} <span style="color: #64748b; font-size: 1.125rem">/ ${totalModules}</span>`;
-                document.getElementById('total-xp').innerText = appState.xp;
-
-                // Rendu des modules
-                const modulesList = document.getElementById('modules-list');
-                modulesList.innerHTML = Object.keys(modules).map(key => {
-                    const m = modules[key];
-                    const isDone = appState.completedModules.includes(key);
-                    return `
-                        <div onclick="app.navigate('${key}')" class="module-card ${isDone ? 'completed' : ''}">
-                            <div class="module-left">
-                                <div class="module-icon">
-                                    <i class="fa-solid ${m.icon}"></i>
+            'module-xss': {
+                title: "XSS (Cross-Site Scripting)",
+                icon: "fa-code",
+                xp: 150,
+                content: `
+                    <div style="max-width: 48rem; margin: 0 auto;">
+                        <button onclick="app.navigate('dashboard')" class="back-btn">
+                            <i class="fa-solid fa-arrow-left"></i> Retour au tableau de bord
+                        </button>
+                        
+                        <div class="module-header">
+                            <h2 class="module-title">
+                                <i class="fa-solid fa-code"></i>
+                                XSS (Cross-Site Scripting)
+                            </h2>
+                        </div>
+                        
+                        <hr style="border-color: #475569; margin-bottom: 2rem;">
+                        
+                        <div class="content-section">
+                            <h2 class="section-title">Qu'est-ce qu'une faille XSS ?</h2>
+                            <p class="section-text">
+                                Le Cross-Site Scripting (XSS) est une vulnérabilité qui permet à un attaquant d'injecter du code JavaScript malveillant dans une page web. Ce code s'exécute ensuite dans le navigateur des victimes.
+                            </p>
+                            <div class="features-grid">
+                                <div class="feature-card">
+                                    <h3 class="feature-title"><i class="fa-solid fa-bullseye"></i> XSS Reflected</h3>
+                                    <p class="feature-text">Le code malveillant est reflété immédiatement par le serveur sans être stocké. Généralement via des paramètres URL.</p>
                                 </div>
-                                <div class="module-info">
-                                    <h4>${m.title}</h4>
-                                    <p>Module Théorique</p>
+                                <div class="feature-card">
+                                    <h3 class="feature-title"><i class="fa-solid fa-database"></i> XSS Stored</h3>
+                                    <p class="feature-text">Le code est stocké dans la base de données et exécuté chaque fois qu'un utilisateur visite la page.</p>
                                 </div>
-                            </div>
-                            <div class="module-status">
-                                ${isDone ? '<i class="fa-solid fa-circle-check text-emerald-500 text-xl"></i>' : '<i class="fa-solid fa-chevron-right text-slate-600"></i>'}
                             </div>
                         </div>
-                    `;
-                }).join('');
+
+                        <div class="content-section">
+                            <h2 class="section-title">Exemple de payload</h2>
+                            <p class="section-text">Voici un exemple basique de payload XSS :</p>
+                            <div style="background-color: #000; border-radius: 0.375rem; padding: 1rem; border: 1px solid #334155; overflow-x: auto; font-family: monospace; font-size: 0.875rem;">
+                                <span style="color: #e06c75;">&lt;script&gt;</span><span style="color: #61afef;">alert</span>(<span style="color: #98c379;">'XSS Vulnerability!'</span>)<span style="color: #e06c75;">&lt;/script&gt;</span>
+                            </div>
+                        </div>
+
+                        <button onclick="app.completeModule('module-xss', 150)" class="action-btn">
+                            <i class="fa-solid fa-check" style="margin-right: 0.5rem;"></i> Marquer comme terminé (+150 XP)
+                        </button>
+                    </div>
+                `
             },
+            'module-idor': {
+                title: "IDOR (Insecure Direct Object Reference)",
+                icon: "fa-id-card",
+                xp: 150,
+                content: `
+                    <div style="max-width: 48rem; margin: 0 auto;">
+                        <button onclick="app.navigate('dashboard')" class="back-btn">
+                            <i class="fa-solid fa-arrow-left"></i> Retour au tableau de bord
+                        </button>
+                        
+                        <div class="module-header">
+                            <h2 class="module-title">
+                                <i class="fa-solid fa-id-card"></i>
+                                IDOR
+                            </h2>
+                        </div>
+                        
+                        <hr style="border-color: #475569; margin-bottom: 2rem;">
+                        
+                        <div class="content-section">
+                            <h2 class="section-title">Qu'est-ce qu'un IDOR ?</h2>
+                            <p class="section-text">
+                                IDOR (Insecure Direct Object Reference) est une vulnérabilité qui permet à un attaquant d'accéder directement à des objets en manipulant les identifiants dans les URLs ou paramètres.
+                            </p>
+                            <p class="section-text">
+                                Par exemple, si vous pouvez voir votre profil sur <code style="background: #0f172a; padding: 0.25rem 0.5rem; border-radius: 0.25rem;">/profile?id=123</code>, vous pourriez essayer <code style="background: #0f172a; padding: 0.25rem 0.5rem; border-radius: 0.25rem;">/profile?id=124</code> pour voir le profil d'un autre utilisateur.
+                            </p>
+                        </div>
 
-            // ... les autres méthodes restent identiques
-        };
+                        <div class="content-section">
+                            <h2 class="section-title">Comment détecter un IDOR ?</h2>
+                            <ul class="section-text" style="list-style: disc; padding-left: 2rem; line-height: 2;">
+                                <li>Cherchez des paramètres d'ID dans les URLs</li>
+                                <li>Essayez de modifier ces IDs</li>
+                                <li>Vérifiez si vous pouvez accéder aux données d'autres utilisateurs</li>
+                                <li>Testez avec différents types d'objets (profils, documents, commandes)</li>
+                            </ul>
+                        </div>
 
-        function toggleMobileMenu() {
-            const nav = document.getElementById('sidebar');
-            const overlay = document.getElementById('mobile-overlay');
-            
-            nav.classList.toggle('mobile-open');
-            overlay.classList.toggle('active');
-        }
+                        <button onclick="app.completeModule('module-idor', 150)" class="action-btn">
+                            <i class="fa-solid fa-check" style="margin-right: 0.5rem;"></i> Marquer comme terminé (+150 XP)
+                        </button>
+                    </div>
+                `
+            },
+            'module-sqli': {
+                title: "SQL Injection",
+                icon: "fa-database",
+                xp: 200,
+                content: `
+                    <div style="max-width: 48rem; margin: 0 auto;">
+                        <button onclick="app.navigate('dashboard')" class="back-btn">
+                            <i class="fa-solid fa-arrow-left"></i> Retour au tableau de bord
+                        </button>
+                        
+                        <div class="module-header">
+                            <h2 class="module-title">
+                                <i class="fa-solid fa-database"></i>
+                                SQL Injection
+                            </h2>
+                        </div>
+                        
+                        <hr style="border-color: #475569; margin-bottom: 2rem;">
+                        
+                        <div class="content-section">
+                            <h2 class="section-title">Qu'est-ce qu'une SQL Injection ?</h2>
+                            <p class="section-text">
+                                Une SQL Injection permet à un attaquant d'injecter du code SQL malveillant dans une requête, permettant potentiellement d'accéder, modifier ou supprimer des données dans la base de données.
+                            </p>
+                        </div>
 
-        // Initialisation
-        window.addEventListener('DOMContentLoaded', () => {
-            app.init();
-        });
-    </script>
-</body>
-</html>
+                        <div class="content-section">
+                            <h2 class="section-title">Exemple de vulnérabilité</h2>
+                            <p class="section-text">Code vulnérable :</p>
+                            <div style="background-color: #000; border-radius: 0.375rem; padding: 1rem; border: 1px solid #334155; overflow-x: auto; font-family: monospace; font-size: 0.875rem; margin-bottom: 1rem;">
+                                <span style="color: #c678dd;">SELECT</span> * <span style="color: #c678dd;">FROM</span> users <span style="color: #c678dd;">WHERE</span> username = <span style="color: #98c379;">'</span> + input + <span style="color: #98c379;">'</span>
+                            </div>
+                            <p class="section-text">Payload d'attaque :</p>
+                            <div style="background-color: #000; border-radius: 0.375rem; padding: 1rem; border: 1px solid #334155; overflow-x: auto; font-family: monospace; font-size: 0.875rem;">
+                                <span style="color: #98c379;">' OR '1'='1</span>
+                            </div>
+                        </div>
+
+                        <button onclick="app.completeModule('module-sqli', 200)" class="action-btn">
+                            <i class="fa-solid fa-check" style="margin-right: 0.5rem;"></i> Marquer comme terminé (+200 XP)

@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
@@ -95,11 +95,54 @@
         .str { color: #98c379; } /* String */
         .fn { color: #61afef; } /* Function */
         .com { color: #5c6370; font-style: italic; } /* Comment */
+
+        /* Mobile Menu */
+        @media (max-width: 768px) {
+            nav {
+                position: fixed;
+                height: 100vh;
+                z-index: 40;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            nav.mobile-open {
+                transform: translateX(0);
+            }
+            .mobile-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 30;
+            }
+            .mobile-overlay.active {
+                display: block;
+            }
+        }
+
+        /* Module completion indicator */
+        .module-completed {
+            position: relative;
+        }
+        .module-completed::after {
+            content: "✓";
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--accent);
+            font-weight: bold;
+        }
     </style>
 </head>
 <body class="h-screen flex flex-col md:flex-row overflow-hidden">
 
-    <nav class="w-full md:w-64 bg-slate-900 border-r border-slate-800 flex flex-col z-20">
+    <div id="mobile-overlay" class="mobile-overlay" onclick="toggleMobileMenu()"></div>
+
+    <nav id="sidebar" class="w-full md:w-64 bg-slate-900 border-r border-slate-800 flex flex-col z-20">
         <div class="p-6 flex items-center gap-3 border-b border-slate-800">
             <i class="fa-solid fa-bug text-emerald-500 text-2xl"></i>
             <h1 class="text-xl font-bold tracking-wider text-white">Bounty<span class="text-emerald-500">Acad</span></h1>
@@ -161,7 +204,8 @@
         </div>
 
         <div id="content-area" class="p-4 md:p-8 max-w-5xl mx-auto min-h-full pb-20">
-            </div>
+            <!-- Content will be dynamically loaded here -->
+        </div>
     </main>
 
     <div id="toast-container"></div>
@@ -400,6 +444,18 @@
                 document.querySelectorAll('.nav-btn').forEach(btn => {
                     btn.classList.remove('border-emerald-500', 'text-emerald-400', 'bg-slate-800');
                     btn.classList.add('text-slate-400', 'border-transparent');
+                    
+                    // Add completion indicator
+                    const onclick = btn.getAttribute('onclick');
+                    if (onclick) {
+                        const moduleMatch = onclick.match(/app\.navigate\('([^']+)'\)/);
+                        if (moduleMatch && appState.completedModules.includes(moduleMatch[1])) {
+                            btn.classList.add('module-completed');
+                        } else {
+                            btn.classList.remove('module-completed');
+                        }
+                    }
+                    
                     if (btn.getAttribute('onclick').includes(appState.currentView)) {
                         btn.classList.add('border-emerald-500', 'text-emerald-400', 'bg-slate-800');
                         btn.classList.remove('text-slate-400', 'border-transparent');
@@ -422,6 +478,11 @@
             navigate: function(view) {
                 appState.currentView = view;
                 this.updateUI();
+                
+                // Close mobile menu if open
+                if (window.innerWidth < 768) {
+                    toggleMobileMenu();
+                }
                 
                 const contentArea = document.getElementById('content-area');
                 
@@ -469,9 +530,9 @@
                                 const m = modules[key];
                                 const isDone = appState.completedModules.includes(key);
                                 return `
-                                    <div onclick="app.navigate('${key}')" class="bg-slate-800 p-4 rounded-lg border border-slate-700 hover:border-emerald-500 transition-all cursor-pointer flex items-center justify-between group">
+                                    <div onclick="app.navigate('${key}')" class="bg-slate-800 p-4 rounded-lg border ${isDone ? 'border-emerald-500/50' : 'border-slate-700'} hover:border-emerald-500 transition-all cursor-pointer flex items-center justify-between group">
                                         <div class="flex items-center gap-4">
-                                            <div class="w-12 h-12 rounded-full bg-slate-700 flex items-center justify-center text-emerald-500 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
+                                            <div class="w-12 h-12 rounded-full ${isDone ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-700 text-emerald-500'} flex items-center justify-center group-hover:bg-emerald-500 group-hover:text-white transition-colors">
                                                 <i class="fa-solid ${m.icon}"></i>
                                             </div>
                                             <div>
@@ -491,14 +552,18 @@
 
             renderModule: function(key) {
                 const m = modules[key];
+                const isCompleted = appState.completedModules.includes(key);
                 const html = `
                     <div class="max-w-3xl mx-auto">
                         <div class="flex items-center gap-3 mb-6 text-slate-400 hover:text-white cursor-pointer" onclick="app.navigate('dashboard')">
                             <i class="fa-solid fa-arrow-left"></i> Retour au tableau de bord
                         </div>
-                        <h1 class="text-3xl font-bold text-white mb-2 flex items-center gap-3">
-                            <i class="fa-solid ${m.icon} text-emerald-500"></i> ${m.title}
-                        </h1>
+                        <div class="flex justify-between items-center mb-2">
+                            <h1 class="text-3xl font-bold text-white flex items-center gap-3">
+                                <i class="fa-solid ${m.icon} text-emerald-500"></i> ${m.title}
+                            </h1>
+                            ${isCompleted ? '<span class="bg-emerald-500/20 text-emerald-400 px-3 py-1 rounded-full text-sm"><i class="fa-solid fa-check mr-1"></i>Terminé</span>' : ''}
+                        </div>
                         <hr class="border-slate-700 mb-8">
                         ${m.content}
                     </div>
@@ -592,7 +657,7 @@
                                 </div>
                                 <div class="flex-1 bg-white border rounded px-3 py-1 text-xs text-gray-500 font-mono flex justify-between items-center">
                                     <span>http://shop.local/profile?user_id=<span id="url-id" class="text-blue-600 font-bold">${this.simId}</span></span>
-                                    <i class="fa-solid fa-rotate-right cursor-pointer hover:text-blue-500"></i>
+                                    <i class="fa-solid fa-rotate-right cursor-pointer hover:text-blue-500" onclick="app.resetIDOR()"></i>
                                 </div>
                             </div>
 
@@ -639,6 +704,13 @@
                     this.showToast("ACCÈS ADMIN RÉUSSI ! Faille IDOR exploitée.", "success");
                     this.completeModule('lab-idor', 250);
                 }
+            },
+
+            resetIDOR: function() {
+                this.simId = 1050;
+                document.getElementById('idor-input').value = 1050;
+                document.getElementById('url-id').innerText = 1050;
+                document.getElementById('profile-view').innerHTML = this.getProfileHTML(1050);
             },
 
             getProfileHTML: function(id) {
@@ -743,13 +815,11 @@
 
         // --- Mobile Menu Helper ---
         function toggleMobileMenu() {
-            // Simple toggle logic for brevity in single file
-            const nav = document.querySelector('nav');
-            nav.classList.toggle('hidden'); 
-            // Note: In a real complex app, we'd use a better overlay system
-            // Here we assume desktop first, mobile tweaks via CSS classes if needed
-            // but for this single file, sidebar is fixed. 
-            // Let's make it just alert for now as a placeholder or scroll to top
+            const nav = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobile-overlay');
+            
+            nav.classList.toggle('mobile-open');
+            overlay.classList.toggle('active');
         }
 
         // Init App

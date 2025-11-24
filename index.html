@@ -1,10 +1,11 @@
+HTML
 
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BountyAcademy - Labs XSS, IDOR & SQLi</title>
+    <title>BountyAcademy - Labs XSS, IDOR, SQLi & XXE</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -68,7 +69,7 @@
         .api-key { background: #fee2e2; color: #991b1b; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 0.85rem; }
         .idor-control { margin-top: 20px; padding: 15px; background: #f1f5f9; border-radius: 8px; display: inline-flex; align-items: center; gap: 10px; }
         
-        /* SQLi Styles */
+        /* SQLi/XXE Styles */
         .login-box { max-width: 350px; margin: 0 auto; background: white; padding: 2rem; border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
         .login-input { width: 100%; padding: 10px; margin-bottom: 1rem; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 1rem; }
         .sql-debug { margin-top: 20px; font-family: monospace; font-size: 0.85rem; background: #1e293b; color: #10b981; padding: 10px; border-radius: 4px; text-align: left; border-left: 3px solid #10b981; min-height: 3.5em; display: flex; align-items: center; }
@@ -110,7 +111,7 @@
                 </div>
                 <div class="xp-info">
                     <span id="current-xp">0 XP</span>
-                    <span id="next-level-xp">1000 XP</span>
+                    <span id="next-level-xp">1300 XP (Max)</span>
                 </div>
             </div>
             <div class="nav-section">
@@ -127,8 +128,11 @@
                 <button class="nav-btn" onclick="navigateTo('module-sqli')" data-view="module-sqli">
                     <i class="fa-solid fa-database"></i> Lab 3: SQL Injection
                 </button>
+                <button class="nav-btn" onclick="navigateTo('module-xxe')" data-view="module-xxe">
+                    <i class="fa-solid fa-file-code"></i> Lab 4: XXE (External Entity)
+                </button>
             </div>
-            <div class="sidebar-footer">v1.4 | SQLi Added</div>
+            <div class="sidebar-footer">v1.5 | XXE Added</div>
         </nav>
 
         <main class="main-content">
@@ -177,7 +181,7 @@
                     html += '</div>';
                     html += '<div class="stat-card">';
                     html += '<div style="color: #94a3b8; font-size: 0.875rem;">Modules Terminés</div>';
-                    html += '<div style="font-size: 1.875rem; font-weight: bold; color: white;">' + appState.completedModules.length + '</div>';
+                    html += '<div style="font-size: 1.875rem; font-weight: bold; color: white;">' + appState.completedModules.length + '/4</div>';
                     html += '</div>';
                     html += '</div>';
                     html += '<h3 style="color:white; margin-bottom:1rem;">Continuer l\'apprentissage</h3>';
@@ -219,6 +223,20 @@
                     html += '<div>';
                     html += '<h4 style="color: white; font-weight: bold;">Lab SQL Injection</h4>';
                     html += '<p style="font-size: 0.75rem; color: #94a3b8;">Niveau: Intermédiaire • 400 XP</p>';
+                    html += '</div>';
+                    html += '</div>';
+                    html += '<i class="fa-solid fa-chevron-right" style="color: #475569;"></i>';
+                    html += '</div>';
+
+                    // CARTE XXE (NEW)
+                    html += '<div class="module-card" onclick="navigateTo(\'module-xxe\')">';
+                    html += '<div style="display:flex; align-items:center; gap:1rem;">';
+                    html += '<div style="width: 3rem; height: 3rem; background: #334155; border-radius: 50%; display:flex; align-items:center; justify-content:center; color: #3b82f6;">';
+                    html += '<i class="fa-solid fa-file-code"></i>';
+                    html += '</div>';
+                    html += '<div>';
+                    html += '<h4 style="color: white; font-weight: bold;">Lab XXE (External Entity)</h4>';
+                    html += '<p style="font-size: 0.75rem; color: #94a3b8;">Niveau: Avancé • 400 XP</p>';
                     html += '</div>';
                     html += '</div>';
                     html += '<i class="fa-solid fa-chevron-right" style="color: #475569;"></i>';
@@ -312,6 +330,47 @@
                     
                     return html;
                 }
+            },
+            'module-xxe': { // NOUVEAU MODULE XXE
+                xpReward: 400,
+                render: function() {
+                    var isDone = appState.completedModules.indexOf('module-xxe') !== -1;
+                    var html = '';
+                    html += '<button onclick="navigateTo(\'dashboard\')" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Retour</button>';
+                    html += '<h2 class="dashboard-title"><i class="fa-solid fa-file-code" style="color:#3b82f6"></i> Lab: XXE (XML External Entity)</h2>';
+                    
+                    html += '<div class="stat-card" style="margin-bottom: 2rem;">';
+                    html += '<h3 style="color: white; margin-bottom: 0.5rem;">Mission : Lire le fichier /etc/passwd</h3>';
+                    html += '<p style="color: #cbd5e1; line-height: 1.6;">';
+                    html += 'Ce service de configuration traite le XML de manière vulnérable. Déclarez une entité externe pour lire un fichier sensible du système (<code>file:///etc/passwd</code>).';
+                    html += '<br><br><strong>Indice :</strong> La balise <code>&lt;user&gt;</code> est lue et affichée dans le traitement. L\'injection doit être dans le DTD.';
+                    html += '</p>';
+                    html += '</div>';
+
+                    html += '<div class="lab-container">';
+                    html += '<div style="margin-bottom: 1rem; color: #cbd5e1;">http://api-config-uploader.local</div>';
+                    html += '<div class="lab-browser">';
+                    html += '<div class="browser-bar"><div class="browser-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><div id="xxe-url-bar" class="url-bar">/upload/config.xml</div></div>';
+                    
+                    // Contenu du Browser (XML Input)
+                    html += '<div class="browser-content" style="background:#f1f5f9; display:flex; flex-direction:column; align-items:center;">';
+                    
+                    html += '<div style="max-width: 500px; width:100%;">';
+                    html += '<h3 style="color:#1e293b; margin-bottom:1rem;">Uploader de Fichier de Configuration XML</h3>';
+                    html += '<textarea id="xxe-xml-input" class="login-input" style="height: 200px; font-family: monospace; font-size: 0.9rem;" placeholder="Collez votre XML ici..."><?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<config>\n  <user>Invité</user>\n  <settings>default</settings>\n</config></textarea>';
+                    html += '<button onclick="runXXELab()" class="vulnerable-btn" style="width:100%;">Envoyer le XML</button>';
+                    html += '<div id="xxe-output" class="sql-debug" style="min-height: 4em; color: #3b82f6; border-left-color: #3b82f6; margin-top:1rem;">En attente d\'un fichier XML...</div>';
+                    html += '</div>';
+                    
+                    html += '</div>'; // fin browser-content
+                    html += '</div></div>'; // fin lab-container & browser
+
+                    html += '<button id="validate-btn-xxe" class="action-btn" disabled>';
+                    html += isDone ? '<i class="fa-solid fa-check"></i> Module Déjà Validé' : 'Soumettez la payload pour valider';
+                    html += '</button>';
+                    
+                    return html;
+                }
             }
         };
 
@@ -361,6 +420,12 @@
                         var fn = function(e) { if(e.key === 'Enter') runSQLiLab(); };
                         if(inputUser) inputUser.addEventListener('keypress', fn);
                         if(inputPass) inputPass.addEventListener('keypress', fn);
+                    } else if (viewName === 'module-xxe') {
+                        var input = document.getElementById('xxe-xml-input');
+                        if(input) input.addEventListener('keypress', function(e) { 
+                             // Trigger on Ctrl+Enter or Cmd+Enter to prevent accidental submission on new lines
+                            if(e.ctrlKey || e.metaKey) runXXELab(); 
+                        });
                     }
                 }, 100);
             }
@@ -368,7 +433,8 @@
         }
 
         function updateUI() {
-            var percentage = Math.min((appState.xp / 1200) * 100, 100);
+            // Total XP possible is 200 + 300 + 400 + 400 = 1300 XP
+            var percentage = Math.min((appState.xp / 1300) * 100, 100); 
             document.getElementById('xp-bar').style.width = percentage + '%';
             document.getElementById('current-xp').innerText = appState.xp + ' XP';
             
@@ -376,6 +442,7 @@
             if (appState.xp >= 200) rank = 'Hunter';
             if (appState.xp >= 500) rank = 'Pro Hunter';
             if (appState.xp >= 900) rank = 'Elite';
+            if (appState.xp >= 1300) rank = 'Legend';
             document.getElementById('user-level').innerText = rank;
         }
 
@@ -428,7 +495,7 @@
             }
         }
 
-        /* --- SQLi LOGIC (NEW) --- */
+        /* --- SQLi LOGIC --- */
         function runSQLiLab() {
             var user = document.getElementById('sqli-user').value;
             var pass = document.getElementById('sqli-pass').value;
@@ -471,6 +538,44 @@
             }
         }
 
+        /* --- XXE LOGIC (NEW) --- */
+        function runXXELab() {
+            var input = document.getElementById('xxe-xml-input');
+            var outputDiv = document.getElementById('xxe-output');
+            var urlBar = document.getElementById('xxe-url-bar');
+            if (!input) return;
+            var xml = input.value.trim();
+
+            urlBar.innerText = '/upload/config.xml?data=' + encodeURIComponent(xml.substring(0, 50)) + '...';
+            outputDiv.innerHTML = '<p style="color:#64748b; font-style:italic;">[STATUS] Traitement du XML en cours...</p>';
+
+
+            // Logique de détection simplifiée pour le lab
+            // La payload cible est: <!ENTITY xxe SYSTEM "file:///etc/passwd">
+            var isVulnerable = xml.indexOf('<!ENTITY') !== -1 && xml.indexOf('file:///etc/passwd') !== -1 && xml.indexOf('&xxe;') !== -1;
+
+            if (isVulnerable) {
+                // SUCCESS: Simulation de la lecture du fichier
+                setTimeout(function() {
+                    var fakePasswd = "root:x:0:0:root:/root:/bin/bash\ndaemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin\nbounty:x:1000:1000:Bounty User:/home/bounty:/bin/bash\nFLAG: BOUNTY{XXE_FILE_READ}";
+                    outputDiv.innerHTML = '<div style="background: #fee2e2; color: #991b1b; padding: 15px; border-radius: 4px; border: 1px solid #fca5a5; text-align: left; overflow-x: auto; white-space: pre-wrap; margin-top: 10px;">' +
+                        '<strong style="color: #ef4444;">[SERVER RESPONSE] Fichier lu avec succès !</strong><br><br>' +
+                        'Contenu injecté dans le champ USER:' +
+                        '<div style="background:#f1f5f9; padding: 5px; margin-top: 5px; border-radius: 2px; color: #1e293b;">' +
+                        fakePasswd.replace(/</g, '&lt;').replace(/\n/g, '<br>') +
+                        '</div>' +
+                        '</div>';
+                    completeModule('module-xxe');
+                }, 500);
+            } else {
+                // FAIL
+                setTimeout(function() {
+                    outputDiv.innerHTML = '<strong style="color:#ef4444;">[SERVER RESPONSE] Erreur : L\'entité XML n\'a pas pu être résolue ou le format est invalide.</strong>';
+                }, 500);
+            }
+        }
+
+
         function completeModule(moduleId) {
             if (appState.completedModules.indexOf(moduleId) === -1) {
                 appState.completedModules.push(moduleId);
@@ -482,6 +587,7 @@
                 var btnId = 'validate-btn';
                 if(moduleId === 'module-idor') btnId = 'validate-btn-idor';
                 if(moduleId === 'module-sqli') btnId = 'validate-btn-sqli';
+                if(moduleId === 'module-xxe') btnId = 'validate-btn-xxe';
                 
                 var btn = document.getElementById(btnId);
                 if (btn) {
@@ -515,4 +621,3 @@
     </script>
 </body>
 </html>
-```

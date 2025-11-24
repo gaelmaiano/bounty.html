@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BountyAcademy - Labs XSS, IDOR, SQLi & CSRF</title>
+    <title>BountyAcademy - Labs XSS, IDOR, SQLi, CSRF & XXE</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -78,6 +78,13 @@
         .csrf-target { background: white; padding: 1.5rem; border-radius: 8px; border: 1px solid #e2e8f0; text-align: left; color: #334155; }
         .csrf-attacker { background: #fee2e2; padding: 1rem; border-radius: 8px; border: 1px solid #fca5a5; margin-top: 1rem; text-align: left; color: #991b1b; }
         .csrf-payload { width: 100%; height: 80px; font-family: monospace; font-size: 0.85rem; padding: 5px; border: 1px solid #fca5a5; margin-top: 0.5rem; resize: vertical; }
+        
+        /* XXE Styles */
+        .xxe-input { width: 100%; height: 150px; font-family: monospace; font-size: 0.9rem; padding: 10px; border: 1px solid #cbd5e1; border-radius: 4px; resize: vertical; }
+        .xxe-output { margin-top: 1.5rem; padding: 1rem; border: 1px solid #e2e8f0; background: #f1f5f9; border-radius: 4px; text-align: left; min-height: 100px; color: #334155; overflow: auto; }
+        .xxe-error { color:#ef4444; font-weight:bold; }
+        .xxe-success { color:#10b981; font-weight:bold; }
+
 
         /* Feedback Elements */
         .fake-alert-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 50; backdrop-filter: blur(2px); }
@@ -116,7 +123,7 @@
                 </div>
                 <div class="xp-info">
                     <span id="current-xp">0 XP</span>
-                    <span id="next-level-xp">1300 XP (Max)</span>
+                    <span id="next-level-xp">1800 XP (Max)</span>
                 </div>
             </div>
             <div class="nav-section">
@@ -136,8 +143,11 @@
                 <button class="nav-btn" onclick="navigateTo('module-csrf')" data-view="module-csrf">
                     <i class="fa-solid fa-hand-pointer"></i> Lab 4: CSRF
                 </button>
+                 <button class="nav-btn" onclick="navigateTo('module-xxe')" data-view="module-xxe">
+                    <i class="fa-solid fa-file-code"></i> Lab 5: XXE
+                </button>
             </div>
-            <div class="sidebar-footer">v1.5 | CSRF Added</div>
+            <div class="sidebar-footer">v1.6 | XXE Added</div>
         </nav>
 
         <main class="main-content">
@@ -186,7 +196,7 @@
                     html += '</div>';
                     html += '<div class="stat-card">';
                     html += '<div style="color: #94a3b8; font-size: 0.875rem;">Modules Terminés</div>';
-                    html += '<div style="font-size: 1.875rem; font-weight: bold; color: white;">' + appState.completedModules.length + '/4</div>';
+                    html += '<div style="font-size: 1.875rem; font-weight: bold; color: white;">' + appState.completedModules.length + '/5</div>';
                     html += '</div>';
                     html += '</div>';
                     html += '<h3 style="color:white; margin-bottom:1rem;">Continuer l\'apprentissage</h3>';
@@ -198,7 +208,7 @@
                     html += '<i class="fa-solid fa-code"></i>';
                     html += '</div>';
                     html += '<div>';
-                    html += '<h4 style="color: white; font-weight: bold;">Lab XSS Reflected</h4>';
+                    html += '<h4 style="color: white; font-weight: bold;">Lab 1: XSS Reflected</h4>';
                     html += '<p style="font-size: 0.75rem; color: #94a3b8;">Niveau: Facile • 200 XP</p>';
                     html += '</div>';
                     html += '</div>';
@@ -212,7 +222,7 @@
                     html += '<i class="fa-solid fa-id-card"></i>';
                     html += '</div>';
                     html += '<div>';
-                    html += '<h4 style="color: white; font-weight: bold;">Lab IDOR</h4>';
+                    html += '<h4 style="color: white; font-weight: bold;">Lab 2: IDOR</h4>';
                     html += '<p style="font-size: 0.75rem; color: #94a3b8;">Niveau: Moyen • 300 XP</p>';
                     html += '</div>';
                     html += '</div>';
@@ -226,27 +236,41 @@
                     html += '<i class="fa-solid fa-database"></i>';
                     html += '</div>';
                     html += '<div>';
-                    html += '<h4 style="color: white; font-weight: bold;">Lab SQL Injection</h4>';
+                    html += '<h4 style="color: white; font-weight: bold;">Lab 3: SQL Injection</h4>';
                     html += '<p style="font-size: 0.75rem; color: #94a3b8;">Niveau: Intermédiaire • 400 XP</p>';
                     html += '</div>';
                     html += '</div>';
                     html += '<i class="fa-solid fa-chevron-right" style="color: #475569;"></i>';
                     html += '</div>';
 
-                    // CARTE CSRF (NEW)
+                    // CARTE CSRF
                     html += '<div class="module-card" onclick="navigateTo(\'module-csrf\')">';
                     html += '<div style="display:flex; align-items:center; gap:1rem;">';
                     html += '<div style="width: 3rem; height: 3rem; background: #334155; border-radius: 50%; display:flex; align-items:center; justify-content:center; color: #3b82f6;">';
                     html += '<i class="fa-solid fa-hand-pointer"></i>';
                     html += '</div>';
                     html += '<div>';
-                    html += '<h4 style="color: white; font-weight: bold;">Lab CSRF (Request Forgery)</h4>';
+                    html += '<h4 style="color: white; font-weight: bold;">Lab 4: CSRF (Request Forgery)</h4>';
                     html += '<p style="font-size: 0.75rem; color: #94a3b8;">Niveau: Avancé • 400 XP</p>';
                     html += '</div>';
                     html += '</div>';
                     html += '<i class="fa-solid fa-chevron-right" style="color: #475569;"></i>';
                     html += '</div>';
                     
+                    // CARTE XXE (NEW)
+                    html += '<div class="module-card" onclick="navigateTo(\'module-xxe\')">';
+                    html += '<div style="display:flex; align-items:center; gap:1rem;">';
+                    html += '<div style="width: 3rem; height: 3rem; background: #334155; border-radius: 50%; display:flex; align-items:center; justify-content:center; color: #fbbf24;">';
+                    html += '<i class="fa-solid fa-file-code"></i>';
+                    html += '</div>';
+                    html += '<div>';
+                    html += '<h4 style="color: white; font-weight: bold;">Lab 5: XXE (External Entity)</h4>';
+                    html += '<p style="font-size: 0.75rem; color: #94a3b8;">Niveau: Expert • 500 XP</p>';
+                    html += '</div>';
+                    html += '</div>';
+                    html += '<i class="fa-solid fa-chevron-right" style="color: #475569;"></i>';
+                    html += '</div>';
+
                     return html;
                 }
             },
@@ -256,7 +280,7 @@
                     var isDone = appState.completedModules.indexOf('module-xss') !== -1;
                     var html = '';
                     html += '<button onclick="navigateTo(\'dashboard\')" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Retour</button>';
-                    html += '<h2 class="dashboard-title"><i class="fa-solid fa-code" style="color:#10b981"></i> Lab: XSS Reflected</h2>';
+                    html += '<h2 class="dashboard-title"><i class="fa-solid fa-code" style="color:#10b981"></i> Lab 1: XSS Reflected</h2>';
                     html += '<div class="stat-card" style="margin-bottom: 2rem;">';
                     html += '<h3 style="color: white; margin-bottom: 0.5rem;">Mission : Hackez cette recherche</h3>';
                     html += '<p style="color: #cbd5e1; line-height: 1.6;">Injectez du code JavaScript pour faire apparaître une <code>alert(1)</code>.</p>';
@@ -277,7 +301,7 @@
                     var isDone = appState.completedModules.indexOf('module-idor') !== -1;
                     var html = '';
                     html += '<button onclick="navigateTo(\'dashboard\')" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Retour</button>';
-                    html += '<h2 class="dashboard-title"><i class="fa-solid fa-id-card" style="color:#f59e0b"></i> Lab: IDOR</h2>';
+                    html += '<h2 class="dashboard-title"><i class="fa-solid fa-id-card" style="color:#f59e0b"></i> Lab 2: IDOR</h2>';
                     html += '<div class="stat-card" style="margin-bottom: 2rem;">';
                     html += '<h3 style="color: white; margin-bottom: 0.5rem;">Mission : Accès Admin</h3>';
                     html += '<p style="color: #cbd5e1; line-height: 1.6;">Vous êtes ID 101 (Invité). Trouvez le profil Admin (ID 100).</p>';
@@ -296,7 +320,7 @@
                     var isDone = appState.completedModules.indexOf('module-sqli') !== -1;
                     var html = '';
                     html += '<button onclick="navigateTo(\'dashboard\')" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Retour</button>';
-                    html += '<h2 class="dashboard-title"><i class="fa-solid fa-database" style="color:#ef4444"></i> Lab: SQL Injection</h2>';
+                    html += '<h2 class="dashboard-title"><i class="fa-solid fa-database" style="color:#ef4444"></i> Lab 3: SQL Injection</h2>';
                     
                     html += '<div class="stat-card" style="margin-bottom: 2rem;">';
                     html += '<h3 style="color: white; margin-bottom: 0.5rem;">Mission : Bypass Login</h3>';
@@ -336,13 +360,13 @@
                     return html;
                 }
             },
-            'module-csrf': { // NOUVEAU MODULE CSRF
+            'module-csrf': {
                 xpReward: 400,
                 render: function() {
                     var isDone = appState.completedModules.indexOf('module-csrf') !== -1;
                     var html = '';
                     html += '<button onclick="navigateTo(\'dashboard\')" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Retour</button>';
-                    html += '<h2 class="dashboard-title"><i class="fa-solid fa-hand-pointer" style="color:#3b82f6"></i> Lab: CSRF (Cross-Site Request Forgery)</h2>';
+                    html += '<h2 class="dashboard-title"><i class="fa-solid fa-hand-pointer" style="color:#3b82f6"></i> Lab 4: CSRF (Cross-Site Request Forgery)</h2>';
                     
                     html += '<div class="stat-card" style="margin-bottom: 2rem;">';
                     html += '<h3 style="color: white; margin-bottom: 0.5rem;">Mission : Changer l\'email de l\'utilisateur</h3>';
@@ -384,13 +408,51 @@
                     
                     return html;
                 }
+            },
+            'module-xxe': { // NOUVEAU MODULE XXE
+                xpReward: 500,
+                render: function() {
+                    var isDone = appState.completedModules.indexOf('module-xxe') !== -1;
+                    var html = '';
+                    html += '<button onclick="navigateTo(\'dashboard\')" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Retour</button>';
+                    html += '<h2 class="dashboard-title"><i class="fa-solid fa-file-code" style="color:#fbbf24"></i> Lab 5: XXE (XML External Entity)</h2>';
+                    
+                    html += '<div class="stat-card" style="margin-bottom: 2rem;">';
+                    html += '<h3 style="color: white; margin-bottom: 0.5rem;">Mission : Exfiltration de fichier</h3>';
+                    html += '<p style="color: #cbd5e1; line-height: 1.6;">';
+                    html += 'Ce service de configuration XML est vulnérable aux entités externes. Exfiltrez le contenu du fichier système <code>/etc/passwd</code>.';
+                    html += '<br><br><strong>Chemin cible :</strong> <code>file:///etc/passwd</code>';
+                    html += '</p>';
+                    html += '</div>';
+
+                    html += '<div class="lab-container">';
+                    html += '<div style="margin-bottom: 1rem; color: #cbd5e1;">http://api.config-uploader.local/process</div>';
+                    html += '<div class="lab-browser">';
+                    html += '<div class="browser-bar"><div class="browser-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><div class="url-bar">/upload-xml</div></div>';
+                    
+                    html += '<div class="browser-content" style="background:#f1f5f9; display:flex; flex-direction:column; align-items:center;">';
+                    html += '<h3 style="color:#1e293b; margin-bottom:1.5rem;">Uploader de Fichier de Configuration XML</h3>';
+                    html += '<textarea id="xxe-input" class="xxe-input" placeholder="Collez votre document XML ici (ex: <config><setting>value</setting></config>)."></textarea>';
+                    html += '<button onclick="runXXELab()" class="vulnerable-btn" style="width:100%;">Envoyer le XML</button>';
+                    
+                    html += '<div id="xxe-output" class="xxe-output">Résultat du traitement XML...</div>';
+                    
+                    html += '</div>'; // fin browser-content
+                    html += '</div></div>'; // fin lab-container & browser
+
+                    html += '<button id="validate-btn-xxe" class="action-btn" disabled>';
+                    html += isDone ? '<i class="fa-solid fa-check"></i> Module Déjà Validé' : 'Affichez le contenu de /etc/passwd pour valider';
+                    html += '</button>';
+                    
+                    return html;
+                }
             }
         };
 
         function init() {
             try {
                 // IMPORTANT: Mise à jour de la clé de sessionStorage pour éviter les conflits XP
-                var saved = sessionStorage.getItem('bountyState_v5');
+                var saved = sessionStorage.getItem('bountyState_v6'); // Clé mise à jour pour la version 1.6
                 if (saved) {
                     var parsed = JSON.parse(saved);
                     appState.xp = parsed.xp || 0;
@@ -402,7 +464,7 @@
         }
 
         function saveState() {
-            try { sessionStorage.setItem('bountyState_v5', JSON.stringify(appState)); } catch(e) {}
+            try { sessionStorage.setItem('bountyState_v6', JSON.stringify(appState)); } catch(e) {}
         }
 
         function navigateTo(viewName) {
@@ -435,8 +497,9 @@
                         if(inputUser) inputUser.addEventListener('keypress', fn);
                         if(inputPass) inputPass.addEventListener('keypress', fn);
                     } else if (viewName === 'module-csrf') {
-                        // Initialise l'email pour le lab CSRF
                         document.getElementById('csrf-victim-email').innerText = 'user@victim.com';
+                    } else if (viewName === 'module-xxe') {
+                        // Initialise l'input XXE
                     }
                 }, 100);
             }
@@ -444,17 +507,17 @@
         }
 
         function updateUI() {
-            // Total XP possible est 200 + 300 + 400 + 400 = 1300 XP
-            var maxXP = 1300;
+            // Total XP possible est 200 + 300 + 400 + 400 + 500 = 1800 XP
+            var maxXP = 1800;
             var percentage = Math.min((appState.xp / maxXP) * 100, 100); 
             document.getElementById('xp-bar').style.width = percentage + '%';
             document.getElementById('current-xp').innerText = appState.xp + ' XP';
             
             var rank = 'Novice';
-            if (appState.xp >= 200) rank = 'Hunter';
-            if (appState.xp >= 500) rank = 'Pro Hunter';
-            if (appState.xp >= 900) rank = 'Elite';
-            if (appState.xp >= 1300) rank = 'Legend';
+            if (appState.xp >= 300) rank = 'Hunter';
+            if (appState.xp >= 800) rank = 'Pro Hunter';
+            if (appState.xp >= 1400) rank = 'Elite';
+            if (appState.xp >= 1800) rank = 'Legend';
             document.getElementById('user-level').innerText = rank;
         }
 
@@ -544,7 +607,7 @@
             }
         }
         
-        /* --- CSRF LOGIC (NEW) --- */
+        /* --- CSRF LOGIC --- */
         function simulerChangementEmail(isAttacker) {
             var emailDisplay = document.getElementById('csrf-victim-email');
             var currentEmail = emailDisplay.innerText;
@@ -572,10 +635,6 @@
             var output = document.getElementById('csrf-output');
             
             // Logique de détection :
-            // 1. Cherche le domaine cible dans la payload
-            // 2. Cherche l'action "update"
-            // 3. Cherche le paramètre "email" avec l'email de l'attaquant
-            
             var targetURL = 'settings/update';
             var attackerEmail = 'hacked@attacker.com';
             
@@ -588,6 +647,38 @@
             } else {
                 // Échec
                 output.innerHTML = '<strong style="color:#ef4444;">Payload Invalide.</strong> Assurez-vous d\'utiliser une balise HTML (img, iframe, etc.) pour déclencher une requête GET vers l\'URL cible, et de spécifier le paramètre <code>email=' + attackerEmail + '</code>.';
+            }
+        }
+        
+        /* --- XXE LOGIC (NEW) --- */
+        function runXXELab() {
+            var xmlInput = document.getElementById('xxe-input').value.trim();
+            var outputDiv = document.getElementById('xxe-output');
+            
+            outputDiv.innerHTML = 'Traitement en cours...';
+
+            var low = xmlInput.toLowerCase();
+            
+            // Simulation de la détection XXE (tentative de lecture de fichier)
+            var isXXE = (low.includes('<!entity') || low.includes('<!doctype')) && low.includes('file:///etc/passwd');
+
+            if (isXXE) {
+                // Simulation de la lecture réussie de /etc/passwd
+                var fileContent = `root:x:0:0:root:/root:/bin/bash
+daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+bin:x:2:2:bin:/bin:/usr/sbin/nologin
+sys:x:3:3:sys:/dev:/usr/sbin/nologin
+www-data:x:33:33:www-data:/var/www:/usr/sbin/nologin
+bountyacademy:x:1000:1000:BountyAcademy,,,:/home/bountyacademy:/bin/bash`;
+                
+                outputDiv.innerHTML = '<strong class="xxe-success">Traitement Réussi ! Fichier Exfiltré :</strong><br><pre style="white-space: pre-wrap; word-break: break-all; margin-top:0.5rem; font-size: 0.8rem; background:#fff; padding:5px;">' + fileContent + '</pre>';
+                completeModule('module-xxe');
+            } else if (low.includes('<config>')) {
+                // XML valide mais sans XXE
+                outputDiv.innerHTML = '<strong class="xxe-success">Traitement réussi.</strong> Les paramètres de configuration ont été mis à jour.';
+            } else {
+                // XML non valide
+                outputDiv.innerHTML = '<strong class="xxe-error">Erreur de syntaxe XML.</strong> Veuillez vérifier votre document.';
             }
         }
 
@@ -604,7 +695,8 @@
                 if(moduleId === 'module-idor') btnId = 'validate-btn-idor';
                 if(moduleId === 'module-sqli') btnId = 'validate-btn-sqli';
                 if(moduleId === 'module-csrf') btnId = 'validate-btn-csrf';
-                
+                if(moduleId === 'module-xxe') btnId = 'validate-btn-xxe';
+
                 var btn = document.getElementById(btnId);
                 if (btn) {
                     btn.innerHTML = '<i class="fa-solid fa-check"></i> Validé !';
@@ -637,5 +729,7 @@
     </script>
 </body>
 </html>
-```
 
+
+
+-----

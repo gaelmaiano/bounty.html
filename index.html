@@ -1,10 +1,11 @@
 
+-----
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BountyAcademy - Labs XSS, IDOR, SQLi, CSRF & XXE</title>
+    <title>BountyAcademy - Labs XSS, IDOR, SQLi, CSRF, XXE & Race Condition</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -85,6 +86,108 @@
         .xxe-error { color:#ef4444; font-weight:bold; }
         .xxe-success { color:#10b981; font-weight:bold; }
 
+        /* --- Styles for Race Condition Lab (LAB 6) --- */
+        .shop-mission-box {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid #ef4444;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+        .shop-product-card {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 2rem;
+            border: 1px solid #334155;
+            max-width: 400px;
+            margin: 0 auto 2rem;
+        }
+        .shop-product-image {
+            width: 100%;
+            height: 150px;
+            background: linear-gradient(45deg, #334155, #475569);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: #94a3b8;
+        }
+        .shop-product-price {
+            color: #10b981;
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 1rem 0;
+        }
+        .shop-cart-summary {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid #10b981;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 2rem auto;
+            max-width: 500px;
+            text-align: center;
+        }
+        .shop-cart-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #fbbf24;
+            margin: 0.5rem 0;
+        }
+        .shop-amount-paid {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #10b981;
+            margin: 0.5rem 0;
+        }
+        .shop-savings {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #ef4444;
+            margin: 0.5rem 0;
+        }
+        .shop-attack-panel {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid #ef4444;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .shop-logs {
+            background: #0f172a;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+        .shop-products-received {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin: 1rem 0;
+            flex-wrap: wrap;
+        }
+        .shop-product-received {
+            background: #334155;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            min-width: 80px;
+            border: 2px solid #475569;
+        }
+        .shop-product-free {
+            border-color: #f59e0b;
+            background: rgba(245, 158, 11, 0.1);
+        }
+        /* Fin des styles Race Condition */
+
 
         /* Feedback Elements */
         .fake-alert-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 50; backdrop-filter: blur(2px); }
@@ -123,7 +226,7 @@
                 </div>
                 <div class="xp-info">
                     <span id="current-xp">0 XP</span>
-                    <span id="next-level-xp">1800 XP (Max)</span>
+                    <span id="next-level-xp">2400 XP (Max)</span>
                 </div>
             </div>
             <div class="nav-section">
@@ -146,8 +249,11 @@
                  <button class="nav-btn" onclick="navigateTo('module-xxe')" data-view="module-xxe">
                     <i class="fa-solid fa-file-code"></i> Lab 5: XXE
                 </button>
+                <button class="nav-btn" onclick="navigateTo('module-race-condition')" data-view="module-race-condition">
+                    <i class="fa-solid fa-gauge-high"></i> Lab 6: Race Condition
+                </button>
             </div>
-            <div class="sidebar-footer">v1.6 | XXE Added</div>
+            <div class="sidebar-footer">v1.7 | Race Condition Added</div>
         </nav>
 
         <main class="main-content">
@@ -196,7 +302,7 @@
                     html += '</div>';
                     html += '<div class="stat-card">';
                     html += '<div style="color: #94a3b8; font-size: 0.875rem;">Modules Terminés</div>';
-                    html += '<div style="font-size: 1.875rem; font-weight: bold; color: white;">' + appState.completedModules.length + '/5</div>';
+                    html += '<div style="font-size: 1.875rem; font-weight: bold; color: white;">' + appState.completedModules.length + '/6</div>';
                     html += '</div>';
                     html += '</div>';
                     html += '<h3 style="color:white; margin-bottom:1rem;">Continuer l\'apprentissage</h3>';
@@ -257,7 +363,7 @@
                     html += '<i class="fa-solid fa-chevron-right" style="color: #475569;"></i>';
                     html += '</div>';
                     
-                    // CARTE XXE (NEW)
+                    // CARTE XXE
                     html += '<div class="module-card" onclick="navigateTo(\'module-xxe\')">';
                     html += '<div style="display:flex; align-items:center; gap:1rem;">';
                     html += '<div style="width: 3rem; height: 3rem; background: #334155; border-radius: 50%; display:flex; align-items:center; justify-content:center; color: #fbbf24;">';
@@ -266,6 +372,20 @@
                     html += '<div>';
                     html += '<h4 style="color: white; font-weight: bold;">Lab 5: XXE (External Entity)</h4>';
                     html += '<p style="font-size: 0.75rem; color: #94a3b8;">Niveau: Expert • 500 XP</p>';
+                    html += '</div>';
+                    html += '</div>';
+                    html += '<i class="fa-solid fa-chevron-right" style="color: #475569;"></i>';
+                    html += '</div>';
+
+                    // CARTE RACE CONDITION (NEW)
+                    html += '<div class="module-card" onclick="navigateTo(\'module-race-condition\')">';
+                    html += '<div style="display:flex; align-items:center; gap:1rem;">';
+                    html += '<div style="width: 3rem; height: 3rem; background: #334155; border-radius: 50%; display:flex; align-items:center; justify-content:center; color: #ef4444;">';
+                    html += '<i class="fa-solid fa-gauge-high"></i>';
+                    html += '</div>';
+                    html += '<div>';
+                    html += '<h4 style="color: white; font-weight: bold;">Lab 6: Race Condition</h4>';
+                    html += '<p style="font-size: 0.75rem; color: #94a3b8;">Niveau: Expert+ • 600 XP</p>';
                     html += '</div>';
                     html += '</div>';
                     html += '<i class="fa-solid fa-chevron-right" style="color: #475569;"></i>';
@@ -355,381 +475,3 @@
 
                     html += '<button id="validate-btn-sqli" class="action-btn" disabled>';
                     html += isDone ? '<i class="fa-solid fa-check"></i> Module Déjà Validé' : 'Bypassez le login pour valider';
-                    html += '</button>';
-                    
-                    return html;
-                }
-            },
-            'module-csrf': {
-                xpReward: 400,
-                render: function() {
-                    var isDone = appState.completedModules.indexOf('module-csrf') !== -1;
-                    var html = '';
-                    html += '<button onclick="navigateTo(\'dashboard\')" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Retour</button>';
-                    html += '<h2 class="dashboard-title"><i class="fa-solid fa-hand-pointer" style="color:#3b82f6"></i> Lab 4: CSRF (Cross-Site Request Forgery)</h2>';
-                    
-                    html += '<div class="stat-card" style="margin-bottom: 2rem;">';
-                    html += '<h3 style="color: white; margin-bottom: 0.5rem;">Mission : Changer l\'email de l\'utilisateur</h3>';
-                    html += '<p style="color: #cbd5e1; line-height: 1.6;">';
-                    html += 'La page "Settings" permet de changer l\'email via une simple requête GET. ';
-                    html += 'Créez une payload sur la page de l\'attaquant pour déclencher cette action.';
-                    html += '<br><br><strong>Action de la victime :</strong> <code>/settings/update?email=...</code>';
-                    html += '</p>';
-                    html += '</div>';
-
-                    html += '<div class="lab-container">';
-                    html += '<div class="csrf-panel">';
-                    
-                    // Partie 1: Site de la Victime (simulé)
-                    html += '<h4 style="color:white; margin-bottom:0.5rem;"><i class="fa-solid fa-lock"></i> Site de la Victime (Connecté)</h4>';
-                    html += '<div class="csrf-target">';
-                    html += '<h3>Mes Paramètres</h3>';
-                    html += '<p style="font-size: 0.9rem;">E-mail actuel: <strong id="csrf-victim-email">user@victim.com</strong></p>';
-                    html += '<p style="margin-top: 10px; font-size: 0.8rem; color: #64748b;">(Cliquez ici pour simuler un changement d\'email par l\'utilisateur lui-même.)</p>';
-                    html += '<button onclick="simulerChangementEmail(false)" class="vulnerable-btn" style="background:#10b981; margin-top:0.5rem;">Changer mon E-mail</button>';
-                    html += '</div>';
-                    
-                    // Partie 2: Site de l'Attaquant (où l'utilisateur colle sa payload)
-                    html += '<h4 style="color:white; margin-top:1.5rem; margin-bottom:0.5rem;"><i class="fa-solid fa-skull"></i> Site de l\'Attaquant (External)</h4>';
-                    html += '<div class="csrf-attacker">';
-                    html += '<h3>Générateur de Payload CSRF</h3>';
-                    html += '<p style="font-size: 0.9rem;">Collez le code HTML pour changer l\'email de l\'utilisateur connecté.</p>';
-                    html += '<textarea id="csrf-payload-input" class="csrf-payload" placeholder="Ex: <img src=\'...\'> ou <iframe src=\'...\'>"></textarea>';
-                    html += '<button onclick="runCSRFLab()" class="vulnerable-btn" style="background:#ef4444; width:100%;">Déclencher l\'Attaque (Simuler le clic)</button>';
-                    html += '<p id="csrf-output" style="margin-top: 10px; font-size: 0.85rem; color: #64748b; font-style:italic;">En attente de la payload...</p>';
-                    html += '</div>';
-                    
-                    html += '</div>'; // fin csrf-panel
-                    html += '</div>'; // fin lab-container
-
-                    html += '<button id="validate-btn-csrf" class="action-btn" disabled>';
-                    html += isDone ? '<i class="fa-solid fa-check"></i> Module Déjà Validé' : 'L\'attaque doit réussir pour valider';
-                    html += '</button>';
-                    
-                    return html;
-                }
-            },
-            'module-xxe': { // NOUVEAU MODULE XXE
-                xpReward: 500,
-                render: function() {
-                    var isDone = appState.completedModules.indexOf('module-xxe') !== -1;
-                    var html = '';
-                    html += '<button onclick="navigateTo(\'dashboard\')" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Retour</button>';
-                    html += '<h2 class="dashboard-title"><i class="fa-solid fa-file-code" style="color:#fbbf24"></i> Lab 5: XXE (XML External Entity)</h2>';
-                    
-                    html += '<div class="stat-card" style="margin-bottom: 2rem;">';
-                    html += '<h3 style="color: white; margin-bottom: 0.5rem;">Mission : Exfiltration de fichier</h3>';
-                    html += '<p style="color: #cbd5e1; line-height: 1.6;">';
-                    html += 'Ce service de configuration XML est vulnérable aux entités externes. Exfiltrez le contenu du fichier système <code>/etc/passwd</code>.';
-                    html += '<br><br><strong>Chemin cible :</strong> <code>file:///etc/passwd</code>';
-                    html += '</p>';
-                    html += '</div>';
-
-                    html += '<div class="lab-container">';
-                    html += '<div style="margin-bottom: 1rem; color: #cbd5e1;">http://api.config-uploader.local/process</div>';
-                    html += '<div class="lab-browser">';
-                    html += '<div class="browser-bar"><div class="browser-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><div class="url-bar">/upload-xml</div></div>';
-                    
-                    html += '<div class="browser-content" style="background:#f1f5f9; display:flex; flex-direction:column; align-items:center;">';
-                    html += '<h3 style="color:#1e293b; margin-bottom:1.5rem;">Uploader de Fichier de Configuration XML</h3>';
-                    html += '<textarea id="xxe-input" class="xxe-input" placeholder="Collez votre document XML ici (ex: <config><setting>value</setting></config>)."></textarea>';
-                    html += '<button onclick="runXXELab()" class="vulnerable-btn" style="width:100%;">Envoyer le XML</button>';
-                    
-                    html += '<div id="xxe-output" class="xxe-output">Résultat du traitement XML...</div>';
-                    
-                    html += '</div>'; // fin browser-content
-                    html += '</div></div>'; // fin lab-container & browser
-
-                    html += '<button id="validate-btn-xxe" class="action-btn" disabled>';
-                    html += isDone ? '<i class="fa-solid fa-check"></i> Module Déjà Validé' : 'Affichez le contenu de /etc/passwd pour valider';
-                    html += '</button>';
-                    
-                    return html;
-                }
-            }
-        };
-
-        function init() {
-            try {
-                // IMPORTANT: Mise à jour de la clé de sessionStorage pour éviter les conflits XP
-                var saved = sessionStorage.getItem('bountyState_v6'); // Clé mise à jour pour la version 1.6
-                if (saved) {
-                    var parsed = JSON.parse(saved);
-                    appState.xp = parsed.xp || 0;
-                    appState.completedModules = parsed.completedModules || [];
-                }
-            } catch(e) {}
-            updateUI();
-            navigateTo('dashboard');
-        }
-
-        function saveState() {
-            try { sessionStorage.setItem('bountyState_v6', JSON.stringify(appState)); } catch(e) {}
-        }
-
-        function navigateTo(viewName) {
-            appState.currentView = viewName;
-            var contentArea = document.getElementById('content-area');
-            
-            var buttons = document.querySelectorAll('.nav-btn');
-            for (var i = 0; i < buttons.length; i++) {
-                buttons[i].classList.remove('active');
-                if (buttons[i].getAttribute('data-view') === viewName) {
-                    buttons[i].classList.add('active');
-                }
-            }
-
-            if (modules[viewName]) {
-                contentArea.innerHTML = modules[viewName].render();
-                
-                // Event Listeners (Entrée Clavier)
-                setTimeout(function() {
-                    if (viewName === 'module-xss') {
-                        var input = document.getElementById('lab-input');
-                        if(input) input.addEventListener('keypress', function(e) { if(e.key === 'Enter') runXSSLab(); });
-                    } else if (viewName === 'module-idor') {
-                        var input = document.getElementById('idor-input');
-                        if(input) input.addEventListener('keypress', function(e) { if(e.key === 'Enter') runIDORLab(); });
-                    } else if (viewName === 'module-sqli') {
-                        var inputUser = document.getElementById('sqli-user');
-                        var inputPass = document.getElementById('sqli-pass');
-                        var fn = function(e) { if(e.key === 'Enter') runSQLiLab(); };
-                        if(inputUser) inputUser.addEventListener('keypress', fn);
-                        if(inputPass) inputPass.addEventListener('keypress', fn);
-                    } else if (viewName === 'module-csrf') {
-                        document.getElementById('csrf-victim-email').innerText = 'user@victim.com';
-                    } else if (viewName === 'module-xxe') {
-                        // Initialise l'input XXE
-                    }
-                }, 100);
-            }
-            if (window.innerWidth <= 768) document.getElementById('sidebar').classList.remove('mobile-open');
-        }
-
-        function updateUI() {
-            // Total XP possible est 200 + 300 + 400 + 400 + 500 = 1800 XP
-            var maxXP = 1800;
-            var percentage = Math.min((appState.xp / maxXP) * 100, 100); 
-            document.getElementById('xp-bar').style.width = percentage + '%';
-            document.getElementById('current-xp').innerText = appState.xp + ' XP';
-            
-            var rank = 'Novice';
-            if (appState.xp >= 300) rank = 'Hunter';
-            if (appState.xp >= 800) rank = 'Pro Hunter';
-            if (appState.xp >= 1400) rank = 'Elite';
-            if (appState.xp >= 1800) rank = 'Legend';
-            document.getElementById('user-level').innerText = rank;
-        }
-
-        function showToast(msg) {
-            var toast = document.getElementById('toast');
-            document.getElementById('toast-message').innerText = msg;
-            toast.classList.add('show');
-            setTimeout(function() { toast.classList.remove('show'); }, 3000);
-        }
-
-        /* --- XSS LOGIC --- */
-        function runXSSLab() {
-            var input = document.getElementById('lab-input');
-            var resultDiv = document.getElementById('lab-result');
-            if (!input) return;
-            var val = input.value;
-            if (!val.trim()) return;
-            
-            resultDiv.style.display = 'block';
-            resultDiv.innerHTML = 'Résultats pour : <strong>' + val.replace(/</g, '&lt;') + '</strong>';
-            
-            var low = val.toLowerCase();
-            if ((low.indexOf('<script>') !== -1 && low.indexOf('alert(1)') !== -1) || 
-                (low.indexOf('<img') !== -1 && low.indexOf('onerror') !== -1)) {
-                document.getElementById('alert-content').innerText = '1';
-                setTimeout(triggerFakeXSSSuccess, 400);
-            }
-        }
-        function triggerFakeXSSSuccess() { document.getElementById('fake-alert-overlay').style.display = 'flex'; }
-        function closeFakeAlert() {
-            document.getElementById('fake-alert-overlay').style.display = 'none';
-            completeModule('module-xss');
-        }
-
-        /* --- IDOR LOGIC --- */
-        function runIDORLab() {
-            var input = document.getElementById('idor-input');
-            var resultDiv = document.getElementById('idor-result');
-            var urlBar = document.getElementById('idor-url-bar');
-            if (!input) return;
-            var id = input.value.trim();
-            urlBar.innerText = '/profile?id=' + id;
-            
-            if (id === '101') {
-                resultDiv.innerHTML = '<div class="profile-card"><div class="profile-header"><div class="profile-avatar"><i class="fa-solid fa-user"></i></div><div><h3>Invité</h3><span style="color:#64748b; font-size:0.8rem;">Utilisateur Standard</span></div></div><div class="profile-details"><p><span class="profile-label">User ID:</span> 101</p></div></div>';
-            } else if (id === '100') {
-                resultDiv.innerHTML = '<div class="profile-card" style="border-color:#10b981; border-width:2px;"><div class="profile-header"><div class="profile-avatar" style="background:#d1fae5; color:#047857;"><i class="fa-solid fa-user-shield"></i></div><div><h3>Admin Root</h3><span style="color:#047857; font-weight:bold; font-size:0.8rem;">Super Administrator</span></div></div><div class="profile-details"><p><span class="profile-label">User ID:</span> 100</p><p><span class="profile-label">Secret:</span> SQLI_IS_NEXT</p></div></div>';
-                completeModule('module-idor');
-            } else {
-                resultDiv.innerHTML = '<div style="color:#ef4444; font-weight:bold;">404 Not Found</div>';
-            }
-        }
-
-        /* --- SQLi LOGIC --- */
-        function runSQLiLab() {
-            var user = document.getElementById('sqli-user').value;
-            var pass = document.getElementById('sqli-pass').value;
-            var debugDiv = document.getElementById('sqli-debug');
-            var viewDiv = document.getElementById('sqli-view');
-            var errorDiv = document.getElementById('sqli-error');
-
-            // Simulation de la requête SQL
-            var query = "SELECT * FROM users WHERE username = '" + user + "' AND password = '" + pass + "'";
-            debugDiv.innerHTML = "<strong>Backend executes:</strong> " + query.replace(/</g, '&lt;');
-            errorDiv.style.display = 'none';
-
-            // Vérification de l'injection: ' OR '1'='1
-            var u = user.toUpperCase();
-            var isInjected = (u.indexOf("' OR '1'='1") !== -1 || u.indexOf("' OR 1=1") !== -1);
-
-            if (isInjected) {
-                // SUCCESS
-                viewDiv.innerHTML = '<div style="background:white; padding:2rem; border-radius:8px; text-align:center;">' +
-                    '<i class="fa-solid fa-lock-open" style="font-size:3rem; color:#10b981; margin-bottom:1rem;"></i>' +
-                    '<h2 style="color:#1e293b;">Accès Autorisé !</h2>' +
-                    '<p style="color:#64748b;">Bienvenue, Administrateur.</p>' +
-                    '<div style="margin-top:1rem; padding:10px; background:#d1fae5; color:#065f46; border-radius:4px;">Flag: BOUNTY{SQLI_MASTER}</div>' +
-                    '</div>';
-                completeModule('module-sqli');
-            } else {
-                // FAIL
-                errorDiv.style.display = 'block';
-                var box = document.querySelector('.login-box');
-                box.style.transform = 'translateX(5px)';
-                setTimeout(function(){ box.style.transform = 'translateX(-5px)'; }, 50);
-                setTimeout(function(){ box.style.transform = 'translateX(0)'; }, 100);
-            }
-        }
-        
-        /* --- CSRF LOGIC --- */
-        function simulerChangementEmail(isAttacker) {
-            var emailDisplay = document.getElementById('csrf-victim-email');
-            var currentEmail = emailDisplay.innerText;
-            var newEmail = isAttacker ? 'hacked@attacker.com' : 'user@victim.com';
-            var output = document.getElementById('csrf-output');
-
-            if (isAttacker) {
-                output.innerHTML = '<strong style="color:#991b1b;">Requête CSRF reçue par le serveur !</strong><br>Ancien Email: ' + currentEmail + '<br>Nouvel Email: ' + newEmail;
-            } else {
-                output.innerHTML = '<span style="color:#10b981;">Requête légitime reçue.</span>';
-            }
-
-            // Simple update simulation
-            emailDisplay.innerText = newEmail;
-            emailDisplay.style.fontWeight = 'bold';
-            emailDisplay.style.color = isAttacker ? '#ef4444' : '#10b981';
-
-            if (isAttacker) {
-                completeModule('module-csrf');
-            }
-        }
-        
-        function runCSRFLab() {
-            var payload = document.getElementById('csrf-payload-input').value.trim();
-            var output = document.getElementById('csrf-output');
-            
-            // Logique de détection :
-            var targetURL = 'settings/update';
-            var attackerEmail = 'hacked@attacker.com';
-            
-            var isPayloadValid = payload.includes(targetURL) && payload.includes(attackerEmail);
-
-            if (isPayloadValid) {
-                // Succès de l'attaque simulée
-                output.innerHTML = '<strong style="color:#10b981;">Payload activée avec succès. Requête envoyée au serveur de la victime...</strong>';
-                simulerChangementEmail(true);
-            } else {
-                // Échec
-                output.innerHTML = '<strong style="color:#ef4444;">Payload Invalide.</strong> Assurez-vous d\'utiliser une balise HTML (img, iframe, etc.) pour déclencher une requête GET vers l\'URL cible, et de spécifier le paramètre <code>email=' + attackerEmail + '</code>.';
-            }
-        }
-        
-        /* --- XXE LOGIC (NEW) --- */
-        function runXXELab() {
-            var xmlInput = document.getElementById('xxe-input').value.trim();
-            var outputDiv = document.getElementById('xxe-output');
-            
-            outputDiv.innerHTML = 'Traitement en cours...';
-
-            var low = xmlInput.toLowerCase();
-            
-            // Simulation de la détection XXE (tentative de lecture de fichier)
-            var isXXE = (low.includes('<!entity') || low.includes('<!doctype')) && low.includes('file:///etc/passwd');
-
-            if (isXXE) {
-                // Simulation de la lecture réussie de /etc/passwd
-                var fileContent = `root:x:0:0:root:/root:/bin/bash
-daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
-bin:x:2:2:bin:/bin:/usr/sbin/nologin
-sys:x:3:3:sys:/dev:/usr/sbin/nologin
-www-data:x:33:33:www-data:/var/www:/usr/sbin/nologin
-bountyacademy:x:1000:1000:BountyAcademy,,,:/home/bountyacademy:/bin/bash`;
-                
-                outputDiv.innerHTML = '<strong class="xxe-success">Traitement Réussi ! Fichier Exfiltré :</strong><br><pre style="white-space: pre-wrap; word-break: break-all; margin-top:0.5rem; font-size: 0.8rem; background:#fff; padding:5px;">' + fileContent + '</pre>';
-                completeModule('module-xxe');
-            } else if (low.includes('<config>')) {
-                // XML valide mais sans XXE
-                outputDiv.innerHTML = '<strong class="xxe-success">Traitement réussi.</strong> Les paramètres de configuration ont été mis à jour.';
-            } else {
-                // XML non valide
-                outputDiv.innerHTML = '<strong class="xxe-error">Erreur de syntaxe XML.</strong> Veuillez vérifier votre document.';
-            }
-        }
-
-
-        function completeModule(moduleId) {
-            if (appState.completedModules.indexOf(moduleId) === -1) {
-                appState.completedModules.push(moduleId);
-                appState.xp += modules[moduleId].xpReward;
-                saveState();
-                updateUI();
-                
-                // Update Button generic
-                var btnId = 'validate-btn';
-                if(moduleId === 'module-idor') btnId = 'validate-btn-idor';
-                if(moduleId === 'module-sqli') btnId = 'validate-btn-sqli';
-                if(moduleId === 'module-csrf') btnId = 'validate-btn-csrf';
-                if(moduleId === 'module-xxe') btnId = 'validate-btn-xxe';
-
-                var btn = document.getElementById(btnId);
-                if (btn) {
-                    btn.innerHTML = '<i class="fa-solid fa-check"></i> Validé !';
-                    btn.style.backgroundColor = '#334155';
-                    btn.disabled = true;
-                }
-                showToast('Bravo ! +' + modules[moduleId].xpReward + ' XP');
-                createConfetti();
-            }
-        }
-
-        function createConfetti() {
-            var colors = ['#10b981', '#f59e0b', '#ef4444', '#ffffff'];
-            for (var i = 0; i < 40; i++) {
-                var conf = document.createElement('div');
-                conf.style.position = 'fixed';
-                conf.style.left = Math.random() * 100 + 'vw';
-                conf.style.top = '-10px';
-                conf.style.width = Math.random() * 10 + 5 + 'px';
-                conf.style.height = Math.random() * 10 + 5 + 'px';
-                conf.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                conf.style.transition = 'top 1.5s ease-out, transform 1.5s linear';
-                conf.style.zIndex = '9999';
-                document.body.appendChild(conf);
-                (function(el){ setTimeout(function(){ el.style.top = '110vh'; el.style.transform = 'rotate('+Math.random()*360+'deg)'; }, 10); setTimeout(function(){ el.remove(); }, 1500); })(conf);
-            }
-        }
-
-        init();
-    </script>
-</body>
-</html>
-
-
-
------

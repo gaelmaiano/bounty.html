@@ -3,562 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BountyAcademy - Apprenez le Bug Bounty</title>
+    <title>BountyAcademy - Lab XSS</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            background-color: #0f172a;
-            color: #e2e8f0;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        .app-container {
-            display: flex;
-            height: 100vh;
-        }
-
-        .sidebar {
-            width: 16rem;
-            background-color: #1e293b;
-            border-right: 1px solid #334155;
-            display: flex;
-            flex-direction: column;
-            z-index: 20;
-        }
-
-        .sidebar-header {
-            padding: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            border-bottom: 1px solid #334155;
-        }
-
-        .sidebar-header i {
-            color: #10b981;
-            font-size: 1.5rem;
-        }
-
-        .sidebar-header h1 {
-            font-size: 1.25rem;
-            font-weight: bold;
-            color: white;
-            letter-spacing: 0.05em;
-        }
-
-        .sidebar-header span {
-            color: #10b981;
-        }
-
-        .xp-panel {
-            padding: 1rem;
-            background-color: rgba(30, 41, 59, 0.5);
-            margin: 1rem;
-            border-radius: 0.5rem;
-            border: 1px solid #475569;
-        }
-
-        .xp-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.5rem;
-        }
-
-        .xp-label {
-            font-size: 0.75rem;
-            color: #94a3b8;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-        }
-
-        .user-level {
-            font-size: 0.75rem;
-            background-color: rgba(16, 185, 129, 0.2);
-            color: #34d399;
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.25rem;
-        }
-
-        .xp-bar-container {
-            width: 100%;
-            background-color: #334155;
-            height: 0.5rem;
-            border-radius: 9999px;
-            overflow: hidden;
-        }
-
-        .xp-bar {
-            background-color: #10b981;
-            height: 100%;
-            transition: width 0.5s;
-        }
-
-        .xp-info {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 0.25rem;
-            font-size: 0.75rem;
-            color: #94a3b8;
-        }
-
-        .nav-section {
-            flex: 1;
-            overflow-y: auto;
-            padding: 0.5rem 0;
-        }
-
-        .nav-btn {
-            width: 100%;
-            text-align: left;
-            padding: 0.75rem 1.5rem;
-            color: #94a3b8;
-            background: none;
-            border: none;
-            border-left: 4px solid transparent;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            cursor: pointer;
-            transition: all 0.15s;
-        }
-
-        .nav-btn:hover {
-            color: #34d399;
-            background-color: #1e293b;
-            border-left-color: #10b981;
-        }
-
-        .nav-btn.active {
-            color: #34d399;
-            background-color: #1e293b;
-            border-left-color: #10b981;
-        }
-
-        .nav-btn i {
-            width: 1.25rem;
-        }
-
-        .nav-divider {
-            padding: 0.5rem 1.5rem;
-            margin-top: 1rem;
-            font-size: 0.75rem;
-            font-weight: bold;
-            color: #64748b;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .sidebar-footer {
-            padding: 1rem;
-            text-align: center;
-            font-size: 0.75rem;
-            color: #475569;
-            border-top: 1px solid #334155;
-        }
-
-        .main-content {
-            flex: 1;
-            overflow-y: auto;
-            background-color: #0f172a;
-            position: relative;
-        }
-
-        .mobile-header {
-            display: none;
-            padding: 1rem;
-            background-color: #1e293b;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .content-area {
-            padding: 2rem;
-            max-width: 64rem;
-            margin: 0 auto;
-            min-height: 100%;
-        }
-
-        .dashboard-title {
-            font-size: 1.875rem;
-            font-weight: bold;
-            color: white;
-            margin-bottom: 1.5rem;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        @media (min-width: 768px) {
-            .stats-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-
-        .stat-card {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(10px);
-            padding: 1.5rem;
-            border-radius: 0.5rem;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .stat-label {
-            color: #94a3b8;
-            font-size: 0.875rem;
-            margin-bottom: 0.25rem;
-        }
-
-        .stat-value {
-            font-size: 1.875rem;
-            font-weight: bold;
-            color: white;
-            margin-bottom: 0.5rem;
-        }
-
-        .progress-bar {
-            width: 100%;
-            background-color: #334155;
-            height: 0.375rem;
-            border-radius: 9999px;
-        }
-
-        .progress-fill {
-            background-color: #10b981;
-            height: 100%;
-            border-radius: 9999px;
-            transition: width 0.5s;
-        }
-
-        .modules-title {
-            font-size: 1.25rem;
-            font-weight: bold;
-            color: white;
-            margin-bottom: 1rem;
-        }
-
-        .modules-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 1rem;
-        }
-
-        .module-card {
-            background-color: #1e293b;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            border: 1px solid #475569;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            transition: all 0.15s;
-        }
-
-        .module-card:hover {
-            border-color: #10b981;
-            transform: translateX(4px);
-        }
-
-        .module-card.completed {
-            border-color: rgba(16, 185, 129, 0.5);
-        }
-
-        .module-left {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .module-icon {
-            width: 3rem;
-            height: 3rem;
-            border-radius: 9999px;
-            background-color: #334155;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #10b981;
-            transition: all 0.15s;
-            font-size: 1.25rem;
-        }
-
-        .module-card:hover .module-icon {
-            background-color: #10b981;
-            color: white;
-        }
-
-        .module-card.completed .module-icon {
-            background-color: rgba(16, 185, 129, 0.2);
-            color: #34d399;
-        }
-
-        .module-info h4 {
-            color: white;
-            font-weight: bold;
-            transition: color 0.15s;
-            margin-bottom: 0.25rem;
-        }
-
-        .module-card:hover .module-info h4 {
-            color: #34d399;
-        }
-
-        .module-info p {
-            font-size: 0.75rem;
-            color: #94a3b8;
-        }
-
-        .module-status {
-            color: #475569;
-            font-size: 1.25rem;
-        }
-
-        .module-card.completed .module-status {
-            color: #10b981;
-        }
-
-        .back-btn {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            color: #94a3b8;
-            margin-bottom: 1.5rem;
-            cursor: pointer;
-            background: none;
-            border: none;
-            font-size: 1rem;
-            padding: 0.5rem 0;
-        }
-
-        .back-btn:hover {
-            color: white;
-        }
-
-        .module-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.5rem;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-
-        .module-title {
-            font-size: 1.875rem;
-            font-weight: bold;
-            color: white;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .module-title i {
-            color: #10b981;
-        }
-
-        .completion-badge {
-            background-color: rgba(16, 185, 129, 0.2);
-            color: #34d399;
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
-            font-size: 0.875rem;
-        }
-
-        .content-section {
-            background-color: #1e293b;
-            padding: 1.5rem;
-            border-radius: 0.5rem;
-            border: 1px solid #475569;
-            margin-bottom: 1.5rem;
-        }
-
-        .section-title {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: white;
-            margin-bottom: 1rem;
-        }
-
-        .section-text {
-            color: #cbd5e1;
-            margin-bottom: 1rem;
-            line-height: 1.6;
-        }
-
-        .features-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 1rem;
-            margin-top: 1.5rem;
-        }
-
-        @media (min-width: 768px) {
-            .features-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        .feature-card {
-            background-color: #0f172a;
-            padding: 1rem;
-            border-radius: 0.25rem;
-            border: 1px solid #475569;
-        }
-
-        .feature-title {
-            color: #34d399;
-            font-weight: bold;
-            margin-bottom: 0.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .feature-text {
-            font-size: 0.875rem;
-            color: #94a3b8;
-            line-height: 1.5;
-        }
-
-        .action-btn {
-            width: 100%;
-            padding: 1rem;
-            background-color: #059669;
-            color: white;
-            font-weight: bold;
-            border: none;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            transition: background-color 0.15s;
-            margin-top: 1rem;
-            font-size: 1rem;
-        }
-
-        .action-btn:hover {
-            background-color: #10b981;
-        }
-
-        .action-btn:disabled {
-            background-color: #334155;
-            cursor: not-allowed;
-        }
-
-        .toast-container {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 50;
-        }
-
-        .toast {
-            background: #1e293b;
-            border-left: 4px solid #10b981;
-            color: white;
-            padding: 15px 20px;
-            margin-top: 10px;
-            border-radius: 4px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            transform: translateX(100%);
-            transition: transform 0.3s ease-out;
-        }
-
-        .toast.show {
-            transform: translateX(0);
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background-color: #0f172a; color: #e2e8f0; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; height: 100vh; overflow: hidden; }
+        .app-container { display: flex; height: 100vh; }
+        .sidebar { width: 16rem; background-color: #1e293b; border-right: 1px solid #334155; display: flex; flex-direction: column; z-index: 20; transition: transform 0.3s; }
+        .sidebar-header { padding: 1.5rem; display: flex; align-items: center; gap: 0.75rem; border-bottom: 1px solid #334155; }
+        .sidebar-header i { color: #10b981; font-size: 1.5rem; }
+        .sidebar-header h1 { font-size: 1.25rem; font-weight: bold; color: white; }
+        .sidebar-header span { color: #10b981; }
+        .xp-panel { padding: 1rem; background-color: rgba(30, 41, 59, 0.5); margin: 1rem; border-radius: 0.5rem; border: 1px solid #475569; }
+        .xp-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+        .xp-label { font-size: 0.75rem; color: #94a3b8; font-weight: bold; text-transform: uppercase; }
+        .user-level { font-size: 0.75rem; background-color: rgba(16, 185, 129, 0.2); color: #34d399; padding: 0.25rem 0.5rem; border-radius: 0.25rem; }
+        .xp-bar-container { width: 100%; background-color: #334155; height: 0.5rem; border-radius: 9999px; overflow: hidden; }
+        .xp-bar { background-color: #10b981; height: 100%; transition: width 0.5s; }
+        .xp-info { display: flex; justify-content: space-between; margin-top: 0.25rem; font-size: 0.75rem; color: #94a3b8; }
+        .nav-section { flex: 1; overflow-y: auto; padding: 0.5rem 0; }
+        .nav-btn { width: 100%; text-align: left; padding: 0.75rem 1.5rem; color: #94a3b8; background: none; border: none; border-left: 4px solid transparent; display: flex; align-items: center; gap: 0.75rem; cursor: pointer; transition: all 0.15s; }
+        .nav-btn:hover, .nav-btn.active { color: #34d399; background-color: #1e293b; border-left-color: #10b981; }
+        .nav-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .sidebar-footer { padding: 1rem; text-align: center; font-size: 0.75rem; color: #475569; border-top: 1px solid #334155; }
+        .main-content { flex: 1; overflow-y: auto; background-color: #0f172a; position: relative; }
+        .content-area { padding: 2rem; max-width: 64rem; margin: 0 auto; min-height: 100%; }
+        .dashboard-title { font-size: 1.875rem; font-weight: bold; margin-bottom: 1.5rem; }
+        .stat-card { background: rgba(30, 41, 59, 0.7); padding: 1.5rem; border-radius: 0.5rem; border: 1px solid rgba(255, 255, 255, 0.05); }
+        .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; margin-bottom: 2rem; }
+        .module-card { background-color: #1e293b; padding: 1rem; border-radius: 0.5rem; border: 1px solid #475569; margin-bottom: 1rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: transform 0.2s; }
+        .module-card:hover { border-color: #10b981; transform: translateX(5px); }
+        .action-btn { width: 100%; padding: 1rem; background-color: #059669; color: white; border: none; border-radius: 0.5rem; cursor: pointer; margin-top: 1rem; font-size: 1rem; transition: background 0.2s; }
+        .action-btn:hover { background-color: #047857; }
+        .action-btn:disabled { background-color: #334155; cursor: not-allowed; }
+        .back-btn { background:none; border:none; color: #94a3b8; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem; font-size: 1rem; }
+        .back-btn:hover { color: #10b981; }
+        .lab-container { background-color: #1e293b; border: 1px solid #475569; border-radius: 0.5rem; padding: 1.5rem; margin-top: 1rem; }
+        .lab-browser { background-color: #f8fafc; border-radius: 0.5rem; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); color: #334155; font-family: 'Segoe UI', sans-serif; border: 1px solid #cbd5e1; }
+        .browser-bar { background-color: #e2e8f0; padding: 0.5rem 1rem; display: flex; align-items: center; gap: 0.5rem; border-bottom: 1px solid #cbd5e1; }
+        .browser-dots { display: flex; gap: 0.25rem; }
+        .dot { width: 0.75rem; height: 0.75rem; border-radius: 50%; }
+        .dot-red { background-color: #ef4444; }
+        .dot-yellow { background-color: #f59e0b; }
+        .dot-green { background-color: #10b981; }
+        .url-bar { background-color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; flex: 1; font-size: 0.8rem; color: #64748b; margin-left: 1rem; border: 1px solid #cbd5e1; }
+        .browser-content { padding: 2rem; min-height: 250px; text-align: center; }
+        .vulnerable-input { padding: 0.75rem; border: 2px solid #cbd5e1; border-radius: 0.25rem; width: 70%; margin-right: 0.5rem; font-size: 1rem; outline: none; }
+        .vulnerable-input:focus { border-color: #3b82f6; }
+        .vulnerable-btn { padding: 0.75rem 1.5rem; background-color: #3b82f6; color: white; border: none; border-radius: 0.25rem; cursor: pointer; font-size: 1rem; transition: background 0.2s; }
+        .vulnerable-btn:hover { background-color: #2563eb; }
+        .search-result { margin-top: 2rem; padding: 1rem; border: 1px dashed #94a3b8; background-color: #f1f5f9; border-radius: 0.25rem; display: none; text-align: left; max-width: 80%; margin-left: auto; margin-right: auto; }
+        .fake-alert-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 50; backdrop-filter: blur(2px); }
+        .fake-alert-box { background: white; padding: 1.5rem; border-radius: 0.5rem; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); width: 320px; text-align: center; color: #0f172a; animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .alert-btn { margin-top: 1rem; background: #3b82f6; color: white; border: none; padding: 0.5rem 1.5rem; border-radius: 0.25rem; cursor: pointer; }
+        .toast { position: fixed; bottom: 20px; right: 20px; background: #1e293b; border-left: 4px solid #10b981; color: white; padding: 15px 20px; border-radius: 4px; transform: translateX(150%); transition: transform 0.3s; z-index: 100; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3); display: flex; align-items: center; gap: 10px; }
+        .toast.show { transform: translateX(0); }
+        .mobile-header { display: none; }
         @media (max-width: 768px) {
-            .sidebar {
-                position: fixed;
-                height: 100vh;
-                transform: translateX(-100%);
-                transition: transform 0.3s ease;
-            }
-            
-            .sidebar.mobile-open {
-                transform: translateX(0);
-            }
-            
-            .mobile-overlay {
-                display: none;
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background: rgba(0, 0, 0, 0.5);
-                z-index: 10;
-            }
-            
-            .mobile-overlay.active {
-                display: block;
-            }
-            
-            .mobile-header {
-                display: flex;
-            }
-            
-            .content-area {
-                padding: 1rem;
-            }
-        }
-
-        .fade-in {
-            animation: fadeIn 0.3s ease-in-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        
-        ::-webkit-scrollbar-track {
-            background: #0f172a;
-        }
-        
-        ::-webkit-scrollbar-thumb {
-            background: #334155;
-            border-radius: 4px;
-        }
-        
-        ::-webkit-scrollbar-thumb:hover {
-            background: #475569;
+            .stats-grid { grid-template-columns: 1fr; }
+            .sidebar { position: fixed; transform: translateX(-100%); height: 100vh; }
+            .sidebar.mobile-open { transform: translateX(0); }
+            .mobile-header { display: flex; padding: 1rem; background: #1e293b; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; }
+            .mobile-menu-btn { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
+            .vulnerable-input { width: 100%; margin-bottom: 0.5rem; }
+            .vulnerable-btn { width: 100%; }
         }
     </style>
 </head>
 <body>
     <div class="app-container">
-        <div id="mobile-overlay" class="mobile-overlay"></div>
-
         <nav id="sidebar" class="sidebar">
             <div class="sidebar-header">
                 <i class="fa-solid fa-bug"></i>
                 <h1>Bounty<span>Acad</span></h1>
             </div>
-
             <div class="xp-panel">
                 <div class="xp-header">
-                    <span class="xp-label">Rang Actuel</span>
+                    <span class="xp-label">Rang</span>
                     <span id="user-level" class="user-level">Novice</span>
                 </div>
                 <div class="xp-bar-container">
@@ -569,460 +91,306 @@
                     <span id="next-level-xp">1000 XP</span>
                 </div>
             </div>
-
             <div class="nav-section">
-                <button class="nav-btn active" data-view="dashboard">
-                    <i class="fa-solid fa-chart-line"></i> Tableau de bord
+                <button class="nav-btn active" onclick="navigateTo('dashboard')" data-view="dashboard">
+                    <i class="fa-solid fa-chart-line"></i> Dashboard
                 </button>
-                
-                <div class="nav-divider">Modules</div>
-                
-                <button class="nav-btn" data-view="module-intro">
-                    <i class="fa-solid fa-book-open"></i> Introduction
+                <div style="padding: 1rem; font-size: 0.75rem; color: #64748b; font-weight: bold;">MODULES PRATIQUES</div>
+                <button class="nav-btn" onclick="navigateTo('module-xss')" data-view="module-xss">
+                    <i class="fa-solid fa-code"></i> Lab 1: XSS Reflected
                 </button>
-                <button class="nav-btn" data-view="module-xss">
-                    <i class="fa-solid fa-code"></i> XSS
-                </button>
-                <button class="nav-btn" data-view="module-idor">
-                    <i class="fa-solid fa-id-card"></i> IDOR
-                </button>
-                <button class="nav-btn" data-view="module-sqli">
-                    <i class="fa-solid fa-database"></i> SQL Injection
+                <button class="nav-btn" disabled>
+                    <i class="fa-solid fa-database"></i> Lab 2: SQLi (Bientôt)
                 </button>
             </div>
-
-            <div class="sidebar-footer">
-                v1.0.0 | Mode Simulation
-            </div>
+            <div class="sidebar-footer">v1.2 | Lab Interactif</div>
         </nav>
 
         <main class="main-content">
             <div class="mobile-header">
-                <span style="font-weight: bold; color: white;">BountyAcademy</span>
-                <button id="mobile-menu-btn" style="color: white; background: none; border: none; font-size: 1.25rem; cursor: pointer;">
+                <span style="font-weight: bold; color:white;">BountyAcademy</span>
+                <button class="mobile-menu-btn" onclick="document.getElementById('sidebar').classList.toggle('mobile-open')">
                     <i class="fa-solid fa-bars"></i>
                 </button>
             </div>
-
             <div id="content-area" class="content-area"></div>
         </main>
     </div>
 
-    <div id="toast-container" class="toast-container"></div>
+    <div id="toast" class="toast">
+        <i class="fa-solid fa-check-circle" style="color:#34d399"></i> <span id="toast-message">Succès !</span>
+    </div>
+
+    <div id="fake-alert-overlay" class="fake-alert-overlay">
+        <div class="fake-alert-box">
+            <h3 style="margin-bottom: 0.5rem; color: #ef4444; display:flex; align-items:center; justify-content:center; gap:0.5rem;">
+                <i class="fa-solid fa-triangle-exclamation"></i> Alert
+            </h3>
+            <p style="margin-bottom: 1rem; color:#334155;">Le site indique :</p>
+            <p id="alert-content" style="font-family: monospace; font-size:1.2rem; font-weight:bold; background: #f1f5f9; padding: 0.5rem; margin-bottom: 1rem; border-radius: 4px; border:1px solid #cbd5e1;">1</p>
+            <button class="alert-btn" onclick="closeFakeAlert()">OK</button>
+        </div>
+    </div>
 
     <script>
-        const appState = {
+        var appState = {
             xp: 0,
             level: 1,
             completedModules: [],
             currentView: 'dashboard'
         };
 
-        const modules = {
-            'module-intro': {
-                title: "Introduction au Bug Bounty",
-                icon: "fa-book-open",
-                xp: 100,
-                content: `
-                    <div style="max-width: 48rem; margin: 0 auto;">
-                        <button onclick="navigateTo('dashboard')" class="back-btn">
-                            <i class="fa-solid fa-arrow-left"></i> Retour au tableau de bord
-                        </button>
-                        
-                        <div class="module-header">
-                            <h2 class="module-title">
-                                <i class="fa-solid fa-book-open"></i>
-                                Introduction au Bug Bounty
-                            </h2>
-                            <span id="badge-intro"></span>
-                        </div>
-                        
-                        <hr style="border-color: #475569; margin-bottom: 2rem;">
-                        
-                        <div class="content-section">
-                            <h2 class="section-title">Qu'est-ce que le Bug Bounty ?</h2>
-                            <p class="section-text">
-                                Le Bug Bounty est un programme offert par de nombreux sites web et développeurs de logiciels qui permet aux individus de recevoir reconnaissance et compensation financière pour avoir rapporté des bugs, en particulier ceux liés à la sécurité et aux vulnérabilités.
-                            </p>
-                            <div class="features-grid">
-                                <div class="feature-card">
-                                    <h3 class="feature-title"><i class="fa-solid fa-user-shield"></i> White Hat</h3>
-                                    <p class="feature-text">Hackers éthiques qui utilisent leurs compétences pour améliorer la sécurité. Ils demandent la permission et rapportent les failles.</p>
-                                </div>
-                                <div class="feature-card">
-                                    <h3 class="feature-title"><i class="fa-solid fa-user-ninja"></i> Black Hat</h3>
-                                    <p class="feature-text">Hackers malveillants qui exploitent les failles pour un gain personnel ou pour nuire, sans autorisation.</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="content-section">
-                            <h2 class="section-title">Les plateformes principales</h2>
-                            <ul class="section-text" style="list-style: disc; padding-left: 2rem; line-height: 2;">
-                                <li><strong style="color: white;">HackerOne</strong> : La plus grosse plateforme mondiale.</li>
-                                <li><strong style="color: white;">Bugcrowd</strong> : Très populaire avec beaucoup de programmes privés.</li>
-                                <li><strong style="color: white;">Intigriti</strong> : Plateforme européenne en pleine croissance.</li>
-                                <li><strong style="color: white;">YesWeHack</strong> : Leader européen, excellent pour débuter.</li>
-                            </ul>
-                        </div>
-
-                        <button onclick="completeModule('module-intro', 100)" class="action-btn" id="btn-intro">
-                            <i class="fa-solid fa-check" style="margin-right: 0.5rem;"></i> Marquer comme terminé (+100 XP)
-                        </button>
-                    </div>
-                `
+        var modules = {
+            dashboard: {
+                render: function() {
+                    var html = '';
+                    html += '<h2 class="dashboard-title">Tableau de bord</h2>';
+                    html += '<div class="stats-grid">';
+                    html += '<div class="stat-card">';
+                    html += '<div style="color: #94a3b8; font-size: 0.875rem;">XP Total</div>';
+                    html += '<div style="font-size: 1.875rem; font-weight: bold; color: white;">' + appState.xp + '</div>';
+                    html += '</div>';
+                    html += '<div class="stat-card">';
+                    html += '<div style="color: #94a3b8; font-size: 0.875rem;">Modules Terminés</div>';
+                    html += '<div style="font-size: 1.875rem; font-weight: bold; color: white;">' + appState.completedModules.length + '</div>';
+                    html += '</div>';
+                    html += '</div>';
+                    html += '<h3 style="color:white; margin-bottom:1rem;">Continuer l\'apprentissage</h3>';
+                    html += '<div class="module-card" onclick="navigateTo(\'module-xss\')">';
+                    html += '<div style="display:flex; align-items:center; gap:1rem;">';
+                    html += '<div style="width: 3rem; height: 3rem; background: #334155; border-radius: 50%; display:flex; align-items:center; justify-content:center; color: #10b981;">';
+                    html += '<i class="fa-solid fa-code"></i>';
+                    html += '</div>';
+                    html += '<div>';
+                    html += '<h4 style="color: white; font-weight: bold;">Lab XSS Reflected</h4>';
+                    html += '<p style="font-size: 0.75rem; color: #94a3b8;">Niveau: Facile • 200 XP</p>';
+                    html += '</div>';
+                    html += '</div>';
+                    html += '<i class="fa-solid fa-chevron-right" style="color: #475569;"></i>';
+                    html += '</div>';
+                    return html;
+                }
             },
             'module-xss': {
-                title: "XSS (Cross-Site Scripting)",
-                icon: "fa-code",
-                xp: 150,
-                content: `
-                    <div style="max-width: 48rem; margin: 0 auto;">
-                        <button onclick="navigateTo('dashboard')" class="back-btn">
-                            <i class="fa-solid fa-arrow-left"></i> Retour au tableau de bord
-                        </button>
-                        
-                        <div class="module-header">
-                            <h2 class="module-title">
-                                <i class="fa-solid fa-code"></i>
-                                XSS (Cross-Site Scripting)
-                            </h2>
-                            <span id="badge-xss"></span>
-                        </div>
-                        
-                        <hr style="border-color: #475569; margin-bottom: 2rem;">
-                        
-                        <div class="content-section">
-                            <h2 class="section-title">Qu'est-ce qu'une faille XSS ?</h2>
-                            <p class="section-text">
-                                Le Cross-Site Scripting (XSS) est une vulnérabilité qui permet à un attaquant d'injecter du code JavaScript malveillant dans une page web. Ce code s'exécute ensuite dans le navigateur des victimes.
-                            </p>
-                            <div class="features-grid">
-                                <div class="feature-card">
-                                    <h3 class="feature-title"><i class="fa-solid fa-bullseye"></i> XSS Reflected</h3>
-                                    <p class="feature-text">Le code malveillant est reflété immédiatement par le serveur sans être stocké. Généralement via des paramètres URL.</p>
-                                </div>
-                                <div class="feature-card">
-                                    <h3 class="feature-title"><i class="fa-solid fa-database"></i> XSS Stored</h3>
-                                    <p class="feature-text">Le code est stocké dans la base de données et exécuté chaque fois qu'un utilisateur visite la page.</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="content-section">
-                            <h2 class="section-title">Exemple de payload</h2>
-                            <p class="section-text">Voici un exemple basique de payload XSS :</p>
-                            <div style="background-color: #000; border-radius: 0.375rem; padding: 1rem; border: 1px solid #334155; overflow-x: auto; font-family: monospace; font-size: 0.875rem;">
-                                <span style="color: #e06c75;">&lt;script&gt;</span><span style="color: #61afef;">alert</span>(<span style="color: #98c379;">'XSS!'</span>)<span style="color: #e06c75;">&lt;/script&gt;</span>
-                            </div>
-                        </div>
-
-                        <button onclick="completeModule('module-xss', 150)" class="action-btn" id="btn-xss">
-                            <i class="fa-solid fa-check" style="margin-right: 0.5rem;"></i> Marquer comme terminé (+150 XP)
-                        </button>
-                    </div>
-                `
-            },
-            'module-idor': {
-                title: "IDOR",
-                icon: "fa-id-card",
-                xp: 150,
-                content: `
-                    <div style="max-width: 48rem; margin: 0 auto;">
-                        <button onclick="navigateTo('dashboard')" class="back-btn">
-                            <i class="fa-solid fa-arrow-left"></i> Retour au tableau de bord
-                        </button>
-                        
-                        <div class="module-header">
-                            <h2 class="module-title">
-                                <i class="fa-solid fa-id-card"></i>
-                                IDOR
-                            </h2>
-                            <span id="badge-idor"></span>
-                        </div>
-                        
-                        <hr style="border-color: #475569; margin-bottom: 2rem;">
-                        
-                        <div class="content-section">
-                            <h2 class="section-title">Qu'est-ce qu'un IDOR ?</h2>
-                            <p class="section-text">
-                                IDOR (Insecure Direct Object Reference) est une vulnérabilité qui permet à un attaquant d'accéder directement à des objets en manipulant les identifiants dans les URLs ou paramètres.
-                            </p>
-                            <p class="section-text">
-                                Par exemple, si vous pouvez voir votre profil sur <code style="background: #0f172a; padding: 0.25rem 0.5rem; border-radius: 0.25rem;">/profile?id=123</code>, vous pourriez essayer <code style="background: #0f172a; padding: 0.25rem 0.5rem; border-radius: 0.25rem;">/profile?id=124</code> pour voir le profil d'un autre utilisateur.
-                            </p>
-                        </div>
-
-                        <div class="content-section">
-                            <h2 class="section-title">Comment détecter un IDOR ?</h2>
-                            <ul class="section-text" style="list-style: disc; padding-left: 2rem; line-height: 2;">
-                                <li>Cherchez des paramètres d'ID dans les URLs</li>
-                                <li>Essayez de modifier ces IDs</li>
-                                <li>Vérifiez si vous pouvez accéder aux données d'autres utilisateurs</li>
-                                <li>Testez avec différents types d'objets</li>
-                            </ul>
-                        </div>
-
-                        <button onclick="completeModule('module-idor', 150)" class="action-btn" id="btn-idor">
-                            <i class="fa-solid fa-check" style="margin-right: 0.5rem;"></i> Marquer comme terminé (+150 XP)
-                        </button>
-                    </div>
-                `
-            },
-            'module-sqli': {
-                title: "SQL Injection",
-                icon: "fa-database",
-                xp: 200,
-                content: `
-                    <div style="max-width: 48rem; margin: 0 auto;">
-                        <button onclick="navigateTo('dashboard')" class="back-btn">
-                            <i class="fa-solid fa-arrow-left"></i> Retour au tableau de bord
-                        </button>
-                        
-                        <div class="module-header">
-                            <h2 class="module-title">
-                                <i class="fa-solid fa-database"></i>
-                                SQL Injection
-                            </h2>
-                            <span id="badge-sqli"></span>
-                        </div>
-                        
-                        <hr style="border-color: #475569; margin-bottom: 2rem;">
-                        
-                        <div class="content-section">
-                            <h2 class="section-title">Qu'est-ce qu'une SQL Injection ?</h2>
-                            <p class="section-text">
-                                Une SQL Injection permet à un attaquant d'injecter du code SQL malveillant dans une requête, permettant potentiellement d'accéder, modifier ou supprimer des données dans la base de données.
-                            </p>
-                        </div>
-
-                        <div class="content-section">
-                            <h2 class="section-title">Exemple de vulnérabilité</h2>
-                            <p class="section-text">Code vulnérable :</p>
-                            <div style="background-color: #000; border-radius: 0.375rem; padding: 1rem; border: 1px solid #334155; overflow-x: auto; font-family: monospace; font-size: 0.875rem; margin-bottom: 1rem;">
-                                <span style="color: #c678dd;">SELECT</span> * <span style="color: #c678dd;">FROM</span> users <span style="color: #c678dd;">WHERE</span> username = <span style="color: #98c379;">'</span> + input + <span style="color: #98c379;">'</span>
-                            </div>
-                            <p class="section-text">Payload d'attaque :</p>
-                            <div style="background-color: #000; border-radius: 0.375rem; padding: 1rem; border: 1px solid #334155; overflow-x: auto; font-family: monospace; font-size: 0.875rem;">
-                                <span style="color: #98c379;">' OR '1'='1</span>
-                            </div>
-                        </div>
-
-                        <button onclick="completeModule('module-sqli', 200)" class="action-btn" id="btn-sqli">
-                            <i class="fa-solid fa-check" style="margin-right: 0.5rem;"></i> Marquer comme terminé (+200 XP)
-                        </button>
-                    </div>
-                `
+                xpReward: 200,
+                render: function() {
+                    var isDone = appState.completedModules.indexOf('module-xss') !== -1;
+                    var html = '';
+                    html += '<button onclick="navigateTo(\'dashboard\')" class="back-btn">';
+                    html += '<i class="fa-solid fa-arrow-left"></i> Retour';
+                    html += '</button>';
+                    html += '<h2 class="dashboard-title"><i class="fa-solid fa-code" style="color:#10b981"></i> Lab: XSS Reflected</h2>';
+                    html += '<div class="stat-card" style="margin-bottom: 2rem;">';
+                    html += '<h3 style="color: white; margin-bottom: 0.5rem;">Mission : Hackez cette recherche</h3>';
+                    html += '<p style="color: #cbd5e1; line-height: 1.6;">';
+                    html += 'Ce moteur de recherche simulé ne nettoie pas les entrées utilisateurs. ';
+                    html += 'Tout ce que vous tapez est "reflété" (affiché) tel quel sur la page de résultats.';
+                    html += '<br><br>';
+                    html += '<strong>Objectif :</strong> Injectez du code JavaScript pour faire apparaître une <code>alert(1)</code>.';
+                    html += '</p>';
+                    html += '<div style="margin-top:1rem; padding:0.5rem; background:rgba(0,0,0,0.3); border-radius:4px; font-size:0.85rem; color:#94a3b8;">';
+                    html += '<i class="fa-solid fa-lightbulb" style="color:#fbbf24"></i> <strong>Indice :</strong> Essayez les balises <code>&lt;script&gt;</code> ou <code>&lt;img&gt;</code>.';
+                    html += '</div>';
+                    html += '</div>';
+                    html += '<div class="lab-container">';
+                    html += '<div style="margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">';
+                    html += '<span style="font-weight: bold; color: #cbd5e1;">Navigateur Victime</span>';
+                    html += '<span style="font-size: 0.75rem; color: #64748b;">http://vulnerable-search.com</span>';
+                    html += '</div>';
+                    html += '<div class="lab-browser">';
+                    html += '<div class="browser-bar">';
+                    html += '<div class="browser-dots">';
+                    html += '<div class="dot dot-red"></div>';
+                    html += '<div class="dot dot-yellow"></div>';
+                    html += '<div class="dot dot-green"></div>';
+                    html += '</div>';
+                    html += '<div class="url-bar">http://vulnerable-search.com/search</div>';
+                    html += '</div>';
+                    html += '<div class="browser-content">';
+                    html += '<h2 style="margin-bottom: 1.5rem; color: #1e293b; font-weight:800;">Super Search <span style="color:#3b82f6">v1.0</span></h2>';
+                    html += '<div style="display: flex; flex-wrap:wrap; justify-content: center; margin-bottom: 1rem; gap:0.5rem;">';
+                    html += '<input type="text" id="lab-input" class="vulnerable-input" placeholder="Que cherchez-vous ?" autocomplete="off">';
+                    html += '<button onclick="runXSSLab()" class="vulnerable-btn">Rechercher</button>';
+                    html += '</div>';
+                    html += '<div id="lab-result" class="search-result"></div>';
+                    html += '</div>';
+                    html += '</div>';
+                    html += '</div>';
+                    html += '<button id="validate-btn" class="action-btn" disabled>';
+                    html += isDone ? '<i class="fa-solid fa-check"></i> Module Déjà Validé' : 'Réussissez le Lab pour valider';
+                    html += '</button>';
+                    return html;
+                }
             }
         };
 
-        function loadState() {
-            const saved = localStorage.getItem('bountyAcademyState');
-            if (saved) {
-                const parsed = JSON.parse(saved);
-                appState.xp = parsed.xp || 0;
-                appState.level = parsed.level || 1;
-                appState.completedModules = parsed.completedModules || [];
+        function init() {
+            try {
+                var saved = sessionStorage.getItem('bountyState_v3');
+                if (saved) {
+                    var parsed = JSON.parse(saved);
+                    appState.xp = parsed.xp || 0;
+                    appState.completedModules = parsed.completedModules || [];
+                }
+            } catch(e) { 
+                console.log('Erreur chargement:', e); 
             }
+            updateUI();
+            navigateTo('dashboard');
         }
 
         function saveState() {
-            localStorage.setItem('bountyAcademyState', JSON.stringify(appState));
+            try {
+                sessionStorage.setItem('bountyState_v3', JSON.stringify(appState));
+            } catch(e) { 
+                console.log('Erreur sauvegarde:', e); 
+            }
+        }
+
+        function navigateTo(viewName) {
+            appState.currentView = viewName;
+            var contentArea = document.getElementById('content-area');
+            
+            var buttons = document.querySelectorAll('.nav-btn');
+            for (var i = 0; i < buttons.length; i++) {
+                buttons[i].classList.remove('active');
+                if (buttons[i].getAttribute('data-view') === viewName) {
+                    buttons[i].classList.add('active');
+                }
+            }
+
+            if (modules[viewName]) {
+                contentArea.innerHTML = modules[viewName].render();
+                
+                if (viewName === 'module-xss') {
+                    setTimeout(function() {
+                        var input = document.getElementById('lab-input');
+                        if (input) {
+                            input.addEventListener('keypress', function(e) {
+                                if (e.key === 'Enter') {
+                                    runXSSLab();
+                                }
+                            });
+                            input.focus();
+                        }
+                    }, 100);
+                }
+            }
+            
+            if (window.innerWidth <= 768) {
+                document.getElementById('sidebar').classList.remove('mobile-open');
+            }
         }
 
         function updateUI() {
-            const nextLevel = appState.level * 1000;
-            const percentage = (appState.xp / nextLevel) * 100;
-            document.getElementById('xp-bar').style.width = `${Math.min(percentage, 100)}%`;
-            document.getElementById('current-xp').innerText = `${appState.xp} XP`;
-            document.getElementById('next-level-xp').innerText = `${nextLevel} XP`;
-
-            const ranks = ["Script Kiddie", "Novice", "Hunter", "Pro Hunter", "Elite"];
-            const rankIndex = Math.min(Math.floor(appState.level / 2), ranks.length - 1);
-            document.getElementById('user-level').innerText = `${ranks[rankIndex]} (Lvl ${appState.level})`;
-
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.remove('active');
-                if (btn.getAttribute('data-view') === appState.currentView) {
-                    btn.classList.add('active');
-                }
-            });
+            var percentage = Math.min((appState.xp / 1000) * 100, 100);
+            document.getElementById('xp-bar').style.width = percentage + '%';
+            document.getElementById('current-xp').innerText = appState.xp + ' XP';
+            
+            var rank = 'Novice';
+            if (appState.xp >= 200) rank = 'Hunter';
+            if (appState.xp >= 800) rank = 'Elite';
+            document.getElementById('user-level').innerText = rank;
         }
 
-        function navigateTo(view) {
-            appState.currentView = view;
-            updateUI();
-            
-            if (window.innerWidth < 768) {
-                toggleMobileMenu();
-            }
-            
-            if (view === 'dashboard') {
-                renderDashboard();
-            } else if (modules[view]) {
-                renderModule(view);
-            }
-        }
-
-        function renderDashboard() {
-            const completedCount = appState.completedModules.length;
-            const totalModules = 4;
-            const progress = Math.round((completedCount / totalModules) * 100);
-
-            const content = `
-                <div class="fade-in">
-                    <h2 class="dashboard-title">Tableau de bord</h2>
-                    
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="stat-label">Progression Globale</div>
-                            <div class="stat-value">${progress}%</div>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: ${progress}%"></div>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-label">Modules Terminés</div>
-                            <div class="stat-value">${completedCount} <span style="color: #64748b; font-size: 1.125rem">/ ${totalModules}</span></div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-label">Total XP</div>
-                            <div class="stat-value" style="color: #34d399">${appState.xp}</div>
-                        </div>
-                    </div>
-
-                    <h3 class="modules-title">Parcours d'apprentissage</h3>
-                    <div class="modules-grid">
-                        ${renderModulesList()}
-                    </div>
-                </div>
-            `;
-
-            document.getElementById('content-area').innerHTML = content;
-        }
-
-        function renderModulesList() {
-            return Object.keys(modules).map(key => {
-                const m = modules[key];
-                const isDone = appState.completedModules.includes(key);
-                return `
-                    <div onclick="navigateTo('${key}')" class="module-card ${isDone ? 'completed' : ''}">
-                        <div class="module-left">
-                            <div class="module-icon">
-                                <i class="fa-solid ${m.icon}"></i>
-                            </div>
-                            <div class="module-info">
-                                <h4>${m.title}</h4>
-                                <p>Module Théorique • ${m.xp} XP</p>
-                            </div>
-                        </div>
-                        <div class="module-status">
-                            ${isDone ? '<i class="fa-solid fa-circle-check" style="color: #10b981; font-size: 1.25rem;"></i>' : '<i class="fa-solid fa-chevron-right" style="color: #64748b;"></i>'}
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function renderModule(moduleKey) {
-            const module = modules[moduleKey];
-            const isDone = appState.completedModules.includes(moduleKey);
-            
-            document.getElementById('content-area').innerHTML = `<div class="fade-in">${module.content}</div>`;
-            
-            if (isDone) {
-                const badgeId = 'badge-' + moduleKey.replace('module-', '');
-                const badgeEl = document.getElementById(badgeId);
-                if (badgeEl) {
-                    badgeEl.innerHTML = '<span class="completion-badge"><i class="fa-solid fa-check"></i> Terminé</span>';
-                }
-                
-                const btnId = 'btn-' + moduleKey.replace('module-', '');
-                const btnEl = document.getElementById(btnId);
-                if (btnEl) {
-                    btnEl.disabled = true;
-                    btnEl.innerHTML = '<i class="fa-solid fa-check" style="margin-right: 0.5rem;"></i> Déjà terminé';
-                }
-            }
-        }
-
-        function completeModule(moduleKey, xpGain) {
-            if (appState.completedModules.includes(moduleKey)) {
-                showToast('Module déjà terminé !', 'info');
-                return;
-            }
-
-            appState.completedModules.push(moduleKey);
-            appState.xp += xpGain;
-
-            const nextLevel = appState.level * 1000;
-            if (appState.xp >= nextLevel) {
-                appState.level++;
-                showToast(`Niveau ${appState.level} atteint ! 🎉`, 'success');
-            }
-
-            saveState();
-            updateUI();
-            showToast(`+${xpGain} XP ! Module terminé avec succès !`, 'success');
-            
-            renderModule(moduleKey);
-        }
-
-        function showToast(message, type = 'success') {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            toast.className = 'toast';
-            
-            const icon = type === 'success' ? 'fa-check-circle' : 'fa-info-circle';
-            toast.innerHTML = `
-                <i class="fa-solid ${icon}" style="color: #10b981;"></i>
-                <span>${message}</span>
-            `;
-            
-            container.appendChild(toast);
-            
-            setTimeout(() => {
-                toast.classList.add('show');
-            }, 10);
-            
-            setTimeout(() => {
+        function showToast(msg) {
+            var toast = document.getElementById('toast');
+            document.getElementById('toast-message').innerText = msg;
+            toast.classList.add('show');
+            setTimeout(function() {
                 toast.classList.remove('show');
-                setTimeout(() => {
-                    container.removeChild(toast);
-                }, 300);
             }, 3000);
         }
 
-        function toggleMobileMenu() {
-            const nav = document.getElementById('sidebar');
-            const overlay = document.getElementById('mobile-overlay');
+        function runXSSLab() {
+            var input = document.getElementById('lab-input');
+            var resultDiv = document.getElementById('lab-result');
             
-            nav.classList.toggle('mobile-open');
-            overlay.classList.toggle('active');
+            if (!input) return;
+            var value = input.value;
+            
+            if (!value.trim()) {
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = '<span style="color:#64748b">Veuillez entrer un terme de recherche.</span>';
+                return;
+            }
+            
+            var safeValue = value.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '<span style="color:#64748b">Résultats pour : </span> <strong>' + safeValue + '</strong> <br><br> <em>Aucun résultat trouvé dans la base de données.</em>';
+
+            var lowerInput = value.toLowerCase();
+            var isScriptAlert = lowerInput.indexOf('<script>') !== -1 && lowerInput.indexOf('alert(1)') !== -1;
+            var isImgAlert = lowerInput.indexOf('<img') !== -1 && lowerInput.indexOf('onerror') !== -1 && lowerInput.indexOf('alert(1)') !== -1;
+            var isSvgAlert = lowerInput.indexOf('<svg') !== -1 && lowerInput.indexOf('onload') !== -1 && lowerInput.indexOf('alert(1)') !== -1;
+
+            if (isScriptAlert || isImgAlert || isSvgAlert) {
+                setTimeout(function() {
+                    triggerFakeXSSSuccess();
+                }, 400);
+            }
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            loadState();
-            updateUI();
-            renderDashboard();
+        function triggerFakeXSSSuccess() {
+            document.getElementById('fake-alert-overlay').style.display = 'flex';
+        }
+
+        function closeFakeAlert() {
+            document.getElementById('fake-alert-overlay').style.display = 'none';
             
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const view = this.getAttribute('data-view');
-                    navigateTo(view);
-                });
-            });
-            
-            const mobileBtn = document.getElementById('mobile-menu-btn');
-            if (mobileBtn) {
-                mobileBtn.addEventListener('click', toggleMobileMenu);
+            if (appState.completedModules.indexOf('module-xss') === -1) {
+                completeModule('module-xss');
             }
-            
-            const overlay = document.getElementById('mobile-overlay');
-            if (overlay) {
-                overlay.addEventListener('click', toggleMobileMenu);
+        }
+
+        function completeModule(moduleId) {
+            if (appState.completedModules.indexOf(moduleId) === -1) {
+                appState.completedModules.push(moduleId);
+                appState.xp += modules[moduleId].xpReward;
+                saveState();
+                updateUI();
+                
+                var btn = document.getElementById('validate-btn');
+                if (btn) {
+                    btn.innerHTML = '<i class="fa-solid fa-check"></i> Module Validé !';
+                    btn.style.backgroundColor = '#334155';
+                    btn.disabled = true;
+                }
+                
+                showToast('Bravo ! +' + modules[moduleId].xpReward + ' XP gagnés');
+                createConfetti();
             }
-        });
+        }
+        
+        function createConfetti() {
+            var colors = ['#10b981', '#34d399', '#ffffff', '#fbbf24'];
+            for (var i = 0; i < 40; i++) {
+                var conf = document.createElement('div');
+                conf.style.position = 'fixed';
+                conf.style.left = Math.random() * 100 + 'vw';
+                conf.style.top = '-10px';
+                conf.style.width = Math.random() * 10 + 5 + 'px';
+                conf.style.height = Math.random() * 10 + 5 + 'px';
+                conf.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                conf.style.transition = 'top 1.5s ease-out, transform 1.5s linear';
+                conf.style.zIndex = '9999';
+                conf.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+                document.body.appendChild(conf);
+                
+                (function(element) {
+                    setTimeout(function() {
+                        element.style.top = '110vh';
+                        element.style.transform = 'rotate(' + (Math.random() * 360) + 'deg) translateX(' + (Math.random() * 50 - 25) + 'px)';
+                    }, 10);
+                    
+                    setTimeout(function() {
+                        element.remove();
+                    }, 1500);
+                })(conf);
+            }
+        }
+
+        init();
     </script>
 </body>
 </html>

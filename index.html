@@ -1,11 +1,10 @@
-HTML
 
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BountyAcademy - Labs XSS, IDOR, SQLi & XXE</title>
+    <title>BountyAcademy - Labs XSS, IDOR, SQLi & CSRF</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -69,10 +68,16 @@ HTML
         .api-key { background: #fee2e2; color: #991b1b; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 0.85rem; }
         .idor-control { margin-top: 20px; padding: 15px; background: #f1f5f9; border-radius: 8px; display: inline-flex; align-items: center; gap: 10px; }
         
-        /* SQLi/XXE Styles */
+        /* SQLi/CSRF Styles */
         .login-box { max-width: 350px; margin: 0 auto; background: white; padding: 2rem; border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
         .login-input { width: 100%; padding: 10px; margin-bottom: 1rem; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 1rem; }
         .sql-debug { margin-top: 20px; font-family: monospace; font-size: 0.85rem; background: #1e293b; color: #10b981; padding: 10px; border-radius: 4px; text-align: left; border-left: 3px solid #10b981; min-height: 3.5em; display: flex; align-items: center; }
+
+        /* CSRF Styles */
+        .csrf-panel { max-width: 500px; margin: 0 auto; }
+        .csrf-target { background: white; padding: 1.5rem; border-radius: 8px; border: 1px solid #e2e8f0; text-align: left; color: #334155; }
+        .csrf-attacker { background: #fee2e2; padding: 1rem; border-radius: 8px; border: 1px solid #fca5a5; margin-top: 1rem; text-align: left; color: #991b1b; }
+        .csrf-payload { width: 100%; height: 80px; font-family: monospace; font-size: 0.85rem; padding: 5px; border: 1px solid #fca5a5; margin-top: 0.5rem; resize: vertical; }
 
         /* Feedback Elements */
         .fake-alert-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 50; backdrop-filter: blur(2px); }
@@ -128,11 +133,11 @@ HTML
                 <button class="nav-btn" onclick="navigateTo('module-sqli')" data-view="module-sqli">
                     <i class="fa-solid fa-database"></i> Lab 3: SQL Injection
                 </button>
-                <button class="nav-btn" onclick="navigateTo('module-xxe')" data-view="module-xxe">
-                    <i class="fa-solid fa-file-code"></i> Lab 4: XXE (External Entity)
+                <button class="nav-btn" onclick="navigateTo('module-csrf')" data-view="module-csrf">
+                    <i class="fa-solid fa-hand-pointer"></i> Lab 4: CSRF
                 </button>
             </div>
-            <div class="sidebar-footer">v1.5 | XXE Added</div>
+            <div class="sidebar-footer">v1.5 | CSRF Added</div>
         </nav>
 
         <main class="main-content">
@@ -228,14 +233,14 @@ HTML
                     html += '<i class="fa-solid fa-chevron-right" style="color: #475569;"></i>';
                     html += '</div>';
 
-                    // CARTE XXE (NEW)
-                    html += '<div class="module-card" onclick="navigateTo(\'module-xxe\')">';
+                    // CARTE CSRF (NEW)
+                    html += '<div class="module-card" onclick="navigateTo(\'module-csrf\')">';
                     html += '<div style="display:flex; align-items:center; gap:1rem;">';
                     html += '<div style="width: 3rem; height: 3rem; background: #334155; border-radius: 50%; display:flex; align-items:center; justify-content:center; color: #3b82f6;">';
-                    html += '<i class="fa-solid fa-file-code"></i>';
+                    html += '<i class="fa-solid fa-hand-pointer"></i>';
                     html += '</div>';
                     html += '<div>';
-                    html += '<h4 style="color: white; font-weight: bold;">Lab XXE (External Entity)</h4>';
+                    html += '<h4 style="color: white; font-weight: bold;">Lab CSRF (Request Forgery)</h4>';
                     html += '<p style="font-size: 0.75rem; color: #94a3b8;">Niveau: Avancé • 400 XP</p>';
                     html += '</div>';
                     html += '</div>';
@@ -331,42 +336,50 @@ HTML
                     return html;
                 }
             },
-            'module-xxe': { // NOUVEAU MODULE XXE
+            'module-csrf': { // NOUVEAU MODULE CSRF
                 xpReward: 400,
                 render: function() {
-                    var isDone = appState.completedModules.indexOf('module-xxe') !== -1;
+                    var isDone = appState.completedModules.indexOf('module-csrf') !== -1;
                     var html = '';
                     html += '<button onclick="navigateTo(\'dashboard\')" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Retour</button>';
-                    html += '<h2 class="dashboard-title"><i class="fa-solid fa-file-code" style="color:#3b82f6"></i> Lab: XXE (XML External Entity)</h2>';
+                    html += '<h2 class="dashboard-title"><i class="fa-solid fa-hand-pointer" style="color:#3b82f6"></i> Lab: CSRF (Cross-Site Request Forgery)</h2>';
                     
                     html += '<div class="stat-card" style="margin-bottom: 2rem;">';
-                    html += '<h3 style="color: white; margin-bottom: 0.5rem;">Mission : Lire le fichier /etc/passwd</h3>';
+                    html += '<h3 style="color: white; margin-bottom: 0.5rem;">Mission : Changer l\'email de l\'utilisateur</h3>';
                     html += '<p style="color: #cbd5e1; line-height: 1.6;">';
-                    html += 'Ce service de configuration traite le XML de manière vulnérable. Déclarez une entité externe pour lire un fichier sensible du système (<code>file:///etc/passwd</code>).';
-                    html += '<br><br><strong>Indice :</strong> La balise <code>&lt;user&gt;</code> est lue et affichée dans le traitement. L\'injection doit être dans le DTD.';
+                    html += 'La page "Settings" permet de changer l\'email via une simple requête GET. ';
+                    html += 'Créez une payload sur la page de l\'attaquant pour déclencher cette action.';
+                    html += '<br><br><strong>Action de la victime :</strong> <code>/settings/update?email=...</code>';
                     html += '</p>';
                     html += '</div>';
 
                     html += '<div class="lab-container">';
-                    html += '<div style="margin-bottom: 1rem; color: #cbd5e1;">http://api-config-uploader.local</div>';
-                    html += '<div class="lab-browser">';
-                    html += '<div class="browser-bar"><div class="browser-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><div id="xxe-url-bar" class="url-bar">/upload/config.xml</div></div>';
+                    html += '<div class="csrf-panel">';
                     
-                    // Contenu du Browser (XML Input)
-                    html += '<div class="browser-content" style="background:#f1f5f9; display:flex; flex-direction:column; align-items:center;">';
-                    
-                    html += '<div style="max-width: 500px; width:100%;">';
-                    html += '<h3 style="color:#1e293b; margin-bottom:1rem;">Uploader de Fichier de Configuration XML</h3>';
-                    html += '<textarea id="xxe-xml-input" class="login-input" style="height: 200px; font-family: monospace; font-size: 0.9rem;" placeholder="Collez votre XML ici..."><?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<config>\n  <user>Invité</user>\n  <settings>default</settings>\n</config></textarea>';
-                    html += '<button onclick="runXXELab()" class="vulnerable-btn" style="width:100%;">Envoyer le XML</button>';
-                    html += '<div id="xxe-output" class="sql-debug" style="min-height: 4em; color: #3b82f6; border-left-color: #3b82f6; margin-top:1rem;">En attente d\'un fichier XML...</div>';
+                    // Partie 1: Site de la Victime (simulé)
+                    html += '<h4 style="color:white; margin-bottom:0.5rem;"><i class="fa-solid fa-lock"></i> Site de la Victime (Connecté)</h4>';
+                    html += '<div class="csrf-target">';
+                    html += '<h3>Mes Paramètres</h3>';
+                    html += '<p style="font-size: 0.9rem;">E-mail actuel: <strong id="csrf-victim-email">user@victim.com</strong></p>';
+                    html += '<p style="margin-top: 10px; font-size: 0.8rem; color: #64748b;">(Cliquez ici pour simuler un changement d\'email par l\'utilisateur lui-même.)</p>';
+                    html += '<button onclick="simulerChangementEmail(false)" class="vulnerable-btn" style="background:#10b981; margin-top:0.5rem;">Changer mon E-mail</button>';
                     html += '</div>';
                     
-                    html += '</div>'; // fin browser-content
-                    html += '</div></div>'; // fin lab-container & browser
+                    // Partie 2: Site de l'Attaquant (où l'utilisateur colle sa payload)
+                    html += '<h4 style="color:white; margin-top:1.5rem; margin-bottom:0.5rem;"><i class="fa-solid fa-skull"></i> Site de l\'Attaquant (External)</h4>';
+                    html += '<div class="csrf-attacker">';
+                    html += '<h3>Générateur de Payload CSRF</h3>';
+                    html += '<p style="font-size: 0.9rem;">Collez le code HTML pour changer l\'email de l\'utilisateur connecté.</p>';
+                    html += '<textarea id="csrf-payload-input" class="csrf-payload" placeholder="Ex: <img src=\'...\'> ou <iframe src=\'...\'>"></textarea>';
+                    html += '<button onclick="runCSRFLab()" class="vulnerable-btn" style="background:#ef4444; width:100%;">Déclencher l\'Attaque (Simuler le clic)</button>';
+                    html += '<p id="csrf-output" style="margin-top: 10px; font-size: 0.85rem; color: #64748b; font-style:italic;">En attente de la payload...</p>';
+                    html += '</div>';
+                    
+                    html += '</div>'; // fin csrf-panel
+                    html += '</div>'; // fin lab-container
 
-                    html += '<button id="validate-btn-xxe" class="action-btn" disabled>';
-                    html += isDone ? '<i class="fa-solid fa-check"></i> Module Déjà Validé' : 'Soumettez la payload pour valider';
+                    html += '<button id="validate-btn-csrf" class="action-btn" disabled>';
+                    html += isDone ? '<i class="fa-solid fa-check"></i> Module Déjà Validé' : 'L\'attaque doit réussir pour valider';
                     html += '</button>';
                     
                     return html;
@@ -376,7 +389,8 @@ HTML
 
         function init() {
             try {
-                var saved = sessionStorage.getItem('bountyState_v4');
+                // IMPORTANT: Mise à jour de la clé de sessionStorage pour éviter les conflits XP
+                var saved = sessionStorage.getItem('bountyState_v5');
                 if (saved) {
                     var parsed = JSON.parse(saved);
                     appState.xp = parsed.xp || 0;
@@ -388,7 +402,7 @@ HTML
         }
 
         function saveState() {
-            try { sessionStorage.setItem('bountyState_v4', JSON.stringify(appState)); } catch(e) {}
+            try { sessionStorage.setItem('bountyState_v5', JSON.stringify(appState)); } catch(e) {}
         }
 
         function navigateTo(viewName) {
@@ -420,12 +434,9 @@ HTML
                         var fn = function(e) { if(e.key === 'Enter') runSQLiLab(); };
                         if(inputUser) inputUser.addEventListener('keypress', fn);
                         if(inputPass) inputPass.addEventListener('keypress', fn);
-                    } else if (viewName === 'module-xxe') {
-                        var input = document.getElementById('xxe-xml-input');
-                        if(input) input.addEventListener('keypress', function(e) { 
-                             // Trigger on Ctrl+Enter or Cmd+Enter to prevent accidental submission on new lines
-                            if(e.ctrlKey || e.metaKey) runXXELab(); 
-                        });
+                    } else if (viewName === 'module-csrf') {
+                        // Initialise l'email pour le lab CSRF
+                        document.getElementById('csrf-victim-email').innerText = 'user@victim.com';
                     }
                 }, 100);
             }
@@ -433,8 +444,9 @@ HTML
         }
 
         function updateUI() {
-            // Total XP possible is 200 + 300 + 400 + 400 = 1300 XP
-            var percentage = Math.min((appState.xp / 1300) * 100, 100); 
+            // Total XP possible est 200 + 300 + 400 + 400 = 1300 XP
+            var maxXP = 1300;
+            var percentage = Math.min((appState.xp / maxXP) * 100, 100); 
             document.getElementById('xp-bar').style.width = percentage + '%';
             document.getElementById('current-xp').innerText = appState.xp + ' XP';
             
@@ -467,6 +479,7 @@ HTML
             var low = val.toLowerCase();
             if ((low.indexOf('<script>') !== -1 && low.indexOf('alert(1)') !== -1) || 
                 (low.indexOf('<img') !== -1 && low.indexOf('onerror') !== -1)) {
+                document.getElementById('alert-content').innerText = '1';
                 setTimeout(triggerFakeXSSSuccess, 400);
             }
         }
@@ -504,19 +517,13 @@ HTML
             var errorDiv = document.getElementById('sqli-error');
 
             // Simulation de la requête SQL
-            // Dans un vrai backend vulnérable : SELECT * FROM users WHERE user = '$user' AND pass = '$pass'
             var query = "SELECT * FROM users WHERE username = '" + user + "' AND password = '" + pass + "'";
             debugDiv.innerHTML = "<strong>Backend executes:</strong> " + query.replace(/</g, '&lt;');
+            errorDiv.style.display = 'none';
 
-            // Vérification de l'injection
-            // On cherche la structure ' OR ...
+            // Vérification de l'injection: ' OR '1'='1
             var u = user.toUpperCase();
-            var isInjected = false;
-            
-            // Logique de détection simplifiée pour le lab
-            if (u.indexOf("' OR '1'='1") !== -1 || u.indexOf("' OR 1=1") !== -1) {
-                isInjected = true;
-            }
+            var isInjected = (u.indexOf("' OR '1'='1") !== -1 || u.indexOf("' OR 1=1") !== -1);
 
             if (isInjected) {
                 // SUCCESS
@@ -530,48 +537,57 @@ HTML
             } else {
                 // FAIL
                 errorDiv.style.display = 'block';
-                // Petite animation shake pour dire "non"
                 var box = document.querySelector('.login-box');
                 box.style.transform = 'translateX(5px)';
                 setTimeout(function(){ box.style.transform = 'translateX(-5px)'; }, 50);
                 setTimeout(function(){ box.style.transform = 'translateX(0)'; }, 100);
             }
         }
+        
+        /* --- CSRF LOGIC (NEW) --- */
+        function simulerChangementEmail(isAttacker) {
+            var emailDisplay = document.getElementById('csrf-victim-email');
+            var currentEmail = emailDisplay.innerText;
+            var newEmail = isAttacker ? 'hacked@attacker.com' : 'user@victim.com';
+            var output = document.getElementById('csrf-output');
 
-        /* --- XXE LOGIC (NEW) --- */
-        function runXXELab() {
-            var input = document.getElementById('xxe-xml-input');
-            var outputDiv = document.getElementById('xxe-output');
-            var urlBar = document.getElementById('xxe-url-bar');
-            if (!input) return;
-            var xml = input.value.trim();
-
-            urlBar.innerText = '/upload/config.xml?data=' + encodeURIComponent(xml.substring(0, 50)) + '...';
-            outputDiv.innerHTML = '<p style="color:#64748b; font-style:italic;">[STATUS] Traitement du XML en cours...</p>';
-
-
-            // Logique de détection simplifiée pour le lab
-            // La payload cible est: <!ENTITY xxe SYSTEM "file:///etc/passwd">
-            var isVulnerable = xml.indexOf('<!ENTITY') !== -1 && xml.indexOf('file:///etc/passwd') !== -1 && xml.indexOf('&xxe;') !== -1;
-
-            if (isVulnerable) {
-                // SUCCESS: Simulation de la lecture du fichier
-                setTimeout(function() {
-                    var fakePasswd = "root:x:0:0:root:/root:/bin/bash\ndaemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin\nbounty:x:1000:1000:Bounty User:/home/bounty:/bin/bash\nFLAG: BOUNTY{XXE_FILE_READ}";
-                    outputDiv.innerHTML = '<div style="background: #fee2e2; color: #991b1b; padding: 15px; border-radius: 4px; border: 1px solid #fca5a5; text-align: left; overflow-x: auto; white-space: pre-wrap; margin-top: 10px;">' +
-                        '<strong style="color: #ef4444;">[SERVER RESPONSE] Fichier lu avec succès !</strong><br><br>' +
-                        'Contenu injecté dans le champ USER:' +
-                        '<div style="background:#f1f5f9; padding: 5px; margin-top: 5px; border-radius: 2px; color: #1e293b;">' +
-                        fakePasswd.replace(/</g, '&lt;').replace(/\n/g, '<br>') +
-                        '</div>' +
-                        '</div>';
-                    completeModule('module-xxe');
-                }, 500);
+            if (isAttacker) {
+                output.innerHTML = '<strong style="color:#991b1b;">Requête CSRF reçue par le serveur !</strong><br>Ancien Email: ' + currentEmail + '<br>Nouvel Email: ' + newEmail;
             } else {
-                // FAIL
-                setTimeout(function() {
-                    outputDiv.innerHTML = '<strong style="color:#ef4444;">[SERVER RESPONSE] Erreur : L\'entité XML n\'a pas pu être résolue ou le format est invalide.</strong>';
-                }, 500);
+                output.innerHTML = '<span style="color:#10b981;">Requête légitime reçue.</span>';
+            }
+
+            // Simple update simulation
+            emailDisplay.innerText = newEmail;
+            emailDisplay.style.fontWeight = 'bold';
+            emailDisplay.style.color = isAttacker ? '#ef4444' : '#10b981';
+
+            if (isAttacker) {
+                completeModule('module-csrf');
+            }
+        }
+        
+        function runCSRFLab() {
+            var payload = document.getElementById('csrf-payload-input').value.trim();
+            var output = document.getElementById('csrf-output');
+            
+            // Logique de détection :
+            // 1. Cherche le domaine cible dans la payload
+            // 2. Cherche l'action "update"
+            // 3. Cherche le paramètre "email" avec l'email de l'attaquant
+            
+            var targetURL = 'settings/update';
+            var attackerEmail = 'hacked@attacker.com';
+            
+            var isPayloadValid = payload.includes(targetURL) && payload.includes(attackerEmail);
+
+            if (isPayloadValid) {
+                // Succès de l'attaque simulée
+                output.innerHTML = '<strong style="color:#10b981;">Payload activée avec succès. Requête envoyée au serveur de la victime...</strong>';
+                simulerChangementEmail(true);
+            } else {
+                // Échec
+                output.innerHTML = '<strong style="color:#ef4444;">Payload Invalide.</strong> Assurez-vous d\'utiliser une balise HTML (img, iframe, etc.) pour déclencher une requête GET vers l\'URL cible, et de spécifier le paramètre <code>email=' + attackerEmail + '</code>.';
             }
         }
 
@@ -587,7 +603,7 @@ HTML
                 var btnId = 'validate-btn';
                 if(moduleId === 'module-idor') btnId = 'validate-btn-idor';
                 if(moduleId === 'module-sqli') btnId = 'validate-btn-sqli';
-                if(moduleId === 'module-xxe') btnId = 'validate-btn-xxe';
+                if(moduleId === 'module-csrf') btnId = 'validate-btn-csrf';
                 
                 var btn = document.getElementById(btnId);
                 if (btn) {
@@ -621,3 +637,5 @@ HTML
     </script>
 </body>
 </html>
+```
+

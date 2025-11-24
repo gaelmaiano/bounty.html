@@ -1,9 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BountyAcademy - Lab XSS</title>
+    <title>BountyAcademy - Labs XSS, IDOR & SQLi</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -38,6 +39,8 @@
         .action-btn:disabled { background-color: #334155; cursor: not-allowed; }
         .back-btn { background:none; border:none; color: #94a3b8; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem; font-size: 1rem; }
         .back-btn:hover { color: #10b981; }
+        
+        /* Labs Containers */
         .lab-container { background-color: #1e293b; border: 1px solid #475569; border-radius: 0.5rem; padding: 1.5rem; margin-top: 1rem; }
         .lab-browser { background-color: #f8fafc; border-radius: 0.5rem; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); color: #334155; font-family: 'Segoe UI', sans-serif; border: 1px solid #cbd5e1; }
         .browser-bar { background-color: #e2e8f0; padding: 0.5rem 1rem; display: flex; align-items: center; gap: 0.5rem; border-bottom: 1px solid #cbd5e1; }
@@ -46,19 +49,38 @@
         .dot-red { background-color: #ef4444; }
         .dot-yellow { background-color: #f59e0b; }
         .dot-green { background-color: #10b981; }
-        .url-bar { background-color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; flex: 1; font-size: 0.8rem; color: #64748b; margin-left: 1rem; border: 1px solid #cbd5e1; }
-        .browser-content { padding: 2rem; min-height: 250px; text-align: center; }
+        .url-bar { background-color: white; padding: 0.25rem 0.75rem; border-radius: 0.25rem; flex: 1; font-size: 0.8rem; color: #64748b; margin-left: 1rem; border: 1px solid #cbd5e1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .browser-content { padding: 2rem; min-height: 250px; text-align: center; position: relative; }
+        
+        /* Inputs & Buttons Labs */
         .vulnerable-input { padding: 0.75rem; border: 2px solid #cbd5e1; border-radius: 0.25rem; width: 70%; margin-right: 0.5rem; font-size: 1rem; outline: none; }
         .vulnerable-input:focus { border-color: #3b82f6; }
         .vulnerable-btn { padding: 0.75rem 1.5rem; background-color: #3b82f6; color: white; border: none; border-radius: 0.25rem; cursor: pointer; font-size: 1rem; transition: background 0.2s; }
         .vulnerable-btn:hover { background-color: #2563eb; }
         .search-result { margin-top: 2rem; padding: 1rem; border: 1px dashed #94a3b8; background-color: #f1f5f9; border-radius: 0.25rem; display: none; text-align: left; max-width: 80%; margin-left: auto; margin-right: auto; }
+        
+        /* IDOR Styles */
+        .profile-card { border: 1px solid #cbd5e1; border-radius: 8px; padding: 20px; max-width: 400px; margin: 0 auto; background: white; text-align: left; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .profile-header { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; border-bottom: 1px solid #e2e8f0; padding-bottom: 15px; }
+        .profile-avatar { width: 60px; height: 60px; background: #e2e8f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #64748b; }
+        .profile-details p { margin-bottom: 8px; font-size: 0.9rem; }
+        .profile-label { font-weight: bold; color: #475569; width: 80px; display: inline-block; }
+        .api-key { background: #fee2e2; color: #991b1b; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 0.85rem; }
+        .idor-control { margin-top: 20px; padding: 15px; background: #f1f5f9; border-radius: 8px; display: inline-flex; align-items: center; gap: 10px; }
+        
+        /* SQLi Styles */
+        .login-box { max-width: 350px; margin: 0 auto; background: white; padding: 2rem; border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .login-input { width: 100%; padding: 10px; margin-bottom: 1rem; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 1rem; }
+        .sql-debug { margin-top: 20px; font-family: monospace; font-size: 0.85rem; background: #1e293b; color: #10b981; padding: 10px; border-radius: 4px; text-align: left; border-left: 3px solid #10b981; min-height: 3.5em; display: flex; align-items: center; }
+
+        /* Feedback Elements */
         .fake-alert-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 50; backdrop-filter: blur(2px); }
         .fake-alert-box { background: white; padding: 1.5rem; border-radius: 0.5rem; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); width: 320px; text-align: center; color: #0f172a; animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         .alert-btn { margin-top: 1rem; background: #3b82f6; color: white; border: none; padding: 0.5rem 1.5rem; border-radius: 0.25rem; cursor: pointer; }
         .toast { position: fixed; bottom: 20px; right: 20px; background: #1e293b; border-left: 4px solid #10b981; color: white; padding: 15px 20px; border-radius: 4px; transform: translateX(150%); transition: transform 0.3s; z-index: 100; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3); display: flex; align-items: center; gap: 10px; }
         .toast.show { transform: translateX(0); }
+        
         .mobile-header { display: none; }
         @media (max-width: 768px) {
             .stats-grid { grid-template-columns: 1fr; }
@@ -99,11 +121,14 @@
                 <button class="nav-btn" onclick="navigateTo('module-xss')" data-view="module-xss">
                     <i class="fa-solid fa-code"></i> Lab 1: XSS Reflected
                 </button>
-                <button class="nav-btn" disabled>
-                    <i class="fa-solid fa-database"></i> Lab 2: SQLi (Bientôt)
+                <button class="nav-btn" onclick="navigateTo('module-idor')" data-view="module-idor">
+                    <i class="fa-solid fa-id-card"></i> Lab 2: IDOR
+                </button>
+                <button class="nav-btn" onclick="navigateTo('module-sqli')" data-view="module-sqli">
+                    <i class="fa-solid fa-database"></i> Lab 3: SQL Injection
                 </button>
             </div>
-            <div class="sidebar-footer">v1.2 | Lab Interactif</div>
+            <div class="sidebar-footer">v1.4 | SQLi Added</div>
         </nav>
 
         <main class="main-content">
@@ -156,6 +181,8 @@
                     html += '</div>';
                     html += '</div>';
                     html += '<h3 style="color:white; margin-bottom:1rem;">Continuer l\'apprentissage</h3>';
+                    
+                    // CARTE XSS
                     html += '<div class="module-card" onclick="navigateTo(\'module-xss\')">';
                     html += '<div style="display:flex; align-items:center; gap:1rem;">';
                     html += '<div style="width: 3rem; height: 3rem; background: #334155; border-radius: 50%; display:flex; align-items:center; justify-content:center; color: #10b981;">';
@@ -168,6 +195,35 @@
                     html += '</div>';
                     html += '<i class="fa-solid fa-chevron-right" style="color: #475569;"></i>';
                     html += '</div>';
+                    
+                    // CARTE IDOR
+                    html += '<div class="module-card" onclick="navigateTo(\'module-idor\')">';
+                    html += '<div style="display:flex; align-items:center; gap:1rem;">';
+                    html += '<div style="width: 3rem; height: 3rem; background: #334155; border-radius: 50%; display:flex; align-items:center; justify-content:center; color: #f59e0b;">';
+                    html += '<i class="fa-solid fa-id-card"></i>';
+                    html += '</div>';
+                    html += '<div>';
+                    html += '<h4 style="color: white; font-weight: bold;">Lab IDOR</h4>';
+                    html += '<p style="font-size: 0.75rem; color: #94a3b8;">Niveau: Moyen • 300 XP</p>';
+                    html += '</div>';
+                    html += '</div>';
+                    html += '<i class="fa-solid fa-chevron-right" style="color: #475569;"></i>';
+                    html += '</div>';
+
+                    // CARTE SQLI
+                    html += '<div class="module-card" onclick="navigateTo(\'module-sqli\')">';
+                    html += '<div style="display:flex; align-items:center; gap:1rem;">';
+                    html += '<div style="width: 3rem; height: 3rem; background: #334155; border-radius: 50%; display:flex; align-items:center; justify-content:center; color: #ef4444;">';
+                    html += '<i class="fa-solid fa-database"></i>';
+                    html += '</div>';
+                    html += '<div>';
+                    html += '<h4 style="color: white; font-weight: bold;">Lab SQL Injection</h4>';
+                    html += '<p style="font-size: 0.75rem; color: #94a3b8;">Niveau: Intermédiaire • 400 XP</p>';
+                    html += '</div>';
+                    html += '</div>';
+                    html += '<i class="fa-solid fa-chevron-right" style="color: #475569;"></i>';
+                    html += '</div>';
+                    
                     return html;
                 }
             },
@@ -176,49 +232,84 @@
                 render: function() {
                     var isDone = appState.completedModules.indexOf('module-xss') !== -1;
                     var html = '';
-                    html += '<button onclick="navigateTo(\'dashboard\')" class="back-btn">';
-                    html += '<i class="fa-solid fa-arrow-left"></i> Retour';
-                    html += '</button>';
+                    html += '<button onclick="navigateTo(\'dashboard\')" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Retour</button>';
                     html += '<h2 class="dashboard-title"><i class="fa-solid fa-code" style="color:#10b981"></i> Lab: XSS Reflected</h2>';
                     html += '<div class="stat-card" style="margin-bottom: 2rem;">';
                     html += '<h3 style="color: white; margin-bottom: 0.5rem;">Mission : Hackez cette recherche</h3>';
-                    html += '<p style="color: #cbd5e1; line-height: 1.6;">';
-                    html += 'Ce moteur de recherche simulé ne nettoie pas les entrées utilisateurs. ';
-                    html += 'Tout ce que vous tapez est "reflété" (affiché) tel quel sur la page de résultats.';
-                    html += '<br><br>';
-                    html += '<strong>Objectif :</strong> Injectez du code JavaScript pour faire apparaître une <code>alert(1)</code>.';
-                    html += '</p>';
-                    html += '<div style="margin-top:1rem; padding:0.5rem; background:rgba(0,0,0,0.3); border-radius:4px; font-size:0.85rem; color:#94a3b8;">';
-                    html += '<i class="fa-solid fa-lightbulb" style="color:#fbbf24"></i> <strong>Indice :</strong> Essayez les balises <code>&lt;script&gt;</code> ou <code>&lt;img&gt;</code>.';
-                    html += '</div>';
+                    html += '<p style="color: #cbd5e1; line-height: 1.6;">Injectez du code JavaScript pour faire apparaître une <code>alert(1)</code>.</p>';
                     html += '</div>';
                     html += '<div class="lab-container">';
-                    html += '<div style="margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">';
-                    html += '<span style="font-weight: bold; color: #cbd5e1;">Navigateur Victime</span>';
-                    html += '<span style="font-size: 0.75rem; color: #64748b;">http://vulnerable-search.com</span>';
+                    html += '<div style="margin-bottom: 1rem; color: #cbd5e1;">http://vulnerable-search.com</div>';
+                    html += '<div class="lab-browser"><div class="browser-bar"><div class="browser-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><div class="url-bar">/search</div></div>';
+                    html += '<div class="browser-content"><h2 style="margin-bottom: 1.5rem; color: #1e293b;">Super Search</h2>';
+                    html += '<div style="display: flex; justify-content: center; gap:0.5rem;"><input type="text" id="lab-input" class="vulnerable-input" placeholder="Que cherchez-vous ?"><button onclick="runXSSLab()" class="vulnerable-btn">Go</button></div>';
+                    html += '<div id="lab-result" class="search-result"></div></div></div></div>';
+                    html += '<button id="validate-btn" class="action-btn" disabled>' + (isDone ? 'Validé' : 'À faire') + '</button>';
+                    return html;
+                }
+            },
+            'module-idor': {
+                xpReward: 300,
+                render: function() {
+                    var isDone = appState.completedModules.indexOf('module-idor') !== -1;
+                    var html = '';
+                    html += '<button onclick="navigateTo(\'dashboard\')" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Retour</button>';
+                    html += '<h2 class="dashboard-title"><i class="fa-solid fa-id-card" style="color:#f59e0b"></i> Lab: IDOR</h2>';
+                    html += '<div class="stat-card" style="margin-bottom: 2rem;">';
+                    html += '<h3 style="color: white; margin-bottom: 0.5rem;">Mission : Accès Admin</h3>';
+                    html += '<p style="color: #cbd5e1; line-height: 1.6;">Vous êtes ID 101 (Invité). Trouvez le profil Admin (ID 100).</p>';
                     html += '</div>';
+                    html += '<div class="lab-container"><div style="margin-bottom: 1rem; color: #cbd5e1;">http://internal-api.local</div>';
+                    html += '<div class="lab-browser"><div class="browser-bar"><div class="browser-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><div id="idor-url-bar" class="url-bar">/profile?id=101</div></div>';
+                    html += '<div class="browser-content" style="background:#f8fafc;"><div id="idor-result"><div class="profile-card"><div class="profile-header"><div class="profile-avatar"><i class="fa-solid fa-user"></i></div><div><h3>Invité</h3><span style="color:#64748b; font-size:0.8rem;">Utilisateur Standard</span></div></div><div class="profile-details"><p><span class="profile-label">User ID:</span> 101</p></div></div></div>';
+                    html += '<div class="idor-control"><label style="color:#334155;">ID:</label><input type="number" id="idor-input" class="vulnerable-input" style="width:80px;" value="101"><button onclick="runIDORLab()" class="vulnerable-btn">Charger</button></div></div></div></div>';
+                    html += '<button id="validate-btn-idor" class="action-btn" disabled>' + (isDone ? 'Validé' : 'À faire') + '</button>';
+                    return html;
+                }
+            },
+            'module-sqli': {
+                xpReward: 400,
+                render: function() {
+                    var isDone = appState.completedModules.indexOf('module-sqli') !== -1;
+                    var html = '';
+                    html += '<button onclick="navigateTo(\'dashboard\')" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Retour</button>';
+                    html += '<h2 class="dashboard-title"><i class="fa-solid fa-database" style="color:#ef4444"></i> Lab: SQL Injection</h2>';
+                    
+                    html += '<div class="stat-card" style="margin-bottom: 2rem;">';
+                    html += '<h3 style="color: white; margin-bottom: 0.5rem;">Mission : Bypass Login</h3>';
+                    html += '<p style="color: #cbd5e1; line-height: 1.6;">';
+                    html += 'Connectez-vous en tant qu\'administrateur sans connaître le mot de passe. ';
+                    html += 'Utilisez une injection SQL pour forcer la condition de connexion à être toujours VRAIE.';
+                    html += '<br><br><strong>Payload suggérée :</strong> <code>\' OR \'1\'=\'1</code>';
+                    html += '</p>';
+                    html += '</div>';
+
+                    html += '<div class="lab-container">';
+                    html += '<div style="margin-bottom: 1rem; color: #cbd5e1;">http://bank-admin.local/login</div>';
                     html += '<div class="lab-browser">';
-                    html += '<div class="browser-bar">';
-                    html += '<div class="browser-dots">';
-                    html += '<div class="dot dot-red"></div>';
-                    html += '<div class="dot dot-yellow"></div>';
-                    html += '<div class="dot dot-green"></div>';
+                    html += '<div class="browser-bar"><div class="browser-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><div class="url-bar">/login.php</div></div>';
+                    
+                    // Contenu du Browser (Formulaire Login)
+                    html += '<div class="browser-content" style="background:#f1f5f9; display:flex; flex-direction:column; align-items:center;">';
+                    
+                    html += '<div id="sqli-view">'; // Vue changeable (Form ou Dashboard Admin)
+                    html += '<div class="login-box">';
+                    html += '<h3 style="color:#1e293b; margin-bottom:1.5rem;">Admin Panel Login</h3>';
+                    html += '<input type="text" id="sqli-user" class="login-input" placeholder="Username">';
+                    html += '<input type="password" id="sqli-pass" class="login-input" placeholder="Password">';
+                    html += '<button onclick="runSQLiLab()" class="vulnerable-btn" style="width:100%;">Se Connecter</button>';
+                    html += '<div id="sqli-error" style="color:#ef4444; margin-top:10px; font-size:0.9rem; display:none;">Identifiants invalides</div>';
                     html += '</div>';
-                    html += '<div class="url-bar">http://vulnerable-search.com/search</div>';
-                    html += '</div>';
-                    html += '<div class="browser-content">';
-                    html += '<h2 style="margin-bottom: 1.5rem; color: #1e293b; font-weight:800;">Super Search <span style="color:#3b82f6">v1.0</span></h2>';
-                    html += '<div style="display: flex; flex-wrap:wrap; justify-content: center; margin-bottom: 1rem; gap:0.5rem;">';
-                    html += '<input type="text" id="lab-input" class="vulnerable-input" placeholder="Que cherchez-vous ?" autocomplete="off">';
-                    html += '<button onclick="runXSSLab()" class="vulnerable-btn">Rechercher</button>';
-                    html += '</div>';
-                    html += '<div id="lab-result" class="search-result"></div>';
-                    html += '</div>';
-                    html += '</div>';
-                    html += '</div>';
-                    html += '<button id="validate-btn" class="action-btn" disabled>';
-                    html += isDone ? '<i class="fa-solid fa-check"></i> Module Déjà Validé' : 'Réussissez le Lab pour valider';
+                    html += '</div>'; // fin sqli-view
+                    
+                    html += '</div>'; // fin browser-content
+                    html += '<div id="sqli-debug" class="sql-debug">En attente d\'exécution...</div>';
+                    html += '</div></div>'; // fin lab-container & browser
+
+                    html += '<button id="validate-btn-sqli" class="action-btn" disabled>';
+                    html += isDone ? '<i class="fa-solid fa-check"></i> Module Déjà Validé' : 'Bypassez le login pour valider';
                     html += '</button>';
+                    
                     return html;
                 }
             }
@@ -226,25 +317,19 @@
 
         function init() {
             try {
-                var saved = sessionStorage.getItem('bountyState_v3');
+                var saved = sessionStorage.getItem('bountyState_v4');
                 if (saved) {
                     var parsed = JSON.parse(saved);
                     appState.xp = parsed.xp || 0;
                     appState.completedModules = parsed.completedModules || [];
                 }
-            } catch(e) { 
-                console.log('Erreur chargement:', e); 
-            }
+            } catch(e) {}
             updateUI();
             navigateTo('dashboard');
         }
 
         function saveState() {
-            try {
-                sessionStorage.setItem('bountyState_v3', JSON.stringify(appState));
-            } catch(e) { 
-                console.log('Erreur sauvegarde:', e); 
-            }
+            try { sessionStorage.setItem('bountyState_v4', JSON.stringify(appState)); } catch(e) {}
         }
 
         function navigateTo(viewName) {
@@ -262,34 +347,35 @@
             if (modules[viewName]) {
                 contentArea.innerHTML = modules[viewName].render();
                 
-                if (viewName === 'module-xss') {
-                    setTimeout(function() {
+                // Event Listeners (Entrée Clavier)
+                setTimeout(function() {
+                    if (viewName === 'module-xss') {
                         var input = document.getElementById('lab-input');
-                        if (input) {
-                            input.addEventListener('keypress', function(e) {
-                                if (e.key === 'Enter') {
-                                    runXSSLab();
-                                }
-                            });
-                            input.focus();
-                        }
-                    }, 100);
-                }
+                        if(input) input.addEventListener('keypress', function(e) { if(e.key === 'Enter') runXSSLab(); });
+                    } else if (viewName === 'module-idor') {
+                        var input = document.getElementById('idor-input');
+                        if(input) input.addEventListener('keypress', function(e) { if(e.key === 'Enter') runIDORLab(); });
+                    } else if (viewName === 'module-sqli') {
+                        var inputUser = document.getElementById('sqli-user');
+                        var inputPass = document.getElementById('sqli-pass');
+                        var fn = function(e) { if(e.key === 'Enter') runSQLiLab(); };
+                        if(inputUser) inputUser.addEventListener('keypress', fn);
+                        if(inputPass) inputPass.addEventListener('keypress', fn);
+                    }
+                }, 100);
             }
-            
-            if (window.innerWidth <= 768) {
-                document.getElementById('sidebar').classList.remove('mobile-open');
-            }
+            if (window.innerWidth <= 768) document.getElementById('sidebar').classList.remove('mobile-open');
         }
 
         function updateUI() {
-            var percentage = Math.min((appState.xp / 1000) * 100, 100);
+            var percentage = Math.min((appState.xp / 1200) * 100, 100);
             document.getElementById('xp-bar').style.width = percentage + '%';
             document.getElementById('current-xp').innerText = appState.xp + ' XP';
             
             var rank = 'Novice';
             if (appState.xp >= 200) rank = 'Hunter';
-            if (appState.xp >= 800) rank = 'Elite';
+            if (appState.xp >= 500) rank = 'Pro Hunter';
+            if (appState.xp >= 900) rank = 'Elite';
             document.getElementById('user-level').innerText = rank;
         }
 
@@ -297,49 +383,91 @@
             var toast = document.getElementById('toast');
             document.getElementById('toast-message').innerText = msg;
             toast.classList.add('show');
-            setTimeout(function() {
-                toast.classList.remove('show');
-            }, 3000);
+            setTimeout(function() { toast.classList.remove('show'); }, 3000);
         }
 
+        /* --- XSS LOGIC --- */
         function runXSSLab() {
             var input = document.getElementById('lab-input');
             var resultDiv = document.getElementById('lab-result');
-            
             if (!input) return;
-            var value = input.value;
+            var val = input.value;
+            if (!val.trim()) return;
             
-            if (!value.trim()) {
-                resultDiv.style.display = 'block';
-                resultDiv.innerHTML = '<span style="color:#64748b">Veuillez entrer un terme de recherche.</span>';
-                return;
-            }
-            
-            var safeValue = value.replace(/</g, '&lt;').replace(/>/g, '&gt;');
             resultDiv.style.display = 'block';
-            resultDiv.innerHTML = '<span style="color:#64748b">Résultats pour : </span> <strong>' + safeValue + '</strong> <br><br> <em>Aucun résultat trouvé dans la base de données.</em>';
-
-            var lowerInput = value.toLowerCase();
-            var isScriptAlert = lowerInput.indexOf('<script>') !== -1 && lowerInput.indexOf('alert(1)') !== -1;
-            var isImgAlert = lowerInput.indexOf('<img') !== -1 && lowerInput.indexOf('onerror') !== -1 && lowerInput.indexOf('alert(1)') !== -1;
-            var isSvgAlert = lowerInput.indexOf('<svg') !== -1 && lowerInput.indexOf('onload') !== -1 && lowerInput.indexOf('alert(1)') !== -1;
-
-            if (isScriptAlert || isImgAlert || isSvgAlert) {
-                setTimeout(function() {
-                    triggerFakeXSSSuccess();
-                }, 400);
+            resultDiv.innerHTML = 'Résultats pour : <strong>' + val.replace(/</g, '&lt;') + '</strong>';
+            
+            var low = val.toLowerCase();
+            if ((low.indexOf('<script>') !== -1 && low.indexOf('alert(1)') !== -1) || 
+                (low.indexOf('<img') !== -1 && low.indexOf('onerror') !== -1)) {
+                setTimeout(triggerFakeXSSSuccess, 400);
             }
         }
-
-        function triggerFakeXSSSuccess() {
-            document.getElementById('fake-alert-overlay').style.display = 'flex';
-        }
-
+        function triggerFakeXSSSuccess() { document.getElementById('fake-alert-overlay').style.display = 'flex'; }
         function closeFakeAlert() {
             document.getElementById('fake-alert-overlay').style.display = 'none';
+            completeModule('module-xss');
+        }
+
+        /* --- IDOR LOGIC --- */
+        function runIDORLab() {
+            var input = document.getElementById('idor-input');
+            var resultDiv = document.getElementById('idor-result');
+            var urlBar = document.getElementById('idor-url-bar');
+            if (!input) return;
+            var id = input.value.trim();
+            urlBar.innerText = '/profile?id=' + id;
             
-            if (appState.completedModules.indexOf('module-xss') === -1) {
-                completeModule('module-xss');
+            if (id === '101') {
+                resultDiv.innerHTML = '<div class="profile-card"><div class="profile-header"><div class="profile-avatar"><i class="fa-solid fa-user"></i></div><div><h3>Invité</h3><span style="color:#64748b; font-size:0.8rem;">Utilisateur Standard</span></div></div><div class="profile-details"><p><span class="profile-label">User ID:</span> 101</p></div></div>';
+            } else if (id === '100') {
+                resultDiv.innerHTML = '<div class="profile-card" style="border-color:#10b981; border-width:2px;"><div class="profile-header"><div class="profile-avatar" style="background:#d1fae5; color:#047857;"><i class="fa-solid fa-user-shield"></i></div><div><h3>Admin Root</h3><span style="color:#047857; font-weight:bold; font-size:0.8rem;">Super Administrator</span></div></div><div class="profile-details"><p><span class="profile-label">User ID:</span> 100</p><p><span class="profile-label">Secret:</span> SQLI_IS_NEXT</p></div></div>';
+                completeModule('module-idor');
+            } else {
+                resultDiv.innerHTML = '<div style="color:#ef4444; font-weight:bold;">404 Not Found</div>';
+            }
+        }
+
+        /* --- SQLi LOGIC (NEW) --- */
+        function runSQLiLab() {
+            var user = document.getElementById('sqli-user').value;
+            var pass = document.getElementById('sqli-pass').value;
+            var debugDiv = document.getElementById('sqli-debug');
+            var viewDiv = document.getElementById('sqli-view');
+            var errorDiv = document.getElementById('sqli-error');
+
+            // Simulation de la requête SQL
+            // Dans un vrai backend vulnérable : SELECT * FROM users WHERE user = '$user' AND pass = '$pass'
+            var query = "SELECT * FROM users WHERE username = '" + user + "' AND password = '" + pass + "'";
+            debugDiv.innerHTML = "<strong>Backend executes:</strong> " + query.replace(/</g, '&lt;');
+
+            // Vérification de l'injection
+            // On cherche la structure ' OR ...
+            var u = user.toUpperCase();
+            var isInjected = false;
+            
+            // Logique de détection simplifiée pour le lab
+            if (u.indexOf("' OR '1'='1") !== -1 || u.indexOf("' OR 1=1") !== -1) {
+                isInjected = true;
+            }
+
+            if (isInjected) {
+                // SUCCESS
+                viewDiv.innerHTML = '<div style="background:white; padding:2rem; border-radius:8px; text-align:center;">' +
+                    '<i class="fa-solid fa-lock-open" style="font-size:3rem; color:#10b981; margin-bottom:1rem;"></i>' +
+                    '<h2 style="color:#1e293b;">Accès Autorisé !</h2>' +
+                    '<p style="color:#64748b;">Bienvenue, Administrateur.</p>' +
+                    '<div style="margin-top:1rem; padding:10px; background:#d1fae5; color:#065f46; border-radius:4px;">Flag: BOUNTY{SQLI_MASTER}</div>' +
+                    '</div>';
+                completeModule('module-sqli');
+            } else {
+                // FAIL
+                errorDiv.style.display = 'block';
+                // Petite animation shake pour dire "non"
+                var box = document.querySelector('.login-box');
+                box.style.transform = 'translateX(5px)';
+                setTimeout(function(){ box.style.transform = 'translateX(-5px)'; }, 50);
+                setTimeout(function(){ box.style.transform = 'translateX(0)'; }, 100);
             }
         }
 
@@ -350,20 +478,24 @@
                 saveState();
                 updateUI();
                 
-                var btn = document.getElementById('validate-btn');
+                // Update Button generic
+                var btnId = 'validate-btn';
+                if(moduleId === 'module-idor') btnId = 'validate-btn-idor';
+                if(moduleId === 'module-sqli') btnId = 'validate-btn-sqli';
+                
+                var btn = document.getElementById(btnId);
                 if (btn) {
-                    btn.innerHTML = '<i class="fa-solid fa-check"></i> Module Validé !';
+                    btn.innerHTML = '<i class="fa-solid fa-check"></i> Validé !';
                     btn.style.backgroundColor = '#334155';
                     btn.disabled = true;
                 }
-                
-                showToast('Bravo ! +' + modules[moduleId].xpReward + ' XP gagnés');
+                showToast('Bravo ! +' + modules[moduleId].xpReward + ' XP');
                 createConfetti();
             }
         }
-        
+
         function createConfetti() {
-            var colors = ['#10b981', '#34d399', '#ffffff', '#fbbf24'];
+            var colors = ['#10b981', '#f59e0b', '#ef4444', '#ffffff'];
             for (var i = 0; i < 40; i++) {
                 var conf = document.createElement('div');
                 conf.style.position = 'fixed';
@@ -374,19 +506,8 @@
                 conf.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
                 conf.style.transition = 'top 1.5s ease-out, transform 1.5s linear';
                 conf.style.zIndex = '9999';
-                conf.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
                 document.body.appendChild(conf);
-                
-                (function(element) {
-                    setTimeout(function() {
-                        element.style.top = '110vh';
-                        element.style.transform = 'rotate(' + (Math.random() * 360) + 'deg) translateX(' + (Math.random() * 50 - 25) + 'px)';
-                    }, 10);
-                    
-                    setTimeout(function() {
-                        element.remove();
-                    }, 1500);
-                })(conf);
+                (function(el){ setTimeout(function(){ el.style.top = '110vh'; el.style.transform = 'rotate('+Math.random()*360+'deg)'; }, 10); setTimeout(function(){ el.remove(); }, 1500); })(conf);
             }
         }
 
@@ -394,3 +515,4 @@
     </script>
 </body>
 </html>
+```

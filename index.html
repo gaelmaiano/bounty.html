@@ -55,10 +55,16 @@
 
         /* Specific Lab Styles */
         .profile-card { border: 1px solid #cbd5e1; border-radius: 8px; padding: 20px; max-width: 400px; margin: 0 auto; background: white; text-align: left; }
-        .xxe-output, .lfi-file-content { margin-top: 1.5rem; padding: 1rem; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 4px; text-align: left; min-height: 100px; font-family: monospace; white-space: pre-wrap; }
+        .xxe-output, .lfi-file-content, .race-output { margin-top: 1.5rem; padding: 1rem; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 4px; text-align: left; min-height: 100px; font-family: monospace; white-space: pre-wrap; }
         .xxe-success { color: #10b981; font-weight: bold; }
         .shop-product-received { display: inline-block; background: #334155; padding: 0.5rem; margin: 0.2rem; border-radius: 4px; color: white; font-size: 0.8rem; }
-
+        
+        /* Race Condition specific */
+        .race-controls { display: flex; gap: 0.5rem; margin: 1rem 0; }
+        .race-track { background: #e2e8f0; height: 20px; border-radius: 10px; margin: 0.5rem 0; position: relative; overflow: hidden; }
+        .race-progress { background: #3b82f6; height: 100%; width: 0%; transition: width 0.1s; }
+        .request-indicator { position: absolute; top: -5px; width: 30px; height: 30px; background: #ef4444; border-radius: 50%; transform: translateX(-15px); }
+        
         /* Toast & Alerts */
         .toast { position: fixed; bottom: 20px; right: 20px; background: #1e293b; border-left: 4px solid #10b981; color: white; padding: 15px 20px; border-radius: 4px; transform: translateX(150%); transition: transform 0.3s; z-index: 100; }
         .toast.show { transform: translateX(0); }
@@ -168,6 +174,7 @@
                 });
                 return html;
             },
+            
             'module-xss': () => `
                 ${getBackButton()}
                 <h2 style="color:white; margin-bottom:1rem;">Lab 1: XSS Reflected</h2>
@@ -177,14 +184,18 @@
                         <div class="browser-bar"><div class="url-bar">/search</div></div>
                         <div class="browser-content">
                             <h3>Super Search</h3>
-                            <input type="text" id="xss-input" class="vulnerable-input" placeholder="Rechercher...">
+                            <input type="text" id="xss-input" class="vulnerable-input" placeholder="Rechercher..." value="">
                             <button onclick="runXSS()" class="vulnerable-btn">Go</button>
                             <div id="xss-result" style="margin-top:1rem;"></div>
+                            <div style="margin-top:1rem; font-size:0.8rem; color:#64748b;">
+                                <strong>Indice:</strong> Essayez <code>&lt;script&gt;alert(1)&lt;/script&gt;</code>
+                            </div>
                         </div>
                     </div>
                 </div>
                 ${getValidateButton('xss')}
             `,
+            
             'module-idor': () => `
                 ${getBackButton()}
                 <h2 style="color:white; margin-bottom:1rem;">Lab 2: IDOR</h2>
@@ -202,11 +213,15 @@
                             <div id="idor-profile" class="profile-card">
                                 <!-- Profile content will be loaded here -->
                             </div>
+                            <div style="margin-top:1rem; font-size:0.8rem; color:#64748b;">
+                                <strong>Indice:</strong> Changez l'ID dans l'URL ou le champ de saisie
+                            </div>
                         </div>
                     </div>
                 </div>
                 ${getValidateButton('idor')}
             `,
+            
             'module-sqli': () => `
                 ${getBackButton()}
                 <h2 style="color:white; margin-bottom:1rem;">Lab 3: SQL Injection</h2>
@@ -218,15 +233,19 @@
                             <h3>Login Admin</h3>
                             <div style="margin:1rem 0;">
                                 <input type="text" id="sqli-user" class="vulnerable-input" placeholder="Username" value="admin">
-                                <input type="password" id="sqli-pass" class="vulnerable-input" placeholder="Password" style="margin-top:0.5rem;">
+                                <input type="password" id="sqli-pass" class="vulnerable-input" placeholder="Password" style="margin-top:0.5rem;" value="">
                                 <button onclick="runSQLI()" class="vulnerable-btn" style="margin-top:0.5rem;">Login</button>
                             </div>
-                            <div id="sqli-result" style="text-align:left; font-family:monospace; background:#f1f5f9; padding:1rem; border-radius:4px;"></div>
+                            <div id="sqli-result" style="text-align:left; font-family:monospace; background:#f1f5f9; padding:1rem; border-radius:4px; min-height:100px;"></div>
+                            <div style="margin-top:1rem; font-size:0.8rem; color:#64748b;">
+                                <strong>Indice:</strong> Essayez <code>' OR '1'='1</code> dans le champ password
+                            </div>
                         </div>
                     </div>
                 </div>
                 ${getValidateButton('sqli')}
             `,
+            
             'module-csrf': () => `
                 ${getBackButton()}
                 <h2 style="color:white; margin-bottom:1rem;">Lab 4: CSRF</h2>
@@ -254,6 +273,101 @@
                     </div>
                 </div>
                 ${getValidateButton('csrf')}
+            `,
+            
+            'module-xxe': () => `
+                ${getBackButton()}
+                <h2 style="color:white; margin-bottom:1rem;">Lab 5: XXE</h2>
+                <div class="lab-container">
+                    <div style="margin-bottom:0.5rem; color:#94a3b8;">Mission: Exfiltrer le fichier /etc/passwd via une injection XML.</div>
+                    <div class="lab-browser">
+                        <div class="browser-bar"><div class="url-bar">/upload</div></div>
+                        <div class="browser-content">
+                            <h3>Upload de fichier XML</h3>
+                            <div style="margin:1rem 0;">
+                                <textarea id="xxe-input" class="vulnerable-input" placeholder="XML content" style="width:100%; height:150px; font-family:monospace; font-size:0.8rem;" rows="6">
+<?xml version="1.0"?>
+<user>
+    <name>John Doe</name>
+    <email>john@example.com</email>
+</user></textarea>
+                                <button onclick="parseXXE()" class="vulnerable-btn" style="margin-top:0.5rem;">Parser XML</button>
+                            </div>
+                            <div id="xxe-result" class="xxe-output">
+                                <!-- XXE output will appear here -->
+                            </div>
+                            <div style="margin-top:1rem; font-size:0.8rem; color:#64748b;">
+                                <strong>Indice:</strong> Essayez une entité externe: <code>&lt;!DOCTYPE foo [&lt;!ENTITY xxe SYSTEM "file:///etc/passwd"&gt;]&gt;</code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                ${getValidateButton('xxe')}
+            `,
+            
+            'module-rc': () => `
+                ${getBackButton()}
+                <h2 style="color:white; margin-bottom:1rem;">Lab 6: Race Condition</h2>
+                <div class="lab-container">
+                    <div style="margin-bottom:0.5rem; color:#94a3b8;">Mission: Profiter d'une condition de course pour acheter plus de produits que le stock disponible.</div>
+                    <div class="lab-browser">
+                        <div class="browser-bar"><div class="url-bar">/shop</div></div>
+                        <div class="browser-content">
+                            <h3>Boutique en ligne</h3>
+                            <div style="margin:1rem 0;">
+                                <div style="background:#f0fdf4; padding:1rem; border-radius:4px;">
+                                    <p><strong>Produit:</strong> Clé de licence premium</p>
+                                    <p><strong>Prix:</strong> 100€</p>
+                                    <p><strong>Stock:</strong> <span id="stock-count">5</span> unités</p>
+                                    <p><strong>Votre argent:</strong> <span id="user-money">1000</span>€</p>
+                                </div>
+                            </div>
+                            
+                            <div class="race-controls">
+                                <button onclick="buyProduct()" class="vulnerable-btn">Acheter 1 unité</button>
+                                <button onclick="startRaceCondition()" class="vulnerable-btn" style="background:#ef4444;">Lancer 10 requêtes simultanées</button>
+                            </div>
+                            
+                            <div class="race-track" id="race-track">
+                                <div class="race-progress" id="race-progress"></div>
+                            </div>
+                            
+                            <div id="race-output" class="race-output">
+                                <!-- Race condition output will appear here -->
+                            </div>
+                            
+                            <div style="margin-top:1rem; font-size:0.8rem; color:#64748b;">
+                                <strong>Indice:</strong> Envoyez plusieurs requêtes d'achat simultanées avant que le stock ne soit mis à jour
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                ${getValidateButton('rc')}
+            `,
+            
+            'module-lfi': () => `
+                ${getBackButton()}
+                <h2 style="color:white; margin-bottom:1rem;">Lab 7: LFI</h2>
+                <div class="lab-container">
+                    <div style="margin-bottom:0.5rem; color:#94a3b8;">Mission: Lire le fichier /etc/passwd via une inclusion de fichier local.</div>
+                    <div class="lab-browser">
+                        <div class="browser-bar"><div class="url-bar">/view</div></div>
+                        <div class="browser-content">
+                            <h3>Vue de fichier</h3>
+                            <div style="margin:1rem 0;">
+                                <input type="text" id="lfi-input" class="vulnerable-input" placeholder="Nom du fichier" value="welcome.txt">
+                                <button onclick="loadLFI()" class="vulnerable-btn">Afficher</button>
+                            </div>
+                            <div id="lfi-result" class="lfi-file-content">
+                                <!-- LFI content will appear here -->
+                            </div>
+                            <div style="margin-top:1rem; font-size:0.8rem; color:#64748b;">
+                                <strong>Indice:</strong> Essayez des chemins comme <code>../../../etc/passwd</code> ou <code>../../../../etc/passwd</code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                ${getValidateButton('lfi')}
             `
         };
 
@@ -275,6 +389,14 @@
             
             if (viewFunction) {
                 contentArea.innerHTML = viewFunction();
+                // Initialize specific lab content if needed
+                if (appState.currentView === 'module-idor') {
+                    loadIDORProfile();
+                } else if (appState.currentView === 'module-xxe') {
+                    parseXXE();
+                } else if (appState.currentView === 'module-lfi') {
+                    loadLFI();
+                }
             } else {
                 contentArea.innerHTML = '<h2>Vue non trouvée</h2>';
             }
@@ -343,14 +465,9 @@
             const input = document.getElementById('xss-input').value;
             const resultDiv = document.getElementById('xss-result');
             
-            // Simple XSS simulation
-            if (input.includes('<script>') || input.includes('alert(')) {
+            if (input.includes('<script>alert(1)</script>') || input.includes('alert(1)')) {
                 resultDiv.innerHTML = `Résultat de recherche pour: <strong>${escapeHtml(input)}</strong>`;
-                
-                // Trigger fake alert if XSS payload
-                if (input.includes('alert(1)') || input === '<script>alert(1)</script>') {
-                    showFakeAlert();
-                }
+                showFakeAlert();
             } else {
                 resultDiv.innerHTML = `Résultat de recherche pour: <strong>${escapeHtml(input)}</strong>`;
             }
@@ -360,7 +477,6 @@
             const profileId = document.getElementById('idor-input').value;
             const profileDiv = document.getElementById('idor-profile');
             
-            // IDOR vulnerability simulation
             if (profileId === '1234') {
                 profileDiv.innerHTML = `
                     <h3>Profil Administrateur</h3>
@@ -369,6 +485,7 @@
                     <p><strong>Email:</strong> admin@bountyacademy.com</p>
                     <p><strong>Rôle:</strong> Super Administrateur</p>
                     <p><strong>Dernière connexion:</strong> 2024-01-15 14:30</p>
+                    <p><strong>API Key:</strong> sk_live_123456789abcdef</p>
                     <p style="color:green; font-weight:bold;">✓ Accès administrateur obtenu!</p>
                 `;
             } else {
@@ -387,21 +504,22 @@
             const password = document.getElementById('sqli-pass').value;
             const resultDiv = document.getElementById('sqli-result');
             
-            // SQL Injection simulation
             if (password.includes("' OR '1'='1") || password.includes("' OR 1=1--")) {
                 resultDiv.innerHTML = `
                     <p style="color:green;">✓ Connexion réussie!</p>
                     <p>Bienvenue, ${escapeHtml(username)}</p>
                     <p>Données extraites de la table users:</p>
                     <ul>
-                        <li>admin:admin123</li>
-                        <li>john:password123</li>
-                        <li>jane:qwerty</li>
-                        <li>root:toor</li>
+                        <li><strong>admin:admin123</strong> (Administrateur)</li>
+                        <li>john:password123 (Utilisateur)</li>
+                        <li>jane:qwerty (Utilisateur)</li>
+                        <li>root:toor (Super Admin)</li>
+                        <li>alice:alice123 (Modérateur)</li>
                     </ul>
+                    <p style="color:green; font-weight:bold;">✓ SQL Injection réussie!</p>
                 `;
             } else {
-                resultDiv.innerHTML = `<p style="color:red;">✗ Échec de connexion</p>`;
+                resultDiv.innerHTML = `<p style="color:red;">✗ Échec de connexion - Identifiants incorrects</p>`;
             }
         }
 
@@ -418,10 +536,132 @@
                         Nouvel email: <strong>${escapeHtml(email)}</strong>
                     </p>
                     <p style="font-size:0.8rem; color:#64748b;">
-                        (Simulation CSRF réussie)
+                        (Simulation CSRF réussie - l'email de l'admin a été changé)
                     </p>
                 </div>
             `;
+        }
+
+        function parseXXE() {
+            const xmlInput = document.getElementById('xxe-input').value;
+            const resultDiv = document.getElementById('xxe-result');
+            
+            if (xmlInput.includes('<!ENTITY') && xmlInput.includes('SYSTEM') && xmlInput.includes('file://')) {
+                resultDiv.innerHTML = `
+                    <div class="xxe-success">✓ XXE Injection réussie!</div>
+                    <div style="color:#334155; margin-top:1rem;">
+                        <strong>Contenu de /etc/passwd:</strong>
+                        <pre style="background:#f8fafc; padding:0.5rem; border-radius:4px; margin-top:0.5rem;">
+root:x:0:0:root:/root:/bin/bash
+daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+bin:x:2:2:bin:/bin:/usr/sbin/nologin
+sys:x:3:3:sys:/dev:/usr/sbin/nologin
+admin:x:1000:1000:Admin User:/home/admin:/bin/bash
+www-data:x:33:33:www-data:/var/www:/usr/sbin/nologin
+                        </pre>
+                    </div>
+                `;
+            } else {
+                resultDiv.innerHTML = `
+                    <div>XML parsé avec succès</div>
+                    <div style="margin-top:1rem;">
+                        <strong>Contenu extrait:</strong>
+                        <pre style="background:#f8fafc; padding:0.5rem; border-radius:4px; margin-top:0.5rem;">
+${escapeHtml(xmlInput)}
+                        </pre>
+                    </div>
+                `;
+            }
+        }
+
+        // Variables pour la condition de course
+        let stock = 5;
+        let userMoney = 1000;
+        let purchaseInProgress = false;
+
+        function buyProduct() {
+            if (purchaseInProgress) return;
+            
+            purchaseInProgress = true;
+            const outputDiv = document.getElementById('race-output');
+            
+            if (stock > 0 && userMoney >= 100) {
+                // Simuler un délai de traitement
+                setTimeout(() => {
+                    stock--;
+                    userMoney -= 100;
+                    document.getElementById('stock-count').textContent = stock;
+                    document.getElementById('user-money').textContent = userMoney;
+                    
+                    outputDiv.innerHTML += `<p>✓ Achat réussi! Stock restant: ${stock}</p>`;
+                    purchaseInProgress = false;
+                }, 100);
+            } else {
+                outputDiv.innerHTML += `<p style="color:red;">✗ Achat échoué - Stock insuffisant ou fonds insuffisants</p>`;
+                purchaseInProgress = false;
+            }
+        }
+
+        function startRaceCondition() {
+            const outputDiv = document.getElementById('race-output');
+            const progressBar = document.getElementById('race-progress');
+            outputDiv.innerHTML = '<p>Lancement de 10 requêtes simultanées...</p>';
+            
+            let completedRequests = 0;
+            progressBar.style.width = '0%';
+            
+            for (let i = 0; i < 10; i++) {
+                setTimeout(() => {
+                    if (stock > 0 && userMoney >= 100) {
+                        // Ne pas vérifier le stock pendant le traitement (condition de course)
+                        setTimeout(() => {
+                            stock--;
+                            userMoney -= 100;
+                            document.getElementById('stock-count').textContent = stock;
+                            document.getElementById('user-money').textContent = userMoney;
+                            
+                            completedRequests++;
+                            progressBar.style.width = `${(completedRequests / 10) * 100}%`;
+                            
+                            if (completedRequests === 10) {
+                                outputDiv.innerHTML += `<p style="color:green; font-weight:bold;">✓ Condition de course exploitée! Acheté ${10 - stock} produits sur 5 disponibles</p>`;
+                            }
+                        }, Math.random() * 200); // Délai aléatoire
+                    }
+                }, i * 10); // Lancement quasi-simultané
+            }
+        }
+
+        function loadLFI() {
+            const filename = document.getElementById('lfi-input').value;
+            const resultDiv = document.getElementById('lfi-result');
+            
+            if (filename.includes('..') && filename.includes('etc/passwd')) {
+                resultDiv.innerHTML = `
+                    <div style="color:green; font-weight:bold;">✓ LFI réussie!</div>
+                    <div style="margin-top:1rem;">
+                        <strong>Contenu de /etc/passwd:</strong>
+                        <pre style="background:#f8fafc; padding:0.5rem; border-radius:4px; margin-top:0.5rem;">
+root:x:0:0:root:/root:/bin/bash
+daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+bin:x:2:2:bin:/bin:/usr/sbin/nologin
+sys:x:3:3:sys:/dev:/usr/sbin/nologin
+sync:x:4:65534:sync:/bin:/bin/sync
+games:x:5:60:games:/usr/games:/usr/sbin/nologin
+man:x:6:12:man:/var/cache/man:/usr/sbin/nologin
+lp:x:7:7:lp:/var/spool/lpd:/usr/sbin/nologin
+mail:x:8:8:mail:/var/mail:/usr/sbin/nologin
+                        </pre>
+                    </div>
+                `;
+            } else if (filename === 'welcome.txt') {
+                resultDiv.innerHTML = `
+                    <div>Bienvenue sur BountyAcademy!</div>
+                    <div style="margin-top:1rem;">Ceci est un message de bienvenue normal.</div>
+                `;
+            } else {
+                resultDiv.innerHTML = `<div style="color:red;">Fichier non trouvé: ${escapeHtml(filename)}</div>`;
+            }
         }
 
         function validateModule(moduleId) {

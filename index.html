@@ -2189,15 +2189,22 @@ sync:x:4:65534:sync:/bin:/bin/sync
                 `;
             }
         }
-
-                    // --- INITIALISATION DE L'APPLICATION ---
-        // Lancer l'init quand la page est prête
-        document.addEventListener('DOMContentLoaded', function() {
-            renderNavButtons();
-            updateXPBar();
-            navigateTo('dashboard');
-        });
-
+        // --- INITIALISATION ---
+        // Démarrage immédiat après le chargement
+        (function() {
+            console.log("BountyAcademy - Initialisation...");
+            try {
+                renderNavButtons();
+                updateXPBar();
+                navigateTo('dashboard');
+                console.log("Application initialisée avec succès");
+            } catch (error) {
+                console.error("Erreur lors de l'initialisation:", error);
+            }
+        })();
+    </script>
+</body>
+</html>
     </script>
  
 </body>

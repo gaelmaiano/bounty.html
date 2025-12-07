@@ -6,383 +6,1516 @@
     <title>BountyAcademy - Labs Cybersec</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        /* --- CSS STYLES --- */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background-color: #0f172a; color: #e2e8f0; font-family: 'Segoe UI', sans-serif; height: 100vh; overflow: hidden; }
-        .app-container { display: flex; height: 100vh; }
-        
-        /* Sidebar */
-        .sidebar { width: 16rem; background-color: #1e293b; border-right: 1px solid #334155; display: flex; flex-direction: column; z-index: 20; transition: transform 0.3s; }
-        .sidebar-header { padding: 1.5rem; display: flex; align-items: center; gap: 0.75rem; border-bottom: 1px solid #334155; }
-        .sidebar-header h1 { font-size: 1.2rem; color: white; font-weight: bold; }
-        
-        /* XP Panel */
-        .xp-panel { padding: 1rem; background: rgba(30, 41, 59, 0.5); margin: 1rem; border-radius: 0.5rem; border: 1px solid #475569; }
-        .xp-bar-container { width: 100%; background: #334155; height: 0.5rem; border-radius: 10px; overflow: hidden; margin: 0.5rem 0; }
-        .xp-bar { background: #10b981; height: 100%; width: 0%; transition: width 0.5s; }
-        .xp-info { display: flex; justify-content: space-between; font-size: 0.75rem; color: #94a3b8; }
+        /* --- VARIABLES CSS --- */
+        :root {
+            --primary-dark: #0f172a;
+            --secondary-dark: #1e293b;
+            --border-dark: #334155;
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+            --transition: all 0.3s ease;
+        }
 
-        /* Navigation */
-        .nav-section { flex: 1; overflow-y: auto; padding: 0.5rem 0; }
-        .nav-btn { width: 100%; text-align: left; padding: 0.75rem 1.5rem; color: #94a3b8; background: none; border: none; border-left: 4px solid transparent; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 10px; }
-        .nav-btn:hover, .nav-btn.active { color: #34d399; background: #1e293b; border-left-color: #10b981; }
-        .module-progress { margin-left: auto; font-size: 0.7rem; color: #64748b; }
+        /* --- RESET & BASE STYLES --- */
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
 
-        /* Main Content */
-        .main-content { flex: 1; overflow-y: auto; position: relative; }
-        .content-area { padding: 2rem; max-width: 64rem; margin: 0 auto; }
-        .mobile-header { display: none; padding: 1rem; background: #1e293b; justify-content: space-between; align-items: center; }
-        
-        /* Cards */
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
-        .stat-card { background: rgba(30, 41, 59, 0.7); padding: 1.5rem; border-radius: 0.5rem; border: 1px solid rgba(255,255,255,0.05); }
-        .module-card { background: #1e293b; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border: 1px solid #475569; }
-        .module-card:hover { border-color: #10b981; transform: translateX(5px); transition: transform 0.2s; }
+        body { 
+            background-color: var(--primary-dark); 
+            color: var(--text-primary); 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100vh; 
+            overflow: hidden; 
+            line-height: 1.6;
+        }
 
-        /* Labs UI */
-        .lab-container { background: #1e293b; border: 1px solid #475569; border-radius: 0.5rem; padding: 1.5rem; margin-top: 1rem; }
-        .lab-browser { background: #f8fafc; border-radius: 0.5rem; overflow: hidden; color: #334155; font-family: sans-serif; border: 1px solid #cbd5e1; }
-        .browser-bar { background: #e2e8f0; padding: 0.5rem; display: flex; align-items: center; gap: 0.5rem; border-bottom: 1px solid #cbd5e1; }
-        .url-bar { background: white; padding: 0.2rem 0.5rem; border-radius: 4px; flex: 1; font-size: 0.8rem; color: #64748b; border: 1px solid #cbd5e1; }
-        .browser-content { padding: 2rem; min-height: 200px; text-align: center; }
-        
-        /* Inputs & Buttons */
-        .vulnerable-input { padding: 0.75rem; border: 2px solid #cbd5e1; border-radius: 4px; width: 70%; margin-right: 0.5rem; }
-        .vulnerable-btn { padding: 0.75rem 1.5rem; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer; }
-        .action-btn { width: 100%; padding: 1rem; background: #059669; color: white; border: none; border-radius: 0.5rem; cursor: pointer; margin-top: 1rem; }
-        .action-btn:disabled { background: #334155; cursor: not-allowed; }
+        .app-container { 
+            display: flex; 
+            height: 100vh; 
+        }
 
-        /* Specific Lab Styles */
-        .profile-card { border: 1px solid #cbd5e1; border-radius: 8px; padding: 20px; max-width: 400px; margin: 0 auto; background: white; text-align: left; }
-        .xxe-output, .lfi-file-content, .race-output { margin-top: 1.5rem; padding: 1rem; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 4px; text-align: left; min-height: 100px; font-family: monospace; white-space: pre-wrap; }
-        .xxe-success { color: #10b981; font-weight: bold; }
-        .shop-product-received { display: inline-block; background: #334155; padding: 0.5rem; margin: 0.2rem; border-radius: 4px; color: white; font-size: 0.8rem; }
-        
-        /* Race Condition specific */
-        .race-controls { display: flex; gap: 0.5rem; margin: 1rem 0; }
-        .race-track { background: #e2e8f0; height: 20px; border-radius: 10px; margin: 0.5rem 0; position: relative; overflow: hidden; }
-        .race-progress { background: #3b82f6; height: 100%; width: 0%; transition: width 0.1s; }
-        .request-indicator { position: absolute; top: -5px; width: 30px; height: 30px; background: #ef4444; border-radius: 50%; transform: translateX(-15px); }
-        
-        /* Toast & Alerts */
-        .toast { position: fixed; bottom: 20px; right: 20px; background: #1e293b; border-left: 4px solid #10b981; color: white; padding: 15px 20px; border-radius: 4px; transform: translateX(150%); transition: transform 0.3s; z-index: 100; }
-        .toast.show { transform: translateX(0); }
-        .fake-alert-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 50; }
-        .fake-alert-box { background: white; padding: 1.5rem; border-radius: 0.5rem; width: 300px; text-align: center; color: #0f172a; }
+        /* --- SIDEBAR --- */
+        .sidebar { 
+            width: 16rem; 
+            background-color: var(--secondary-dark); 
+            border-right: 1px solid var(--border-dark); 
+            display: flex; 
+            flex-direction: column; 
+            z-index: 20; 
+            transition: transform 0.3s; 
+            overflow: hidden;
+        }
 
-        /* Mobile */
+        .sidebar-header { 
+            padding: 1.5rem; 
+            display: flex; 
+            align-items: center; 
+            gap: 0.75rem; 
+            border-bottom: 1px solid var(--border-dark); 
+        }
+
+        .sidebar-header h1 { 
+            font-size: 1.2rem; 
+            color: white; 
+            font-weight: bold; 
+            background: linear-gradient(90deg, var(--success), var(--info));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* --- XP PANEL --- */
+        .xp-panel { 
+            padding: 1rem; 
+            background: rgba(30, 41, 59, 0.5); 
+            margin: 1rem; 
+            border-radius: 0.5rem; 
+            border: 1px solid #475569; 
+            backdrop-filter: blur(10px);
+        }
+
+        .xp-bar-container { 
+            width: 100%; 
+            background: #334155; 
+            height: 0.5rem; 
+            border-radius: 10px; 
+            overflow: hidden; 
+            margin: 0.5rem 0; 
+        }
+
+        .xp-bar { 
+            background: linear-gradient(90deg, var(--success), #34d399); 
+            height: 100%; 
+            width: 0%; 
+            transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); 
+            position: relative;
+            overflow: hidden;
+        }
+
+        .xp-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.2), 
+                transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        .xp-info { 
+            display: flex; 
+            justify-content: space-between; 
+            font-size: 0.75rem; 
+            color: var(--text-secondary); 
+        }
+
+        /* --- NAVIGATION --- */
+        .nav-section { 
+            flex: 1; 
+            overflow-y: auto; 
+            padding: 0.5rem 0; 
+            scrollbar-width: thin;
+            scrollbar-color: var(--border-dark) var(--secondary-dark);
+        }
+
+        .nav-section::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .nav-section::-webkit-scrollbar-track {
+            background: var(--secondary-dark);
+        }
+
+        .nav-section::-webkit-scrollbar-thumb {
+            background: var(--border-dark);
+            border-radius: 2px;
+        }
+
+        .nav-btn { 
+            width: 100%; 
+            text-align: left; 
+            padding: 0.75rem 1.5rem; 
+            color: var(--text-secondary); 
+            background: none; 
+            border: none; 
+            border-left: 4px solid transparent; 
+            cursor: pointer; 
+            transition: var(--transition); 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            position: relative;
+        }
+
+        .nav-btn:hover { 
+            color: #34d399; 
+            background: rgba(16, 185, 129, 0.1); 
+            border-left-color: var(--success); 
+        }
+
+        .nav-btn.active { 
+            color: #34d399; 
+            background: rgba(16, 185, 129, 0.2); 
+            border-left-color: var(--success); 
+            font-weight: 600;
+        }
+
+        .module-progress { 
+            margin-left: auto; 
+            font-size: 0.7rem; 
+            color: #64748b; 
+        }
+
+        /* --- MAIN CONTENT --- */
+        .main-content { 
+            flex: 1; 
+            overflow-y: auto; 
+            position: relative; 
+        }
+
+        .content-area { 
+            padding: 2rem; 
+            max-width: 64rem; 
+            margin: 0 auto; 
+            animation: fadeIn 0.3s ease;
+        }
+
+        .dashboard-title {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            background: linear-gradient(90deg, var(--info), var(--success));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .mobile-header { 
+            display: none; 
+            padding: 1rem; 
+            background: var(--secondary-dark); 
+            justify-content: space-between; 
+            align-items: center; 
+            border-bottom: 1px solid var(--border-dark);
+        }
+
+        /* --- CARDS --- */
+        .stats-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+            gap: 1.5rem; 
+            margin-bottom: 2rem; 
+        }
+
+        .stat-card { 
+            background: rgba(30, 41, 59, 0.7); 
+            padding: 1.5rem; 
+            border-radius: 0.5rem; 
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: var(--transition);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .module-card { 
+            background: var(--secondary-dark); 
+            padding: 1rem; 
+            border-radius: 0.5rem; 
+            margin-bottom: 1rem; 
+            cursor: pointer; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            border: 1px solid #475569; 
+            transition: var(--transition);
+        }
+
+        .module-card:hover { 
+            border-color: var(--success); 
+            transform: translateX(5px); 
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.1);
+        }
+
+        .module-icon {
+            width: 3rem; 
+            height: 3rem; 
+            background: #334155; 
+            border-radius: 50%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        /* --- LABS UI --- */
+        .lab-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .lab-difficulty {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--info);
+        }
+
+        .lab-container { 
+            background: var(--secondary-dark); 
+            border: 1px solid #475569; 
+            border-radius: 0.5rem; 
+            padding: 1.5rem; 
+            margin-top: 1rem; 
+            animation: slideUp 0.3s ease;
+        }
+
+        .lab-browser { 
+            background: #f8fafc; 
+            border-radius: 0.5rem; 
+            overflow: hidden; 
+            color: #334155; 
+            font-family: 'Segoe UI', sans-serif; 
+            border: 1px solid #cbd5e1; 
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .browser-bar { 
+            background: #e2e8f0; 
+            padding: 0.5rem; 
+            display: flex; 
+            align-items: center; 
+            gap: 0.5rem; 
+            border-bottom: 1px solid #cbd5e1; 
+        }
+
+        .url-bar { 
+            background: white; 
+            padding: 0.4rem 0.8rem; 
+            border-radius: 4px; 
+            flex: 1; 
+            font-size: 0.8rem; 
+            color: #64748b; 
+            border: 1px solid #cbd5e1; 
+            font-family: monospace;
+        }
+
+        .browser-content { 
+            padding: 2rem; 
+            min-height: 200px; 
+        }
+
+        /* --- INPUTS & BUTTONS --- */
+        .vulnerable-input { 
+            padding: 0.75rem; 
+            border: 2px solid #cbd5e1; 
+            border-radius: 4px; 
+            width: 100%; 
+            font-family: monospace;
+            transition: var(--transition);
+        }
+
+        .vulnerable-input:focus {
+            outline: none;
+            border-color: var(--info);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .input-group {
+            display: flex;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .vulnerable-btn { 
+            padding: 0.75rem 1.5rem; 
+            background: var(--info); 
+            color: white; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            transition: var(--transition);
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .vulnerable-btn:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+        }
+
+        .action-btn { 
+            width: 100%; 
+            padding: 1rem; 
+            background: var(--success); 
+            color: white; 
+            border: none; 
+            border-radius: 0.5rem; 
+            cursor: pointer; 
+            margin-top: 1rem; 
+            font-size: 1rem;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .action-btn:hover:not(:disabled) {
+            background: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+        }
+
+        .action-btn:disabled { 
+            background: #334155; 
+            cursor: not-allowed; 
+            opacity: 0.6;
+        }
+
+        /* --- SPECIFIC LAB STYLES --- */
+        .profile-card { 
+            border: 1px solid #cbd5e1; 
+            border-radius: 8px; 
+            padding: 20px; 
+            max-width: 400px; 
+            margin: 0 auto; 
+            background: white; 
+            text-align: left; 
+        }
+
+        .code-block {
+            background: #1e293b;
+            border: 1px solid #475569;
+            border-radius: 4px;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+            color: var(--text-primary);
+        }
+
+        .code-block pre {
+            margin: 0;
+        }
+
+        .result-container {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            text-align: left;
+            min-height: 100px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            color: #334155;
+        }
+
+        .success-message {
+            color: var(--success);
+            font-weight: bold;
+            margin-top: 1rem;
+        }
+
+        .error-message {
+            color: var(--danger);
+            font-weight: bold;
+            margin-top: 1rem;
+        }
+
+        /* --- RACE CONDITION SPECIFIC --- */
+        .race-controls { 
+            display: flex; 
+            gap: 0.5rem; 
+            margin: 1rem 0; 
+            flex-wrap: wrap;
+        }
+
+        .race-track { 
+            background: #e2e8f0; 
+            height: 20px; 
+            border-radius: 10px; 
+            margin: 0.5rem 0; 
+            position: relative; 
+            overflow: hidden; 
+        }
+
+        .race-progress { 
+            background: var(--info); 
+            height: 100%; 
+            width: 0%; 
+            transition: width 0.1s; 
+        }
+
+        /* --- TOAST & ALERTS --- */
+        .toast { 
+            position: fixed; 
+            bottom: 20px; 
+            right: 20px; 
+            background: var(--secondary-dark); 
+            border-left: 4px solid var(--success); 
+            color: white; 
+            padding: 15px 20px; 
+            border-radius: 4px; 
+            transform: translateX(150%); 
+            transition: transform 0.3s; 
+            z-index: 100; 
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            min-width: 300px;
+        }
+
+        .toast.show { 
+            transform: translateX(0); 
+        }
+
+        .toast-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .fake-alert-overlay { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            right: 0; 
+            bottom: 0; 
+            background: rgba(0,0,0,0.7); 
+            display: none; 
+            align-items: center; 
+            justify-content: center; 
+            z-index: 50; 
+            backdrop-filter: blur(4px);
+        }
+
+        .fake-alert-box { 
+            background: white; 
+            padding: 1.5rem; 
+            border-radius: 0.5rem; 
+            width: 90%;
+            max-width: 400px;
+            text-align: center; 
+            color: var(--primary-dark);
+            animation: popIn 0.3s ease;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        /* --- ANIMATIONS --- */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { 
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes popIn {
+            from { 
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to { 
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        /* --- MOBILE RESPONSIVE --- */
         @media (max-width: 768px) {
-            .sidebar { position: fixed; transform: translateX(-100%); height: 100vh; width: 80%; }
-            .sidebar.mobile-open { transform: translateX(0); }
-            .mobile-header { display: flex; }
-            .stats-grid { grid-template-columns: 1fr; }
-            .vulnerable-input { width: 100%; margin-bottom: 0.5rem; }
+            .sidebar { 
+                position: fixed; 
+                transform: translateX(-100%); 
+                height: 100vh; 
+                width: 85%; 
+                top: 0;
+                left: 0;
+            }
+            
+            .sidebar.mobile-open { 
+                transform: translateX(0); 
+            }
+            
+            .mobile-header { 
+                display: flex; 
+            }
+            
+            .stats-grid { 
+                grid-template-columns: 1fr; 
+            }
+            
+            .input-group {
+                flex-direction: column;
+            }
+            
+            .race-controls {
+                flex-direction: column;
+            }
+            
+            .vulnerable-btn {
+                width: 100%;
+            }
+            
+            .content-area {
+                padding: 1rem;
+            }
+            
+            .lab-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar {
+                width: 100%;
+            }
+            
+            .toast {
+                min-width: auto;
+                width: calc(100% - 40px);
+                right: 20px;
+                left: 20px;
+            }
+        }
+
+        /* --- LOADING STATES --- */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* --- TOOLTIPS --- */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            width: 200px;
+            background-color: var(--secondary-dark);
+            color: var(--text-primary);
+            text-align: center;
+            border-radius: 4px;
+            padding: 0.5rem;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.8rem;
+            border: 1px solid var(--border-dark);
+        }
+
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* --- BADGES --- */
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+
+        .badge-success {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+        }
+
+        .badge-warning {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--warning);
+        }
+
+        .badge-danger {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
         }
     </style>
 </head>
 <body>
-
     <div class="app-container">
+        <!-- Sidebar -->
         <nav id="sidebar" class="sidebar">
             <div class="sidebar-header">
-                <i class="fa-solid fa-bug" style="color:#10b981"></i>
+                <i class="fa-solid fa-bug" style="color:var(--success)"></i>
                 <h1>BountyAcademy</h1>
             </div>
+            
+            <!-- XP Panel -->
             <div class="xp-panel">
-                <div class="xp-info"><span>Niveau</span><span id="user-level">Novice</span></div>
-                <div class="xp-bar-container"><div id="xp-bar" class="xp-bar"></div></div>
-                <div class="xp-info"><span id="current-xp">0 XP</span><span>3000 XP</span></div>
-            </div>
-            <div class="nav-section" id="nav-buttons">
+                <div class="xp-info">
+                    <span>Niveau</span>
+                    <span id="user-level" class="badge badge-success">Novice</span>
                 </div>
+                <div class="xp-bar-container">
+                    <div id="xp-bar" class="xp-bar"></div>
+                </div>
+                <div class="xp-info">
+                    <span id="current-xp">0 XP</span>
+                    <span id="next-level-xp">3000 XP</span>
+                </div>
+            </div>
+            
+            <!-- Navigation -->
+            <div class="nav-section" id="nav-buttons">
+                <!-- Navigation buttons will be inserted here by JavaScript -->
+            </div>
+            
+            <!-- Sidebar Footer -->
+            <div style="padding: 1rem; border-top: 1px solid var(--border-dark);">
+                <div class="xp-info" style="margin-bottom: 0.5rem;">
+                    <span>Progression totale</span>
+                </div>
+                <div style="font-size: 0.9rem; color: var(--text-secondary); text-align: center;">
+                    <span id="completed-count">0</span>/<span>7</span> labs complétés
+                </div>
+            </div>
         </nav>
 
+        <!-- Main Content -->
         <main class="main-content">
             <div class="mobile-header">
                 <span style="color:white; font-weight:bold;">BountyAcademy</span>
-                <button onclick="toggleSidebar()" style="background:none; border:none; color:white; font-size:1.5rem;"><i class="fa-solid fa-bars"></i></button>
+                <button onclick="toggleSidebar()" style="background:none; border:none; color:white; font-size:1.5rem; cursor:pointer;">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
             </div>
-            <div id="content-area" class="content-area"></div>
+            <div id="content-area" class="content-area">
+                <!-- Content will be inserted here by JavaScript -->
+            </div>
         </main>
     </div>
 
-    <div id="toast" class="toast"><span id="toast-message"></span></div>
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <div class="toast-header">
+            <strong><i class="fa-solid fa-check-circle" style="color:var(--success)"></i> Succès</strong>
+            <button class="toast-close" onclick="hideToast()">
+                <i class="fa-solid fa-times"></i>
+            </button>
+        </div>
+        <span id="toast-message"></span>
+    </div>
+
+    <!-- Fake Alert for XSS Lab -->
     <div id="fake-alert-overlay" class="fake-alert-overlay">
         <div class="fake-alert-box">
-            <h3 style="color:#ef4444; margin-bottom:1rem;">⚠️ Alert</h3>
-            <p id="alert-content" style="background:#f1f5f9; padding:0.5rem; font-family:monospace; margin-bottom:1rem;">1</p>
+            <h3 style="color:var(--danger); margin-bottom:1rem;">
+                <i class="fa-solid fa-triangle-exclamation"></i> Alert
+            </h3>
+            <div class="code-block" style="margin-bottom:1rem;">
+                <pre>alert(1);</pre>
+            </div>
+            <p style="color:#64748b; margin-bottom:1rem; font-size:0.9rem;">
+                XSS Réussi! Une boîte de dialogue a été exécutée.
+            </p>
             <button class="vulnerable-btn" onclick="closeFakeAlert()">OK</button>
         </div>
     </div>
 
     <script>
-        // --- ETAT DE L'APPLICATION ---
+        // --- APPLICATION STATE ---
         const appState = {
             xp: 0,
             level: 1,
             completedModules: [],
             currentView: 'dashboard',
-            // État pour la Race Condition
             raceStock: 5,
             raceUserMoney: 1000,
-            raceInventory: 0
+            raceInventory: 0,
+            userProfile: {
+                id: 1337,
+                name: "Hacker Apprenti",
+                email: "apprenti@bountyacademy.com",
+                role: "Étudiant"
+            }
         };
 
-        // --- DONNÉES DES MODULES ---
+        // --- MODULES DATA ---
         const modulesData = [
-            { id: 'xss', title: 'Lab 1: XSS Reflected', icon: 'code', color: '#10b981', xp: 200, level: 'Facile' },
-            { id: 'idor', title: 'Lab 2: IDOR', icon: 'id-card', color: '#f59e0b', xp: 300, level: 'Moyen' },
-            { id: 'sqli', title: 'Lab 3: SQL Injection', icon: 'database', color: '#ef4444', xp: 400, level: 'Intermédiaire' },
-            { id: 'csrf', title: 'Lab 4: CSRF', icon: 'hand-pointer', color: '#3b82f6', xp: 400, level: 'Avancé' },
-            { id: 'xxe', title: 'Lab 5: XXE', icon: 'file-code', color: '#fbbf24', xp: 500, level: 'Expert' },
-            { id: 'rc', title: 'Lab 6: Race Condition', icon: 'gauge-high', color: '#ef4444', xp: 600, level: 'Expert+' },
-            { id: 'lfi', title: 'Lab 7: LFI', icon: 'folder-open', color: '#34d399', xp: 600, level: 'Intermédiaire' }
+            { 
+                id: 'xss', 
+                title: 'Lab 1: XSS Reflected', 
+                icon: 'code', 
+                color: '#10b981', 
+                xp: 200, 
+                level: 'Facile',
+                description: 'Injectez du JavaScript via un champ de recherche',
+                hint: 'Essayez: <code>&lt;script&gt;alert(1)&lt;/script&gt;</code>'
+            },
+            { 
+                id: 'idor', 
+                title: 'Lab 2: IDOR', 
+                icon: 'id-card', 
+                color: '#f59e0b', 
+                xp: 300, 
+                level: 'Moyen',
+                description: 'Accédez à des ressources sans autorisation',
+                hint: 'Changez l\'ID dans l\'URL pour accéder à d\'autres profils'
+            },
+            { 
+                id: 'sqli', 
+                title: 'Lab 3: SQL Injection', 
+                icon: 'database', 
+                color: '#ef4444', 
+                xp: 400, 
+                level: 'Intermédiaire',
+                description: 'Injectez des commandes SQL via un formulaire de login',
+                hint: 'Utilisez: <code>\' OR \'1\'=\'1</code> dans le mot de passe'
+            },
+            { 
+                id: 'csrf', 
+                title: 'Lab 4: CSRF', 
+                icon: 'hand-pointer', 
+                color: '#3b82f6', 
+                xp: 400, 
+                level: 'Avancé',
+                description: 'Forgez une requête pour modifier des données',
+                hint: 'Créez un formulaire HTML qui s\'envoie automatiquement'
+            },
+            { 
+                id: 'xxe', 
+                title: 'Lab 5: XXE', 
+                icon: 'file-code', 
+                color: '#fbbf24', 
+                xp: 500, 
+                level: 'Expert',
+                description: 'Exploitez le traitement XML pour lire des fichiers système',
+                hint: 'Utilisez une entité externe: <code>&lt;!ENTITY xxe SYSTEM "file:///etc/passwd"&gt;</code>'
+            },
+            { 
+                id: 'rc', 
+                title: 'Lab 6: Race Condition', 
+                icon: 'gauge-high', 
+                color: '#ef4444', 
+                xp: 600, 
+                level: 'Expert+',
+                description: 'Exploitez des conditions de course pour acheter plus que le stock',
+                hint: 'Envoyez plusieurs requêtes simultanées avant la mise à jour du stock'
+            },
+            { 
+                id: 'lfi', 
+                title: 'Lab 7: LFI', 
+                icon: 'folder-open', 
+                color: '#34d399', 
+                xp: 600, 
+                level: 'Intermédiaire',
+                description: 'Lisez des fichiers locaux via des inclusions de fichiers',
+                hint: 'Utilisez: <code>../../../etc/passwd</code>'
+            }
         ];
 
-        // --- FONCTIONS UTILITAIRES ---
+        // --- UTILITY FUNCTIONS ---
         function escapeHtml(text) {
-            if (!text) return text;
-            return text
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
 
         function getBackButton() {
-            return '<button onclick="navigateTo(\'dashboard\')" class="vulnerable-btn" style="margin-bottom:1rem;"><i class="fa-solid fa-arrow-left"></i> Retour</button>';
-        }
-
-        function getValidateButton(moduleId) {
-            const completed = appState.completedModules.includes(moduleId);
             return `
-                <button class="action-btn" onclick="validateModule('${moduleId}')" ${completed ? 'disabled' : ''}>
-                    ${completed ? '<i class="fa-solid fa-check"></i> Déjà validé' : 'Valider le lab'}
+                <button onclick="navigateTo('dashboard')" class="vulnerable-btn" style="margin-bottom:1.5rem;">
+                    <i class="fa-solid fa-arrow-left"></i> Retour au tableau de bord
                 </button>
             `;
         }
 
-        // --- RENDU DES VUES (HTML) ---
+        function getValidateButton(moduleId) {
+            const completed = appState.completedModules.includes(moduleId);
+            const module = modulesData.find(m => m.id === moduleId);
+            const buttonText = completed ? 
+                '<i class="fa-solid fa-check-circle"></i> Déjà validé' : 
+                '<i class="fa-solid fa-trophy"></i> Valider le lab';
+            
+            return `
+                <div style="margin-top: 2rem;">
+                    <button class="action-btn" onclick="validateModule('${moduleId}')" ${completed ? 'disabled' : ''}>
+                        ${buttonText}
+                    </button>
+                    ${completed ? `
+                        <div style="text-align: center; margin-top: 0.5rem; color: var(--success);">
+                            <i class="fa-solid fa-check"></i> ${module.xp} XP obtenus
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        // --- VIEW RENDERING ---
         const views = {
             dashboard: () => {
-                let html = `
-                    <h2 class="dashboard-title">Tableau de bord</h2>
-                    <div class="stats-grid">
-                        <div class="stat-card"><div style="color:#94a3b8">XP Total</div><div style="font-size:1.8rem; font-weight:bold; color:white;">${appState.xp}</div></div>
-                        <div class="stat-card"><div style="color:#94a3b8">Labs Terminés</div><div style="font-size:1.8rem; font-weight:bold; color:white;">${appState.completedModules.length}/7</div></div>
-                    </div>
-                    <h3 style="color:white; margin-bottom:1rem;">Modules</h3>`;
+                const progress = Math.round((appState.completedModules.length / modulesData.length) * 100);
                 
-                modulesData.forEach(m => {
-                    const isCompleted = appState.completedModules.includes(m.id);
-                    const borderColor = isCompleted ? '#10b981' : '#475569';
-                    html += `
-                    <div class="module-card" style="border-color:${borderColor}" onclick="navigateTo('module-${m.id}')">
-                        <div style="display:flex; align-items:center; gap:1rem;">
-                            <div style="width:3rem; height:3rem; background:#334155; border-radius:50%; display:flex; align-items:center; justify-content:center; color:${m.color}"><i class="fa-solid fa-${m.icon}"></i></div>
-                            <div><h4 style="color:white; margin:0;">${m.title}</h4><span style="font-size:0.8rem; color:#94a3b8;">${m.level} • ${m.xp} XP</span></div>
+                return `
+                    <h2 class="dashboard-title">Tableau de bord</h2>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div style="color:var(--text-secondary); margin-bottom:0.5rem;">
+                                <i class="fa-solid fa-medal"></i> XP Total
+                            </div>
+                            <div style="font-size:1.8rem; font-weight:bold; color:white;">${appState.xp}</div>
+                            <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.5rem;">
+                                Prochain niveau: ${3000 - appState.xp} XP
+                            </div>
                         </div>
-                        <i class="fa-solid fa-chevron-right" style="color:#475569"></i>
-                    </div>`;
-                });
-                return html;
+                        <div class="stat-card">
+                            <div style="color:var(--text-secondary); margin-bottom:0.5rem;">
+                                <i class="fa-solid fa-flag-checkered"></i> Labs Terminés
+                            </div>
+                            <div style="font-size:1.8rem; font-weight:bold; color:white;">${appState.completedModules.length}/7</div>
+                            <div style="margin-top:0.5rem;">
+                                <div style="background:#334155; height:4px; border-radius:2px; overflow:hidden;">
+                                    <div style="background:var(--success); height:100%; width:${progress}%; transition:width 0.5s;"></div>
+                                </div>
+                                <div style="font-size:0.8rem; color:var(--text-secondary); text-align:right; margin-top:0.25rem;">
+                                    ${progress}%
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h3 style="color:white; margin-bottom:1.5rem; display:flex; align-items:center; gap:0.5rem;">
+                        <i class="fa-solid fa-list-check"></i> Modules disponibles
+                    </h3>
+                    
+                    <div style="margin-bottom:1rem; color:var(--text-secondary);">
+                        Cliquez sur un module pour commencer le lab
+                    </div>
+                    
+                    ${modulesData.map(module => {
+                        const isCompleted = appState.completedModules.includes(module.id);
+                        const borderColor = isCompleted ? '#10b981' : '#475569';
+                        
+                        return `
+                            <div class="module-card" onclick="navigateTo('module-${module.id}')" style="border-color:${borderColor}">
+                                <div style="display:flex; align-items:center; gap:1rem;">
+                                    <div class="module-icon" style="color:${module.color}">
+                                        <i class="fa-solid fa-${module.icon}"></i>
+                                    </div>
+                                    <div>
+                                        <h4 style="color:white; margin:0;">${module.title}</h4>
+                                        <div style="display:flex; align-items:center; gap:0.5rem; margin-top:0.25rem;">
+                                            <span style="font-size:0.8rem; color:#94a3b8;">${module.level}</span>
+                                            <span style="font-size:0.8rem; color:${module.color}">• ${module.xp} XP</span>
+                                            ${isCompleted ? 
+                                                '<span style="font-size:0.7rem; color:var(--success);"><i class="fa-solid fa-check"></i> Complété</span>' : 
+                                                ''
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                                <i class="fa-solid fa-chevron-right" style="color:#475569"></i>
+                            </div>
+                        `;
+                    }).join('')}
+                `;
             },
             
-            'module-xss': () => `
-                ${getBackButton()}
-                <h2 style="color:white; margin-bottom:1rem;">Lab 1: XSS Reflected</h2>
-                <div class="lab-container">
-                    <div style="margin-bottom:0.5rem; color:#94a3b8;">Mission: Faire apparaître une <code>alert(1)</code> via la recherche.</div>
-                    <div class="lab-browser">
-                        <div class="browser-bar"><div class="url-bar">/search</div></div>
-                        <div class="browser-content">
-                            <h3>Super Search</h3>
-                            <input type="text" id="xss-input" class="vulnerable-input" placeholder="Rechercher..." value="">
-                            <button onclick="runXSS()" class="vulnerable-btn">Go</button>
-                            <div id="xss-result" style="margin-top:1rem;"></div>
-                            <div style="margin-top:1rem; font-size:0.8rem; color:#64748b;">
-                                <strong>Indice:</strong> Essayez <code>&lt;script&gt;alert(1)&lt;/script&gt;</code>
+            // XSS Lab
+            'module-xss': () => {
+                const module = modulesData.find(m => m.id === 'xss');
+                return `
+                    ${getBackButton()}
+                    
+                    <div class="lab-header">
+                        <div>
+                            <h2 style="color:white; margin-bottom:0.25rem;">${module.title}</h2>
+                            <div style="color:var(--text-secondary);">${module.description}</div>
+                        </div>
+                        <span class="lab-difficulty">${module.level}</span>
+                    </div>
+                    
+                    <div class="lab-container">
+                        <div style="margin-bottom:1.5rem; padding:1rem; background:rgba(59, 130, 246, 0.1); border-radius:0.5rem; border:1px solid rgba(59, 130, 246, 0.3);">
+                            <div style="display:flex; align-items:center; gap:0.5rem; color:var(--info); margin-bottom:0.5rem;">
+                                <i class="fa-solid fa-bullseye"></i>
+                                <strong>Mission</strong>
+                            </div>
+                            <div style="color:var(--text-primary);">
+                                Faire apparaître une <code>alert(1)</code> via le champ de recherche.
                             </div>
                         </div>
-                    </div>
-                </div>
-                ${getValidateButton('xss')}
-            `,
-            
-            'module-idor': () => `
-                ${getBackButton()}
-                <h2 style="color:white; margin-bottom:1rem;">Lab 2: IDOR</h2>
-                <div class="lab-container">
-                    <div style="margin-bottom:0.5rem; color:#94a3b8;">Mission: Accéder au profil ID 1234 (Admin). Votre ID est 1337.</div>
-                    <div class="lab-browser">
-                        <div class="browser-bar"><div class="url-bar">/profile?id=1337</div></div>
-                        <div class="browser-content">
-                            <h3>Profil Utilisateur</h3>
-                            <div style="margin:1rem 0;">
-                                <label>ID Profil à afficher:</label>
-                                <input type="number" id="idor-input" class="vulnerable-input" value="1337" min="1">
-                                <button onclick="loadIDORProfile()" class="vulnerable-btn">Charger</button>
+                        
+                        <div class="lab-browser">
+                            <div class="browser-bar">
+                                <div style="width:12px; height:12px; border-radius:50%; background:#ef4444;"></div>
+                                <div style="width:12px; height:12px; border-radius:50%; background:#f59e0b;"></div>
+                                <div style="width:12px; height:12px; border-radius:50%; background:#10b981;"></div>
+                                <div class="url-bar">https://vulnerable-site.com/search</div>
                             </div>
-                            <div id="idor-profile" class="profile-card">
+                            <div class="browser-content">
+                                <h3 style="color:#334155; margin-bottom:1rem;">Recherche sur le site</h3>
+                                
+                                <div class="input-group">
+                                    <input type="text" id="xss-input" class="vulnerable-input" placeholder="Entrez votre recherche..." value="">
+                                    <button onclick="runXSS()" class="vulnerable-btn">Rechercher</button>
                                 </div>
-                            <div style="margin-top:1rem; font-size:0.8rem; color:#64748b;">
-                                <strong>Indice:</strong> Changez l'ID dans l'URL ou le champ de saisie
+                                
+                                <div id="xss-result" style="margin-top:1.5rem; padding:1rem; border:1px solid #e2e8f0; border-radius:4px; min-height:80px;">
+                                    <div style="color:#64748b; text-align:center; padding:1rem;">
+                                        Résultats de recherche apparaîtront ici
+                                    </div>
+                                </div>
+                                
+                                <div style="margin-top:1.5rem; padding:1rem; background:#f1f5f9; border-radius:4px; border:1px dashed #cbd5e1;">
+                                    <div style="display:flex; align-items:center; gap:0.5rem; color:#64748b; margin-bottom:0.5rem;">
+                                        <i class="fa-solid fa-lightbulb"></i>
+                                        <strong>Indice</strong>
+                                    </div>
+                                    <div style="color:#334155; font-size:0.9rem;">
+                                        ${module.hint}
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                ${getValidateButton('idor')}
-            `,
+                    
+                    ${getValidateButton('xss')}
+                `;
+            },
             
-            'module-sqli': () => `
-                ${getBackButton()}
-                <h2 style="color:white; margin-bottom:1rem;">Lab 3: SQL Injection</h2>
-                <div class="lab-container">
-                    <div style="margin-bottom:0.5rem; color:#94a3b8;">Mission: Extraire les informations de la table "users".</div>
-                    <div class="lab-browser">
-                        <div class="browser-bar"><div class="url-bar">/login</div></div>
-                        <div class="browser-content">
-                            <h3>Login Admin</h3>
-                            <div style="margin:1rem 0;">
-                                <input type="text" id="sqli-user" class="vulnerable-input" placeholder="Username" value="admin">
-                                <input type="password" id="sqli-pass" class="vulnerable-input" placeholder="Password" style="margin-top:0.5rem;" value="">
-                                <button onclick="runSQLI()" class="vulnerable-btn" style="margin-top:0.5rem;">Login</button>
+            // IDOR Lab
+            'module-idor': () => {
+                const module = modulesData.find(m => m.id === 'idor');
+                return `
+                    ${getBackButton()}
+                    
+                    <div class="lab-header">
+                        <div>
+                            <h2 style="color:white; margin-bottom:0.25rem;">${module.title}</h2>
+                            <div style="color:var(--text-secondary);">${module.description}</div>
+                        </div>
+                        <span class="lab-difficulty">${module.level}</span>
+                    </div>
+                    
+                    <div class="lab-container">
+                        <div style="margin-bottom:1.5rem; padding:1rem; background:rgba(245, 158, 11, 0.1); border-radius:0.5rem; border:1px solid rgba(245, 158, 11, 0.3);">
+                            <div style="display:flex; align-items:center; gap:0.5rem; color:var(--warning); margin-bottom:0.5rem;">
+                                <i class="fa-solid fa-bullseye"></i>
+                                <strong>Mission</strong>
                             </div>
-                            <div id="sqli-result" style="text-align:left; font-family:monospace; background:#f1f5f9; padding:1rem; border-radius:4px; min-height:100px;"></div>
-                            <div style="margin-top:1rem; font-size:0.8rem; color:#64748b;">
-                                <strong>Indice:</strong> Essayez <code>' OR '1'='1</code> dans le champ password
+                            <div style="color:var(--text-primary);">
+                                Accédez au profil administrateur (ID 1234). Votre ID est ${appState.userProfile.id}.
+                            </div>
+                        </div>
+                        
+                        <div class="lab-browser">
+                            <div class="browser-bar">
+                                <div style="width:12px; height:12px; border-radius:50%; background:#ef4444;"></div>
+                                <div style="width:12px; height:12px; border-radius:50%; background:#f59e0b;"></div>
+                                <div style="width:12px; height:12px; border-radius:50%; background:#10b981;"></div>
+                                <div class="url-bar" id="idor-url">https://vulnerable-site.com/profile?id=${appState.userProfile.id}</div>
+                            </div>
+                            <div class="browser-content">
+                                <h3 style="color:#334155; margin-bottom:1rem;">Gestion des profils</h3>
+                                
+                                <div style="margin:1rem 0;">
+                                    <label style="display:block; color:#334155; margin-bottom:0.5rem; font-weight:600;">
+                                        ID du profil à afficher:
+                                    </label>
+                                    <div class="input-group">
+                                        <input type="number" id="idor-input" class="vulnerable-input" value="${appState.userProfile.id}" min="1" max="9999">
+                                        <button onclick="loadIDORProfile()" class="vulnerable-btn">
+                                            <i class="fa-solid fa-user"></i> Charger
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div id="idor-profile" class="profile-card">
+                                    <!-- Profile will be loaded here -->
+                                </div>
+                                
+                                <div style="margin-top:1.5rem; padding:1rem; background:#f1f5f9; border-radius:4px; border:1px dashed #cbd5e1;">
+                                    <div style="display:flex; align-items:center; gap:0.5rem; color:#64748b; margin-bottom:0.5rem;">
+                                        <i class="fa-solid fa-lightbulb"></i>
+                                        <strong>Indice</strong>
+                                    </div>
+                                    <div style="color:#334155; font-size:0.9rem;">
+                                        ${module.hint}
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                ${getValidateButton('sqli')}
-            `,
+                    
+                    ${getValidateButton('idor')}
+                `;
+            },
             
-            'module-csrf': () => `
-                ${getBackButton()}
-                <h2 style="color:white; margin-bottom:1rem;">Lab 4: CSRF</h2>
-                <div class="lab-container">
-                    <div style="margin-bottom:0.5rem; color:#94a3b8;">Mission: Forger une requête pour changer l'email de l'admin.</div>
-                    <div class="lab-browser">
-                        <div class="browser-bar"><div class="url-bar">/account</div></div>
-                        <div class="browser-content">
-                            <h3>Changer l'Email</h3>
-                            <div style="margin:1rem 0;">
-                                <input type="email" id="csrf-email" class="vulnerable-input" placeholder="nouveau@email.com" value="hacker@evil.com">
-                                <button onclick="submitCSRF()" class="vulnerable-btn">Changer Email</button>
+            // SQL Injection Lab
+            'module-sqli': () => {
+                const module = modulesData.find(m => m.id === 'sqli');
+                return `
+                    ${getBackButton()}
+                    
+                    <div class="lab-header">
+                        <div>
+                            <h2 style="color:white; margin-bottom:0.25rem;">${module.title}</h2>
+                            <div style="color:var(--text-secondary);">${module.description}</div>
+                        </div>
+                        <span class="lab-difficulty">${module.level}</span>
+                    </div>
+                    
+                    <div class="lab-container">
+                        <div style="margin-bottom:1.5rem; padding:1rem; background:rgba(239, 68, 68, 0.1); border-radius:0.5rem; border:1px solid rgba(239, 68, 68, 0.3);">
+                            <div style="display:flex; align-items:center; gap:0.5rem; color:var(--danger); margin-bottom:0.5rem;">
+                                <i class="fa-solid fa-bullseye"></i>
+                                <strong>Mission</strong>
                             </div>
-                            <div id="csrf-result"></div>
-                            <div style="margin-top:2rem; border-top:1px solid #cbd5e1; padding-top:1rem;">
-                                <h4>Code malveillant à injecter:</h4>
-                                <textarea style="width:100%; height:100px; font-family:monospace; font-size:0.8rem;" readonly>
-<form action="https://victime.com/change-email" method="POST">
-    <input type="hidden" name="email" value="hacker@evil.com">
-</form>
-<script>document.forms[0].submit();</script>
-                                </textarea>
+                            <div style="color:var(--text-primary);">
+                                Connectez-vous en tant qu'administrateur sans connaître le mot de passe.
+                            </div>
+                        </div>
+                        
+                        <div class="lab-browser">
+                            <div class="browser-bar">
+                                <div style="width:12px; height:12px; border-radius:50%; background:#ef4444;"></div>
+                                <div style="width:12px; height:12px; border-radius:50%; background:#f59e0b;"></div>
+                                <div style="width:12px; height:12px; border-radius:50%; background:#10b981;"></div>
+                                <div class="url-bar">https://vulnerable-site.com/login</div>
+                            </div>
+                            <div class="browser-content">
+                                <h3 style="color:#334155; margin-bottom:1rem;">Connexion administrateur</h3>
+                                
+                                <div style="margin:1rem 0;">
+                                    <div style="margin-bottom:1rem;">
+                                        <label style="display:block; color:#334155; margin-bottom:0.25rem;">Nom d'utilisateur:</label>
+                                        <input type="text" id="sqli-user" class="vulnerable-input" placeholder="admin" value="admin">
+                                    </div>
+                                    <div style="margin-bottom:1rem;">
+                                        <label style="display:block; color:#334155; margin-bottom:0.25rem;">Mot de passe:</label>
+                                        <input type="password" id="sqli-pass" class="vulnerable-input" placeholder="Entrez le mot de passe" value="">
+                                    </div>
+                                    <button onclick="runSQLI()" class="vulnerable-btn" style="width:100%;">
+                                        <i class="fa-solid fa-sign-in-alt"></i> Se connecter
+                                    </button>
+                                </div>
+                                
+                                <div id="sqli-result" class="result-container">
+                                    <div style="color:#64748b; text-align:center; padding:1rem;">
+                                        Résultat de la connexion apparaîtra ici
+                                    </div>
+                                </div>
+                                
+                                <div style="margin-top:1.5rem; padding:1rem; background:#f1f5f9; border-radius:4px; border:1px dashed #cbd5e1;">
+                                    <div style="display:flex; align-items:center; gap:0.5rem; color:#64748b; margin-bottom:0.5rem;">
+                                        <i class="fa-solid fa-lightbulb"></i>
+                                        <strong>Indice</strong>
+                                    </div>
+                                    <div style="color:#334155; font-size:0.9rem;">
+                                        ${module.hint}
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                ${getValidateButton('csrf')}
-            `,
+                    
+                    ${getValidateButton('sqli')}
+                `;
+            },
             
-            'module-xxe': () => `
-                ${getBackButton()}
-                <h2 style="color:white; margin-bottom:1rem;">Lab 5: XXE</h2>
-                <div class="lab-container">
-                    <div style="margin-bottom:0.5rem; color:#94a3b8;">Mission: Exfiltrer le fichier /etc/passwd via une injection XML.</div>
-                    <div class="lab-browser">
-                        <div class="browser-bar"><div class="url-bar">/upload</div></div>
-                        <div class="browser-content">
-                            <h3>Upload de fichier XML</h3>
-                            <div style="margin:1rem 0;">
-                                <textarea id="xxe-input" class="vulnerable-input" placeholder="XML content" style="width:100%; height:150px; font-family:monospace; font-size:0.8rem;" rows="6">
-<?xml version="1.0"?>
+            // CSRF Lab
+            'module-csrf': () => {
+                const module = modulesData.find(m => m.id === 'csrf');
+                return `
+                    ${getBackButton()}
+                    
+                    <div class="lab-header">
+                        <div>
+                            <h2 style="color:white; margin-bottom:0.25rem;">${module.title}</h2>
+                            <div style="color:var(--text-secondary);">${module.description}</div>
+                        </div>
+                        <span class="lab-difficulty">${module.level}</span>
+                    </div>
+                    
+                    <div class="lab-container">
+                        <div style="margin-bottom:1.5rem; padding:1rem; background:rgba(59, 130, 246, 0.1); border-radius:0.5rem; border:1px solid rgba(59, 130, 246, 0.3);">
+                            <div style="display:flex; align-items:center; gap:0.5rem; color:var(--info); margin-bottom:0.5rem;">
+                                <i class="fa-solid fa-bullseye"></i>
+                                <strong>Mission</strong>
+                            </div>
+                            <div style="color:var(--text-primary);">
+                                Forgez une requête pour changer l'email de l'administrateur.
+                            </div>
+                        </div>
+                        
+                        <div class="lab-browser">
+                            <div class="browser-bar">
+                                <div style="width:12px; height:12px; border-radius:50%; background:#ef4444;"></div>
+                                <div style="width:12px; height:12px; border-radius:50%; background:#f59e0b;"></div>
+                                <div style="width:12px; height:12px; border-radius:50%; background:#10b981;"></div>
+                                <div class="url-bar">https://victim-site.com/account</div>
+                            </div>
+                            <div class="browser-content">
+                                <h3 style="color:#334155; margin-bottom:1rem;">Changer l'adresse email</h3>
+                                
+                                <div style="margin:1rem 0;">
+                                    <div style="margin-bottom:1rem;">
+                                        <label style="display:block; color:#334155; margin-bottom:0.25rem;">Nouvel email:</label>
+                                        <input type="email" id="csrf-email" class="vulnerable-input" placeholder="hacker@evil.com" value="hacker@evil.com">
+                                    </div>
+                                    <button onclick="submitCSRF()" class="vulnerable-btn" style="width:100%;">
+                                        <i class="fa-solid fa-envelope"></i> Changer l'email
+                                    </button>
+                                </div>
+                                
+                                <div id="csrf-result" style="margin-top:1.5rem;">
+                                    <!-- Result will appear here -->
+                                </div>
+                                
+                                <div style="margin-top:2rem; border-top:1px solid #cbd5e1; padding-top:1rem;">
+                                    <h4 style="color:#334155; margin-bottom:0.5rem;">
+                                        <i class="fa-solid fa-code"></i> Code malveillant CSRF
+                                    </h4>
+                                    <div class="code-block">
+                                        <pre>&lt;form action="https://victim-site.com/change-email" method="POST" id="csrf-form"&gt;
+    &lt;input type="hidden" name="email" value="hacker@evil.com"&gt;
+&lt;/form&gt;
+&lt;script&gt;
+    // Soumet automatiquement le formulaire
+    document.getElementById('csrf-form').submit();
+&lt;/script&gt;</pre>
+                                    </div>
+                                    <div style="color:#64748b; font-size:0.8rem; margin-top:0.5rem;">
+                                        Ce code peut être placé sur un site malveillant que la victime visitera.
+                                    </div>
+                                </div>
+                                
+                                <div style="margin-top:1.5rem; padding:1rem; background:#f1f5f9; border-radius:4px; border:1px dashed #cbd5e1;">
+                                    <div style="display:flex; align-items:center; gap:0.5rem; color:#64748b; margin-bottom:0.5rem;">
+                                        <i class="fa-solid fa-lightbulb"></i>
+                                        <strong>Indice</strong>
+                                    </div>
+                                    <div style="color:#334155; font-size:0.9rem;">
+                                        ${module.hint}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    ${getValidateButton('csrf')}
+                `;
+            },
+            
+            // XXE Lab
+            'module-xxe': () => {
+                const module = modulesData.find(m => m.id === 'xxe');
+                const defaultXML = `<?xml version="1.0"?>
 <user>
     <name>John Doe</name>
     <email>john@example.com</email>
-</user></textarea>
-                                <button onclick="parseXXE()" class="vulnerable-btn" style="margin-top:0.5rem;">Parser XML</button>
+</user>`;
+                
+                return `
+                    ${getBackButton()}
+                    
+                    <div class="lab-header">
+                        <div>
+                            <h2 style="color:white; margin-bottom:0.25rem;">${module.title}</h2>
+                            <div style="color:var(--text-secondary);">${module.description}</div>
+                        </div>
+                        <span class="lab-difficulty">${module.level}</span>
+                    </div>
+                    
+                    <div class="lab-container">
+                        <div style="margin-bottom:1.5rem; padding:1rem; background:rgba(251, 191, 36, 0.1); border-radius:0.5rem; border:1px solid rgba(251, 191, 36, 0.3);">
+                            <div style="display:flex; align-items:center; gap:0.5rem; color:#fbbf24; margin-bottom:0.5rem;">
+                                <i class="fa-solid fa-bullseye"></i>
+                                <strong>Mission</strong>
                             </div>
-                            <div id="xxe-result" class="xxe-output">
+                            <div style="color:var(--text-primary);">
+                                Exfiltrer le contenu de /etc/passwd via une injection XML.
+                            </div>
+                        </div>
+                        
+                        <div class="lab-browser">
+                            <div class="browser-bar">
+                                <div style="width:12px; height:12px; border-radius:50%; background:#ef4444;"></div>
+                                <div style="width:12px; height:12px; border-radius:50%; background:#f59e0b;"></div>
+                                <div style="width:12px; height:12px; border-radius:50%; background:#10b981;"></div>
+                                <div class="url-bar">https://vulnerable-site.com/xml-parser</div>
+                            </div>
+                            <div class="browser-content">
+                                <h3 style="color:#334155; margin-bottom:1rem;">Parseur XML</h3>
+                                
+                                <div style="margin:1rem 0;">
+                                    <label style="display:block; color:#334155; margin-bottom:0.5rem; font-weight:600;">
+                                        Contenu XML:
+                                    </label>
+                                    <textarea id="xxe-input" class="vulnerable-input" placeholder="Collez votre XML ici..." 
+                                              style="width:100%; height:180px; font-family:monospace; font-size:0.9rem; resize:vertical;" 
+                                              rows="8">${escapeHtml(defaultXML)}</textarea>
+                                    <button onclick="parseXXE()" class="vulnerable-btn" style="width:100%; margin-top:0.5rem;">
+                                        <i class="fa-solid fa-code"></i> Parser XML
+                                    </button>
                                 </div>
-                            <div style="margin-top:1rem; font-size:0.8rem; color:#64748b;">
-                                <strong>Indice:</strong> Essayez une entité externe: <code>&lt;!DOCTYPE foo [&lt;!ENTITY xxe SYSTEM "file:///etc/passwd"&gt;]&gt;</code>
+                                
+                                <div id="xxe-result" class="result-container">
+                                    <div style="color:#64748b; text-align:center; padding:1rem;">
+                                        Résultat du parsing apparaîtra ici
+                                    </div>
+                                </div>
+                                
+                                <div style="margin-top:1.5rem; padding:1rem; background:#f1f5f9; border-radius:4px; border:1px dashed #cbd5e1;">
+                                    <div style="display:flex; align-items:center; gap:0.5rem; color:#64748b; margin-bottom:0.5rem;">
+                                        <i class="fa-solid fa-lightbulb"></i>
+                                        <strong>Indice</strong>
+                                    </div>
+                                    <div style="color:#334155; font-size:0.9rem;">
+                                        ${module.hint}
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                ${getValidateButton('xxe')}
-            `,
+                    
+                    ${getValidateButton('xxe')}
+                `;
+            },
             
-            'module-rc': () => `
-                ${getBackButton()}
-                <h2 style="color:white; margin-bottom:1rem;">Lab 6: Race Condition</h2>
-                <div class="lab-container">
-                    <div style="margin-bottom:0.5rem; color:#94a3b8;">Mission: Profiter d'une condition de course pour acheter plus de produits que le stock disponible.</div>
-                    <div class="lab-browser">
-                        <div class="browser-bar"><div class="url-bar">/shop</div></div>
-                        <div class="browser-content">
-                            <h3>Boutique en ligne</h3>
-                            <div style="margin:1rem 0;">
-                                <div style="background:#f0fdf4; padding:1rem; border-radius:4px;">
-                                    <p><strong>Produit:</strong> Clé de licence premium</p>
-                                    <p><strong>Prix:</strong> 100€</p>
-                                    <p><strong>Stock:</strong> <span id="stock-count">${appState.raceStock}</span> unités</p>
-                                    <p><strong>Votre argent:</strong> <span id="user-money">${appState.raceUserMoney}</span>€</p>
-                                    <p><strong>Inventaire:</strong> <span id="user-inventory">${appState.raceInventory}</span></p>
+            // Race Condition Lab
+            'module-rc': () => {
+                const module = modulesData.find(m => m.id === 'rc');
+                return `
+                    ${getBackButton()}
+                    
+                    <div class="lab-header">
+                        <div>
+                            <h2 style="color:white; margin-bottom:0.25rem;">${module.title}</h2>
+                            <div style="color:var(--text-secondary);">${module.description}</div>
+                        </div>
+                        <span class="lab-difficulty">${module.level}</span>
+                    </div>
+                    
+                    <div class="lab-container">
+                        <div style="margin-bottom:1.5rem; padding:1rem; background:rgba(239, 68, 68, 0.1); border-radius:0.5rem; border:1px solid rgba(239, 68, 68, 0.3);">
+                            <div style="display:flex; align-items:center; gap:0.5rem; color:var(--danger); margin-bottom:0.5rem;">
+                                <i class="fa-solid fa-bullseye"></i>
+                                <strong>Mission</strong>
+                            </div>
+                            <div style="color:var(--text-primary);">
+                                Achetez plus de produits que le stock disponible en exploitant une condition de course.
+                            </div>
+                        </div>
+                        
+                        <div class="lab-browser">
+                            <div class="browser-bar">
+                                <div style="width:12px; height:12px; border-radius:50%; background:#ef4444;"></div>
+                                <div style="width:12px; height:12px; border-radius:50%; background:#f59e0b;"></div>
+                                <div style="width:12px; height:12px; border-radius:50%; background:#10b981;"></div>
+                                <div class="url-bar">https://vulnerable-shop.com/product/premium-key</div>
+                            </div>
+                            <div class="browser-content">
+                                <h3 style="color:#334155; margin-bottom:1rem;">Boutique Premium</h3>
+                                
+                                <div style="margin:1rem 0; padding:1.5rem; background:#f0fdf4; border-radius:8px; border:1px solid #bbf7d0;">
+                                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:1rem;">
+                                        <div>
+                                            <div style="color:#64748b; font-size:0.8rem; margin-bottom:0.25rem;">Produit</div>
+                                            <div style="color:#334155; font-weight:600;">Clé de licence premium</div>
+                                        </div>
+                                        <div>
+                                            <div style="color:#64748b; font-size:0.8rem; margin-bottom:0.25rem;">Prix</div>
+                                            <div style="color:#334155; font-weight:600;">100€</div>
+                                        </div>
+                                        <div>
+                                            <div style="color:#64748b; font-size:0.8rem; margin-bottom:0.25rem;">Stock</div>
+                                            <div style="color:#334155; font-weight:600;"><span id="stock-count">${appState.raceStock}</span> unités</div>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                            
-                            <div class="race-controls">
-                                <button onclick="buyProduct()" class="vulnerable-btn">Acheter 1 unité</button>
-                                <button onclick="startRaceCondition()" class="vulnerable-btn" style="background:#ef4444;">Lancer 10 requêtes simultanées</button>
-                            </div>
-                            
-                            <div class="race-track" id="race-track">
-                                <div class="race-progress" id="race-progress"></div>
-                            </div>
-                            
-                            <div id="race-output" class="race-output">
+                                
+                                <div style="margin:1.5rem 0; padding:1rem; background:#f8fafc; border-radius:8px; border:1px solid #e2e8f0;">
+                                    <div style="color:#334155; font-weight:600; margin-bottom:0.5rem;">Votre compte</div>
+                                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:1rem;">
+                                        <div>
+                                            <div style="color:#64748b; font-size:0.8rem;">Argent disponible</div>
+                                            <div style="color:#334155; font-weight:600;"><span id="user-money">${appState.raceUserMoney}</span>€</div>
+                                        </div>
+                                        <div>
+                                            <div style="color:#64748b; font-size:0.8rem;">Inventaire</div>
+                                            <div style="color:#334155; font-weight:600;"><span id="user-inventory">${appState.raceInventory}</span> clés</div>
+                                        </div>
+                                    </div>
                                 </div>
-                            
-                            <div style="margin-top:1rem; font-size:0.8rem; color:#64748b;">
-                                <strong>Indice:</strong> Envoyez plusieurs requêtes d'achat simultanées avant que le stock ne soit mis à jour
+                                
+                                <div class="race-controls">
+                                    <button onclick="buyProduct()" class="vulnerable-btn" style="flex:1;">
+                                        <i class="fa-solid fa-cart-shopping"></i> Acheter 1 unité
+                                    </button>
+                                    <button onclick="startRaceCondition()" class="vulnerable-btn" style="flex:1; background:var(--danger);">
+                                        <i class="fa-solid fa-bolt"></i> Lancer 10 requêtes simultanées
+                                    </button>
+                                </div>
+                                
+                                <div style="margin:1.5rem 0;">
+                                    <div style="color:#334155; margin-bottom:0.5rem; font-weight:600;">Progression des requêtes:</div>
+                                    <div class="race-track" id="race-track">
+                                        <div class="race-progress" id="race-progress"></div>
+                                    </div>
+                                </div>
+                                
+                                <div id="race-output" class="result-container">
+                                    <div style="color:#64748b; text-align:center; padding:1rem;">
+                                        Les résultats des achats apparaîtront ici
+                                    </div>
+                                </div>
+                                
+                                <div style="margin-top:1.5rem; padding:1rem; background:#f1f5f9; border-radius:4px; border:1px dashed #cbd5e1;">
+                                    <div style="display:flex; align-items:center; gap:0.5rem; color:#64748b; margin-bottom:0.5rem;">
+                                        <i class="fa-solid fa-lightbulb"></i>
+                                        <strong>Indice</strong>
+                                    </div>
+                                    <div style="color:#334155; font-size:0.9rem;">
+                                        ${module.hint}
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                ${getValidateButton('rc')}
-            `,
+                    
+                    ${getValidateButton('rc')}
+                `;
+            },
             
-            'module-lfi': () => `
-                ${getBackButton()}
-                <h2 style="color:white; margin-bottom:1rem;">Lab 7: LFI</h2>
-                <div class="lab-container">
-                    <div style="margin-bottom:0.5rem; color:#94a3b8;">Mission: Lire le fichier /etc/passwd via une inclusion de fichier local.</div>
-                    <div class="lab-browser">
-                        <div class="browser-bar"><div class="url-bar">/view</div></div>
-                        <div class="browser-content">
-                            <h3>Vue de fichier</h3>
-                            <div style="margin:1rem 0;">
-                                <input type="text" id="lfi-input" class="vulnerable-input" placeholder="Nom du fichier" value="welcome.txt">
-                                <button onclick="loadLFI()" class="vulnerable-btn">Afficher</button>
+            // LFI Lab
+            'module-lfi': () => {
+                const module = modulesData.find(m => m.id === 'lfi');
+                return `
+                    ${getBackButton()}
+                    
+                    <div class="lab-header">
+                        <div>
+                            <h2 style="color:white; margin-bottom:0.25rem;">${module.title}</h2>
+                            <div style="color:var(--text-secondary);">${module.description}</div>
+                        </div>
+                        <span class="lab-difficulty">${module.level}</span>
+                    </div>
+                    
+                    <div class="lab-container">
+                        <div style="margin-bottom:1.5rem; padding:1rem; background:rgba(52, 211, 153, 0.1); border-radius:0.5rem; border:1px solid rgba(52, 211, 153, 0.3);">
+                            <div style="display:flex; align-items:center; gap:0.5rem; color:#34d399; margin-bottom:0.5rem;">
+                                <i class="fa-solid fa-bullseye"></i>
+                                <strong>Mission</strong>
                             </div>
-                            <div id="lfi-result" class="lfi-file-content">
+                            <div style="color:var(--text-primary);">
+                                Lire le fichier /etc/passwd via une inclusion de fichier local.
+                            </div>
+                        </div>
+                        
+                        <div class="lab-browser">
+                            <div class="browser-bar">
+                                <div style="width:12px; height:12px; border-radius:50%; background:#ef4444;"></div>
+                                <div style="width:12px; height:12px; border-radius:50%; background:#f59e0b;"></div>
+                                <div style="width:12px; height:12px; border-radius:50%; background:#10b981;"></div>
+                                <div class="url-bar">https://vulnerable-site.com/view</div>
+                            </div>
+                            <div class="browser-content">
+                                <h3 style="color:#334155; margin-bottom:1rem;">Visualiseur de fichiers</h3>
+                                
+                                <div style="margin:1rem 0;">
+                                    <label style="display:block; color:#334155; margin-bottom:0.5rem; font-weight:600;">
+                                        Nom du fichier à afficher:
+                                    </label>
+                                    <div class="input-group">
+                                        <input type="text" id="lfi-input" class="vulnerable-input" placeholder="welcome.txt" value="welcome.txt">
+                                        <button onclick="loadLFI()" class="vulnerable-btn">
+                                            <i class="fa-solid fa-eye"></i> Afficher
+                                        </button>
+                                    </div>
+                                    <div style="color:#64748b; font-size:0.8rem; margin-top:0.25rem;">
+                                        Exemples: welcome.txt, about.php, config.ini
+                                    </div>
                                 </div>
-                            <div style="margin-top:1rem; font-size:0.8rem; color:#64748b;">
-                                <strong>Indice:</strong> Essayez des chemins comme <code>../../../etc/passwd</code> ou <code>../../../../etc/passwd</code>
+                                
+                                <div id="lfi-result" class="result-container">
+                                    <div style="color:#64748b; text-align:center; padding:1rem;">
+                                        Le contenu du fichier apparaîtra ici
+                                    </div>
+                                </div>
+                                
+                                <div style="margin-top:1.5rem; padding:1rem; background:#f1f5f9; border-radius:4px; border:1px dashed #cbd5e1;">
+                                    <div style="display:flex; align-items:center; gap:0.5rem; color:#64748b; margin-bottom:0.5rem;">
+                                        <i class="fa-solid fa-lightbulb"></i>
+                                        <strong>Indice</strong>
+                                    </div>
+                                    <div style="color:#334155; font-size:0.9rem;">
+                                        ${module.hint}
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                ${getValidateButton('lfi')}
-            `
+                    
+                    ${getValidateButton('lfi')}
+                `;
+            }
         };
 
-        // --- NAVIGATION ---
+        // --- NAVIGATION FUNCTIONS ---
         function navigateTo(view) {
             appState.currentView = view;
             renderContent();
@@ -392,6 +1525,9 @@
             if (window.innerWidth <= 768) {
                 document.getElementById('sidebar').classList.remove('mobile-open');
             }
+            
+            // Mettre à jour l'URL dans la barre d'adresse si nécessaire
+            history.pushState({ view }, '', `#${view}`);
         }
 
         function renderContent() {
@@ -400,16 +1536,22 @@
             
             if (viewFunction) {
                 contentArea.innerHTML = viewFunction();
-                // Initialize specific lab content if needed
+                
+                // Initialiser le contenu spécifique au lab si nécessaire
                 if (appState.currentView === 'module-idor') {
                     loadIDORProfile();
-                } else if (appState.currentView === 'module-xxe') {
-                   // Optional auto-run
-                } else if (appState.currentView === 'module-lfi') {
-                   // Optional auto-run
+                } else if (appState.currentView === 'module-rc') {
+                    updateRaceUI();
                 }
             } else {
-                contentArea.innerHTML = '<h2>Vue non trouvée</h2>';
+                contentArea.innerHTML = `
+                    <div style="text-align:center; padding:4rem 2rem;">
+                        <h2 style="color:white; margin-bottom:1rem;">Vue non trouvée</h2>
+                        <button onclick="navigateTo('dashboard')" class="vulnerable-btn">
+                            <i class="fa-solid fa-home"></i> Retour au tableau de bord
+                        </button>
+                    </div>
+                `;
             }
         }
 
@@ -417,18 +1559,30 @@
             const navContainer = document.getElementById('nav-buttons');
             let html = '';
             
-            // Dashboard button
-            html += `<button class="nav-btn ${appState.currentView === 'dashboard' ? 'active' : ''}" onclick="navigateTo('dashboard')">
-                        <i class="fa-solid fa-gauge"></i> Tableau de bord
-                    </button>`;
+            // Bouton tableau de bord
+            html += `
+                <button class="nav-btn ${appState.currentView === 'dashboard' ? 'active' : ''}" onclick="navigateTo('dashboard')">
+                    <i class="fa-solid fa-gauge-high"></i> Tableau de bord
+                </button>
+            `;
             
-            // Module buttons
+            // Boutons des modules
+            html += '<div style="color:var(--text-secondary); padding:1rem 1.5rem 0.5rem; font-size:0.8rem; text-transform:uppercase; letter-spacing:1px;">Labs</div>';
+            
             modulesData.forEach(module => {
                 const isCompleted = appState.completedModules.includes(module.id);
-                html += `<button class="nav-btn ${appState.currentView === 'module-' + module.id ? 'active' : ''}" onclick="navigateTo('module-${module.id}')">
-                            <i class="fa-solid fa-${module.icon}" style="color:${module.color}"></i> ${module.title}
-                            ${isCompleted ? '<span class="module-progress"><i class="fa-solid fa-check"></i></span>' : ''}
-                        </button>`;
+                const isActive = appState.currentView === 'module-' + module.id;
+                
+                html += `
+                    <button class="nav-btn ${isActive ? 'active' : ''}" onclick="navigateTo('module-${module.id}')">
+                        <i class="fa-solid fa-${module.icon}" style="color:${module.color}"></i>
+                        <span style="flex:1; text-align:left;">${module.title}</span>
+                        ${isCompleted ? 
+                            '<span class="module-progress" style="color:var(--success);"><i class="fa-solid fa-check-circle"></i></span>' : 
+                            '<span class="module-progress">' + module.xp + ' XP</span>'
+                        }
+                    </button>
+                `;
             });
             
             navContainer.innerHTML = html;
@@ -445,57 +1599,85 @@
             }
         }
 
-        // --- GESTION XP ET NIVEAUX ---
-        function updateXPBar() {
-            const xpPercentage = (appState.xp / 3000) * 100;
-            document.getElementById('xp-bar').style.width = `${Math.min(xpPercentage, 100)}%`;
-            
-            // Mettre à jour le niveau
-            if (appState.xp >= 3000) {
-                appState.level = 5;
-                document.getElementById('user-level').textContent = 'Expert';
-            } else if (appState.xp >= 2000) {
-                appState.level = 4;
-                document.getElementById('user-level').textContent = 'Avancé';
-            } else if (appState.xp >= 1000) {
-                appState.level = 3;
-                document.getElementById('user-level').textContent = 'Intermédiaire';
-            } else if (appState.xp >= 500) {
-                appState.level = 2;
-                document.getElementById('user-level').textContent = 'Débutant';
-            } else {
-                appState.level = 1;
-                document.getElementById('user-level').textContent = 'Novice';
-            }
-            
-            document.getElementById('current-xp').textContent = `${appState.xp} XP`;
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('mobile-open');
         }
 
-        // --- VALIDATION MODULE ---
+        // --- XP & LEVEL MANAGEMENT ---
+        function updateXPBar() {
+            const xpPercentage = Math.min((appState.xp / 3000) * 100, 100);
+            document.getElementById('xp-bar').style.width = `${xpPercentage}%`;
+            
+            // Mettre à jour le niveau
+            let level, levelName;
+            if (appState.xp >= 3000) {
+                level = 5;
+                levelName = 'Expert';
+            } else if (appState.xp >= 2000) {
+                level = 4;
+                levelName = 'Avancé';
+            } else if (appState.xp >= 1000) {
+                level = 3;
+                levelName = 'Intermédiaire';
+            } else if (appState.xp >= 500) {
+                level = 2;
+                levelName = 'Débutant';
+            } else {
+                level = 1;
+                levelName = 'Novice';
+            }
+            
+            appState.level = level;
+            document.getElementById('user-level').textContent = levelName;
+            document.getElementById('user-level').className = `badge badge-${level === 5 ? 'success' : level >= 3 ? 'warning' : 'danger'}`;
+            document.getElementById('current-xp').textContent = `${appState.xp} XP`;
+            document.getElementById('completed-count').textContent = appState.completedModules.length;
+            document.getElementById('next-level-xp').textContent = `${3000 - appState.xp} XP`;
+        }
+
+        // --- MODULE VALIDATION ---
         function validateModule(moduleId) {
             if (!appState.completedModules.includes(moduleId)) {
                 appState.completedModules.push(moduleId);
                 const module = modulesData.find(m => m.id === moduleId);
                 if (module) {
                     appState.xp += module.xp;
-                    showToast(`+${module.xp} XP ! Module validé.`);
+                    showToast(`Lab validé ! +${module.xp} XP obtenus.`);
                 }
                 updateXPBar();
                 renderNavButtons();
-                renderContent(); // Refresh to disable button
+                renderContent(); // Rafraîchir pour désactiver le bouton
             }
         }
 
-        function showToast(msg) {
+        // --- TOAST & ALERTS ---
+        function showToast(msg, type = 'success') {
             const toast = document.getElementById('toast');
-            document.getElementById('toast-message').textContent = msg;
+            const toastMessage = document.getElementById('toast-message');
+            
+            // Définir l'icône en fonction du type
+            let icon = 'check-circle';
+            if (type === 'error') icon = 'exclamation-circle';
+            if (type === 'warning') icon = 'exclamation-triangle';
+            if (type === 'info') icon = 'info-circle';
+            
+            document.querySelector('.toast-header strong').innerHTML = `
+                <i class="fa-solid fa-${icon}" style="color:${type === 'success' ? 'var(--success)' : type === 'error' ? 'var(--danger)' : type === 'warning' ? 'var(--warning)' : 'var(--info)'}"></i>
+                ${type === 'success' ? 'Succès' : type === 'error' ? 'Erreur' : type === 'warning' ? 'Avertissement' : 'Information'}
+            `;
+            
+            toastMessage.textContent = msg;
             toast.classList.add('show');
+            
             setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
+                hideToast();
+            }, 4000);
         }
 
-        // --- FONCTIONS DES LABS ---
+        function hideToast() {
+            document.getElementById('toast').classList.remove('show');
+        }
+
         function showFakeAlert() {
             document.getElementById('fake-alert-overlay').style.display = 'flex';
         }
@@ -504,44 +1686,136 @@
             document.getElementById('fake-alert-overlay').style.display = 'none';
         }
 
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('mobile-open');
-        }
-
+        // --- LAB FUNCTIONS ---
         function runXSS() {
             const input = document.getElementById('xss-input').value;
             const resultDiv = document.getElementById('xss-result');
             
-            if (input.includes('<script>alert(1)</script>') || input.includes('alert(1)')) {
-                resultDiv.innerHTML = `Résultat de recherche pour: <strong>${escapeHtml(input)}</strong>`;
+            if (input.includes('<script>alert(1)</script>') || 
+                input.includes('<script>') && input.includes('alert(1)') ||
+                input.includes('alert(') && input.includes(')')) {
+                resultDiv.innerHTML = `
+                    <div style="color:#334155;">
+                        <div style="margin-bottom:0.5rem;">Résultats de recherche pour:</div>
+                        <div style="background:#f8fafc; padding:0.5rem; border-radius:4px; font-family:monospace; margin-bottom:1rem;">
+                            ${escapeHtml(input)}
+                        </div>
+                        <div style="color:#dc2626; font-weight:600;">
+                            <i class="fa-solid fa-triangle-exclamation"></i> Script exécuté avec succès!
+                        </div>
+                    </div>
+                `;
                 showFakeAlert();
             } else {
-                resultDiv.innerHTML = `Résultat de recherche pour: <strong>${escapeHtml(input)}</strong>`;
+                resultDiv.innerHTML = `
+                    <div style="color:#334155;">
+                        <div style="margin-bottom:0.5rem;">Résultats de recherche pour:</div>
+                        <div style="background:#f8fafc; padding:0.5rem; border-radius:4px; font-family:monospace;">
+                            ${escapeHtml(input)}
+                        </div>
+                        <div style="margin-top:1rem; color:#64748b; font-size:0.9rem;">
+                            Aucun script JavaScript détecté dans la recherche.
+                        </div>
+                    </div>
+                `;
             }
         }
 
         function loadIDORProfile() {
             const profileId = document.getElementById('idor-input').value;
             const profileDiv = document.getElementById('idor-profile');
+            const urlBar = document.getElementById('idor-url');
+            
+            if (urlBar) {
+                urlBar.textContent = `https://vulnerable-site.com/profile?id=${profileId}`;
+            }
             
             if (profileId === '1234') {
                 profileDiv.innerHTML = `
-                    <h3>Profil Administrateur</h3>
-                    <p><strong>ID:</strong> 1234</p>
-                    <p><strong>Nom:</strong> Admin System</p>
-                    <p><strong>Email:</strong> admin@bountyacademy.com</p>
-                    <p><strong>Rôle:</strong> Super Administrateur</p>
-                    <p><strong>Dernière connexion:</strong> 2024-01-15 14:30</p>
-                    <p><strong>API Key:</strong> sk_live_123456789abcdef</p>
-                    <p style="color:green; font-weight:bold;">✓ Accès administrateur obtenu!</p>
+                    <div style="border-bottom:1px solid #e2e8f0; padding-bottom:1rem; margin-bottom:1rem;">
+                        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.5rem;">
+                            <h3 style="color:#334155; margin:0;">Profil Administrateur</h3>
+                            <span style="background:#dc2626; color:white; padding:0.25rem 0.5rem; border-radius:4px; font-size:0.8rem; font-weight:600;">
+                                Admin
+                            </span>
+                        </div>
+                        <div style="color:#64748b; font-size:0.9rem;">
+                            ID: <span style="color:#334155; font-family:monospace;">1234</span>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom:1rem;">
+                        <div style="color:#64748b; font-size:0.9rem; margin-bottom:0.25rem;">Nom complet</div>
+                        <div style="color:#334155; font-weight:600;">Admin System</div>
+                    </div>
+                    
+                    <div style="margin-bottom:1rem;">
+                        <div style="color:#64748b; font-size:0.9rem; margin-bottom:0.25rem;">Email</div>
+                        <div style="color:#334155; font-weight:600;">admin@bountyacademy.com</div>
+                    </div>
+                    
+                    <div style="margin-bottom:1rem;">
+                        <div style="color:#64748b; font-size:0.9rem; margin-bottom:0.25rem;">Rôle</div>
+                        <div style="color:#334155; font-weight:600;">Super Administrateur</div>
+                    </div>
+                    
+                    <div style="margin-bottom:1rem;">
+                        <div style="color:#64748b; font-size:0.9rem; margin-bottom:0.25rem;">Dernière connexion</div>
+                        <div style="color:#334155; font-weight:600;">2024-01-15 14:30:42</div>
+                    </div>
+                    
+                    <div style="margin-top:1.5rem; padding:1rem; background:#fef2f2; border-radius:4px; border:1px solid #fecaca;">
+                        <div style="color:#dc2626; font-weight:600; margin-bottom:0.5rem;">
+                            <i class="fa-solid fa-key"></i> Clé API Secrète
+                        </div>
+                        <div style="font-family:monospace; background:#fee2e2; padding:0.5rem; border-radius:4px; color:#b91c1c; font-size:0.9rem;">
+                            sk_live_123456789abcdef
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top:1.5rem; padding:1rem; background:#f0fdf4; border-radius:4px; border:1px solid #bbf7d0;">
+                        <div style="color:#16a34a; font-weight:600;">
+                            <i class="fa-solid fa-check-circle"></i> IDOR Réussi !
+                        </div>
+                        <div style="color:#334155; font-size:0.9rem; margin-top:0.25rem;">
+                            Vous avez accédé au profil administrateur sans autorisation.
+                        </div>
+                    </div>
                 `;
             } else {
                 profileDiv.innerHTML = `
-                    <h3>Profil Utilisateur</h3>
-                    <p><strong>ID:</strong> ${profileId}</p>
-                    <p><strong>Nom:</strong> Utilisateur ${profileId}</p>
-                    <p><strong>Email:</strong> user${profileId}@example.com</p>
-                    <p><strong>Rôle:</strong> Utilisateur standard</p>
+                    <div style="border-bottom:1px solid #e2e8f0; padding-bottom:1rem; margin-bottom:1rem;">
+                        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.5rem;">
+                            <h3 style="color:#334155; margin:0;">Profil Utilisateur</h3>
+                            <span style="background:#94a3b8; color:white; padding:0.25rem 0.5rem; border-radius:4px; font-size:0.8rem; font-weight:600;">
+                                Utilisateur
+                            </span>
+                        </div>
+                        <div style="color:#64748b; font-size:0.9rem;">
+                            ID: <span style="color:#334155; font-family:monospace;">${profileId}</span>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom:1rem;">
+                        <div style="color:#64748b; font-size:0.9rem; margin-bottom:0.25rem;">Nom complet</div>
+                        <div style="color:#334155; font-weight:600;">Utilisateur ${profileId}</div>
+                    </div>
+                    
+                    <div style="margin-bottom:1rem;">
+                        <div style="color:#64748b; font-size:0.9rem; margin-bottom:0.25rem;">Email</div>
+                        <div style="color:#334155; font-weight:600;">user${profileId}@example.com</div>
+                    </div>
+                    
+                    <div style="margin-bottom:1rem;">
+                        <div style="color:#64748b; font-size:0.9rem; margin-bottom:0.25rem;">Rôle</div>
+                        <div style="color:#334155; font-weight:600;">Utilisateur standard</div>
+                    </div>
+                    
+                    <div style="margin-top:1.5rem; padding:1rem; background:#f1f5f9; border-radius:4px; border:1px dashed #cbd5e1;">
+                        <div style="color:#64748b; font-size:0.9rem;">
+                            Pour exploiter l'IDOR, essayez de changer l'ID pour accéder à d'autres profils.
+                        </div>
+                    </div>
                 `;
             }
         }
@@ -551,22 +1825,80 @@
             const password = document.getElementById('sqli-pass').value;
             const resultDiv = document.getElementById('sqli-result');
             
-            if (password.includes("' OR '1'='1") || password.includes("' OR 1=1--")) {
+            if (password.includes("' OR '1'='1") || 
+                password.includes("' OR 1=1--") ||
+                password.includes("' OR 'a'='a") ||
+                password.includes("' OR 'x'='x")) {
                 resultDiv.innerHTML = `
-                    <p style="color:green;">✓ Connexion réussie!</p>
-                    <p>Bienvenue, ${escapeHtml(username)}</p>
-                    <p>Données extraites de la table users:</p>
-                    <ul>
-                        <li><strong>admin:admin123</strong> (Administrateur)</li>
-                        <li>john:password123 (Utilisateur)</li>
-                        <li>jane:qwerty (Utilisateur)</li>
-                        <li>root:toor (Super Admin)</li>
-                        <li>alice:alice123 (Modérateur)</li>
-                    </ul>
-                    <p style="color:green; font-weight:bold;">✓ SQL Injection réussie!</p>
+                    <div style="color:#334155;">
+                        <div style="color:#16a34a; font-weight:600; margin-bottom:1rem;">
+                            <i class="fa-solid fa-check-circle"></i> Connexion réussie !
+                        </div>
+                        
+                        <div style="margin-bottom:1rem;">
+                            Bienvenue, <strong>${escapeHtml(username)}</strong>
+                        </div>
+                        
+                        <div style="color:#64748b; font-size:0.9rem; margin-bottom:0.5rem;">
+                            Données extraites de la table users:
+                        </div>
+                        
+                        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:4px; overflow:hidden;">
+                            <table style="width:100%; border-collapse:collapse; font-family:monospace; font-size:0.9rem;">
+                                <thead>
+                                    <tr style="background:#e2e8f0;">
+                                        <th style="padding:0.5rem; text-align:left; border-bottom:1px solid #cbd5e1;">Username</th>
+                                        <th style="padding:0.5rem; text-align:left; border-bottom:1px solid #cbd5e1;">Password</th>
+                                        <th style="padding:0.5rem; text-align:left; border-bottom:1px solid #cbd5e1;">Role</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="padding:0.5rem; border-bottom:1px solid #f1f5f9;">admin</td>
+                                        <td style="padding:0.5rem; border-bottom:1px solid #f1f5f9;">admin123</td>
+                                        <td style="padding:0.5rem; border-bottom:1px solid #f1f5f9;">Administrateur</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding:0.5rem; border-bottom:1px solid #f1f5f9;">john</td>
+                                        <td style="padding:0.5rem; border-bottom:1px solid #f1f5f9;">password123</td>
+                                        <td style="padding:0.5rem; border-bottom:1px solid #f1f5f9;">Utilisateur</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding:0.5rem; border-bottom:1px solid #f1f5f9;">jane</td>
+                                        <td style="padding:0.5rem; border-bottom:1px solid #f1f5f9;">qwerty</td>
+                                        <td style="padding:0.5rem; border-bottom:1px solid #f1f5f9;">Utilisateur</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding:0.5rem; border-bottom:1px solid #f1f5f9;">root</td>
+                                        <td style="padding:0.5rem; border-bottom:1px solid #f1f5f9;">toor</td>
+                                        <td style="padding:0.5rem;">Super Admin</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div style="margin-top:1rem; padding:1rem; background:#f0fdf4; border-radius:4px; border:1px solid #bbf7d0;">
+                            <div style="color:#16a34a; font-weight:600;">
+                                <i class="fa-solid fa-database"></i> SQL Injection réussie !
+                            </div>
+                            <div style="color:#334155; font-size:0.9rem; margin-top:0.25rem;">
+                                La requête SQL injectée a contourné l'authentification.
+                            </div>
+                        </div>
+                    </div>
                 `;
             } else {
-                resultDiv.innerHTML = `<p style="color:red;">✗ Échec de connexion - Identifiants incorrects</p>`;
+                resultDiv.innerHTML = `
+                    <div style="color:#dc2626; font-weight:600;">
+                        <i class="fa-solid fa-xmark-circle"></i> Échec de la connexion
+                    </div>
+                    <div style="color:#334155; margin-top:0.5rem;">
+                        Identifiants incorrects pour l'utilisateur: ${escapeHtml(username)}
+                    </div>
+                    <div style="color:#64748b; font-size:0.9rem; margin-top:1rem;">
+                        Essayez d'injecter du code SQL dans le champ mot de passe.
+                    </div>
+                `;
             }
         }
 
@@ -575,31 +1907,42 @@
             const resultDiv = document.getElementById('csrf-result');
             
             resultDiv.innerHTML = `
-                <div style="background:#f0fdf4; border:1px solid #bbf7d0; padding:1rem; border-radius:4px;">
-                    <p style="color:#16a34a; margin:0;">
-                        <i class="fa-solid fa-check"></i> Email changé avec succès!
-                    </p>
-                    <p style="margin-top:0.5rem; color:#334155;">
-                        Nouvel email: <strong>${escapeHtml(email)}</strong>
-                    </p>
-                    <p style="font-size:0.8rem; color:#64748b;">
-                        (Simulation CSRF réussie - l'email de l'admin a été changé)
-                    </p>
+                <div style="background:#f0fdf4; border:1px solid #bbf7d0; padding:1.5rem; border-radius:8px;">
+                    <div style="color:#16a34a; font-weight:600; margin-bottom:0.5rem;">
+                        <i class="fa-solid fa-check-circle"></i> Email changé avec succès !
+                    </div>
+                    <div style="color:#334155; margin-bottom:1rem;">
+                        L'adresse email a été mise à jour avec succès.
+                    </div>
+                    <div style="background:#f8fafc; padding:1rem; border-radius:4px; border:1px solid #e2e8f0;">
+                        <div style="color:#64748b; font-size:0.9rem; margin-bottom:0.25rem;">Nouvelle adresse email:</div>
+                        <div style="color:#334155; font-family:monospace; font-weight:600;">${escapeHtml(email)}</div>
+                    </div>
+                    <div style="color:#64748b; font-size:0.8rem; margin-top:1rem;">
+                        (Simulation CSRF réussie - l'email de l'administrateur a été changé)
+                    </div>
                 </div>
             `;
         }
 
-        // --- Réparation de la fonction XXE coupée ---
         function parseXXE() {
             const xmlInput = document.getElementById('xxe-input').value;
             const resultDiv = document.getElementById('xxe-result');
             
-            if (xmlInput.includes('<!ENTITY') && xmlInput.includes('SYSTEM') && xmlInput.includes('file://')) {
+            if (xmlInput.includes('<!ENTITY') && 
+                xmlInput.includes('SYSTEM') && 
+                (xmlInput.includes('file://') || xmlInput.includes('http://'))) {
                 resultDiv.innerHTML = `
-                    <div class="xxe-success">✓ XXE Injection réussie!</div>
-                    <div style="color:#334155; margin-top:1rem;">
-                        <strong>Contenu de /etc/passwd:</strong>
-                        <pre style="background:#f8fafc; padding:0.5rem; border-radius:4px; margin-top:0.5rem;">
+                    <div style="color:#334155;">
+                        <div style="color:#16a34a; font-weight:600; margin-bottom:1rem;">
+                            <i class="fa-solid fa-check-circle"></i> XXE Injection réussie !
+                        </div>
+                        
+                        <div style="color:#64748b; font-size:0.9rem; margin-bottom:0.5rem;">
+                            Contenu de /etc/passwd:
+                        </div>
+                        
+                        <div style="background:#f8fafc; padding:1rem; border-radius:4px; border:1px solid #e2e8f0; font-family:monospace; font-size:0.85rem; max-height:300px; overflow-y:auto;">
 root:x:0:0:root:/root:/bin/bash
 daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
 bin:x:2:2:bin:/bin:/usr/sbin/nologin
@@ -610,22 +1953,54 @@ man:x:6:12:man:/var/cache/man:/usr/sbin/nologin
 lp:x:7:7:lp:/var/spool/lpd:/usr/sbin/nologin
 mail:x:8:8:mail:/var/mail:/usr/sbin/nologin
 news:x:9:9:news:/var/spool/news:/usr/sbin/nologin
-                        </pre>
+uucp:x:10:10:uucp:/var/spool/uucp:/usr/sbin/nologin
+proxy:x:13:13:proxy:/bin:/usr/sbin/nologin
+www-data:x:33:33:www-data:/var/www:/usr/sbin/nologin
+backup:x:34:34:backup:/var/backups:/usr/sbin/nologin
+list:x:38:38:Mailing List Manager:/var/list:/usr/sbin/nologin
+irc:x:39:39:ircd:/var/run/ircd:/usr/sbin/nologin
+gnats:x:41:41:Gnats Bug-Reporting System (admin):/var/lib/gnats:/usr/sbin/nologin
+nobody:x:65534:65534:nobody:/nonexistent:/usr/sbin/nologin
+systemd-network:x:100:102:systemd Network Management,,,:/run/systemd:/usr/sbin/nologin
+systemd-resolve:x:101:103:systemd Resolver,,,:/run/systemd:/usr/sbin/nologin
+systemd-timesync:x:102:104:systemd Time Synchronization,,,:/run/systemd:/usr/sbin/nologin
+                        </div>
+                        
+                        <div style="margin-top:1rem; padding:1rem; background:#f0fdf4; border-radius:4px; border:1px solid #bbf7d0;">
+                            <div style="color:#16a34a; font-weight:600;">
+                                <i class="fa-solid fa-file-code"></i> Fichier système lu avec succès
+                            </div>
+                            <div style="color:#334155; font-size:0.9rem; margin-top:0.25rem;">
+                                L'entité externe a permis de lire un fichier système.
+                            </div>
+                        </div>
                     </div>
                 `;
             } else {
-                resultDiv.innerText = "Erreur de parsing XML: Entité invalide ou syntaxe incorrecte.";
+                resultDiv.innerHTML = `
+                    <div style="color:#334155;">
+                        <div style="color:#dc2626; font-weight:600; margin-bottom:0.5rem;">
+                            <i class="fa-solid fa-xmark-circle"></i> Erreur de parsing XML
+                        </div>
+                        <div style="color:#334155;">
+                            Syntaxe XML invalide ou entité externe non détectée.
+                        </div>
+                        <div style="color:#64748b; font-size:0.9rem; margin-top:1rem;">
+                            Essayez d'ajouter une entité externe pour lire des fichiers système.
+                        </div>
+                    </div>
+                `;
             }
         }
 
-        // --- FONCTIONS MANQUANTES (RACE CONDITION & LFI) ---
         function updateRaceUI() {
             const stockEl = document.getElementById('stock-count');
             const moneyEl = document.getElementById('user-money');
             const invEl = document.getElementById('user-inventory');
-            if(stockEl) stockEl.innerText = appState.raceStock;
-            if(moneyEl) moneyEl.innerText = appState.raceUserMoney;
-            if(invEl) invEl.innerText = appState.raceInventory;
+            
+            if (stockEl) stockEl.textContent = appState.raceStock;
+            if (moneyEl) moneyEl.textContent = appState.raceUserMoney;
+            if (invEl) invEl.textContent = appState.raceInventory;
         }
 
         function buyProduct() {
@@ -634,55 +2009,120 @@ news:x:9:9:news:/var/spool/news:/usr/sbin/nologin
                 appState.raceUserMoney -= 100;
                 appState.raceInventory++;
                 updateRaceUI();
-                document.getElementById('race-output').innerHTML = '<span style="color:green">Achat réussi.</span>';
+                document.getElementById('race-output').innerHTML = `
+                    <div style="color:#16a34a; font-weight:600;">
+                        <i class="fa-solid fa-check-circle"></i> Achat réussi
+                    </div>
+                    <div style="color:#334155; margin-top:0.5rem;">
+                        Vous avez acheté 1 clé de licence premium.
+                    </div>
+                `;
             } else {
-                document.getElementById('race-output').innerHTML = '<span style="color:red">Stock épuisé ou fonds insuffisants.</span>';
+                document.getElementById('race-output').innerHTML = `
+                    <div style="color:#dc2626; font-weight:600;">
+                        <i class="fa-solid fa-xmark-circle"></i> Achat impossible
+                    </div>
+                    <div style="color:#334155; margin-top:0.5rem;">
+                        ${appState.raceStock <= 0 ? 'Stock épuisé.' : 'Fonds insuffisants.'}
+                    </div>
+                `;
             }
         }
 
         function startRaceCondition() {
             const output = document.getElementById('race-output');
-            output.innerHTML = "Lancement de 10 requêtes simultanées...";
             const progressBar = document.getElementById('race-progress');
+            
+            output.innerHTML = `
+                <div style="color:#334155;">
+                    <div style="margin-bottom:0.5rem;">
+                        <i class="fa-solid fa-spinner fa-spin"></i> Lancement de 10 requêtes simultanées...
+                    </div>
+                    <div style="color:#64748b; font-size:0.9rem;">
+                        Exploitation de la condition de course en cours...
+                    </div>
+                </div>
+            `;
+            
             progressBar.style.width = "0%";
             
-            // Simulation de la faille
-            // On envoie 10 requêtes, mais le check de stock est "lent"
-            let successfulBuys = 0;
-            let initialStock = appState.raceStock;
-            
-            // Simulation visuelle
-            progressBar.style.width = "100%";
-            
-            setTimeout(() => {
-                // Logique de faille: Si on lance 10 requêtes alors qu'il reste du stock
-                // Le serveur mal codé pourrait valider plus d'achats que de stock
+            // Animation de progression
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 10;
+                progressBar.style.width = `${progress}%`;
                 
-                if (initialStock > 0) {
-                    // Exploit réussi : on achète plus que le stock (ex: 8 réussites sur 5 stocks)
-                    successfulBuys = Math.min(10, initialStock + 3); 
+                if (progress >= 100) {
+                    clearInterval(interval);
                     
-                    // Mise à jour de l'état buggé
-                    appState.raceStock = 0; // Stock vide
-                    appState.raceUserMoney -= (successfulBuys * 100);
-                    appState.raceInventory += successfulBuys;
+                    // Logique de l'exploit
+                    const initialStock = appState.raceStock;
+                    const initialMoney = appState.raceUserMoney;
+                    const maxPurchases = Math.min(10, initialStock + 3);
                     
-                    updateRaceUI();
-                    
-                    output.innerHTML = `
-                        <div style="background:#fee2e2; color:#b91c1c; padding:1rem; border-radius:4px;">
-                            <strong>RACE CONDITION RÉUSSIE !</strong><br>
-                            Requêtes envoyées: 10<br>
-                            Stock initial: ${initialStock}<br>
-                            Achats validés: ${successfulBuys}<br>
-                            <br>
-                            Le système a vendu plus d'objets qu'il n'en avait en stock car les requêtes sont arrivées avant la mise à jour de la base de données.
-                        </div>
-                    `;
-                } else {
-                    output.innerHTML = "Stock déjà à 0, impossible d'exploiter.";
+                    if (initialStock > 0) {
+                        // Exploit réussi
+                        const successfulBuys = Math.min(10, initialStock + 3);
+                        appState.raceStock = 0;
+                        appState.raceUserMoney -= (successfulBuys * 100);
+                        appState.raceInventory += successfulBuys;
+                        
+                        updateRaceUI();
+                        
+                        output.innerHTML = `
+                            <div style="background:#fee2e2; color:#b91c1c; padding:1.5rem; border-radius:8px; border:1px solid #fecaca;">
+                                <div style="color:#b91c1c; font-weight:600; margin-bottom:0.5rem;">
+                                    <i class="fa-solid fa-bolt"></i> RACE CONDITION RÉUSSIE !
+                                </div>
+                                
+                                <div style="margin-top:1rem;">
+                                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; margin-bottom:1rem;">
+                                        <div>
+                                            <div style="color:#64748b; font-size:0.9rem;">Requêtes envoyées</div>
+                                            <div style="color:#334155; font-weight:600;">10</div>
+                                        </div>
+                                        <div>
+                                            <div style="color:#64748b; font-size:0.9rem;">Stock initial</div>
+                                            <div style="color:#334155; font-weight:600;">${initialStock}</div>
+                                        </div>
+                                        <div>
+                                            <div style="color:#64748b; font-size:0.9rem;">Achats validés</div>
+                                            <div style="color:#334155; font-weight:600;">${successfulBuys}</div>
+                                        </div>
+                                        <div>
+                                            <div style="color:#64748b; font-size:0.9rem;">Argent dépensé</div>
+                                            <div style="color:#334155; font-weight:600;">${successfulBuys * 100}€</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div style="color:#334155; font-size:0.9rem; margin-top:1rem;">
+                                        Le système a validé plus d'achats que le stock disponible car les requêtes 
+                                        sont arrivées simultanément avant la mise à jour de la base de données.
+                                    </div>
+                                    
+                                    <div style="margin-top:1rem; padding:1rem; background:#fecaca; border-radius:4px;">
+                                        <div style="color:#b91c1c; font-weight:600; font-size:0.9rem;">
+                                            <i class="fa-solid fa-triangle-exclamation"></i> Vulnérabilité exploitée
+                                        </div>
+                                        <div style="color:#334155; font-size:0.85rem; margin-top:0.25rem;">
+                                            Manque de vérification atomique du stock lors des achats concurrents.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        output.innerHTML = `
+                            <div style="color:#dc2626; font-weight:600;">
+                                <i class="fa-solid fa-xmark-circle"></i> Exploit impossible
+                            </div>
+                            <div style="color:#334155; margin-top:0.5rem;">
+                                Le stock est déjà à 0, impossible d'exploiter la condition de course.
+                            </div>
+                        `;
+                    }
                 }
-            }, 1000);
+            }, 50);
         }
 
         function loadLFI() {
@@ -690,27 +2130,137 @@ news:x:9:9:news:/var/spool/news:/usr/sbin/nologin
             const result = document.getElementById('lfi-result');
             
             if (input === 'welcome.txt') {
-                result.innerText = "Bienvenue sur notre serveur de fichiers sécurisé.";
-            } else if (input.includes('../../../etc/passwd') || input.includes('..%2F..%2F..%2Fetc%2Fpasswd')) {
                 result.innerHTML = `
-<pre style="color:#334155;">
+                    <div style="color:#334155;">
+                        <div style="margin-bottom:0.5rem; color:#64748b; font-size:0.9rem;">
+                            Contenu de welcome.txt:
+                        </div>
+                        <div style="background:#f8fafc; padding:1rem; border-radius:4px; border:1px solid #e2e8f0;">
+                            Bienvenue sur notre serveur de fichiers sécurisé.
+                            Ce fichier contient un message d'accueil pour les utilisateurs.
+                        </div>
+                    </div>
+                `;
+            } else if (input.includes('../../../etc/passwd') || 
+                       input.includes('..%2F..%2F..%2Fetc%2Fpasswd') ||
+                       input.includes('/etc/passwd') ||
+                       input.includes('..\\..\\..\\etc\\passwd')) {
+                result.innerHTML = `
+                    <div style="color:#334155;">
+                        <div style="color:#16a34a; font-weight:600; margin-bottom:1rem;">
+                            <i class="fa-solid fa-check-circle"></i> LFI Réussie !
+                        </div>
+                        
+                        <div style="color:#64748b; font-size:0.9rem; margin-bottom:0.5rem;">
+                            Contenu de /etc/passwd:
+                        </div>
+                        
+                        <div style="background:#f8fafc; padding:1rem; border-radius:4px; border:1px solid #e2e8f0; font-family:monospace; font-size:0.85rem; max-height:300px; overflow-y:auto;">
 root:x:0:0:root:/root:/bin/bash
 daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
-# ... fichier système lu avec succès
-</pre>
-<div style="color:green; font-weight:bold; margin-top:1rem;">✓ LFI Réussie !</div>
+bin:x:2:2:bin:/bin:/usr/sbin/nologin
+sys:x:3:3:sys:/dev:/usr/sbin/nologin
+sync:x:4:65534:sync:/bin:/bin/sync
+                        </div>
+                        
+                        <div style="margin-top:1rem; padding:1rem; background:#f0fdf4; border-radius:4px; border:1px solid #bbf7d0;">
+                            <div style="color:#16a34a; font-weight:600;">
+                                <i class="fa-solid fa-file-lines"></i> Fichier système lu avec succès
+                            </div>
+                            <div style="color:#334155; font-size:0.9rem; margin-top:0.25rem;">
+                                L'inclusion de fichier local a permis de lire un fichier système sensible.
+                            </div>
+                        </div>
+                    </div>
                 `;
             } else {
-                result.innerText = "Erreur: Fichier introuvable ou accès refusé.";
+                result.innerHTML = `
+                    <div style="color:#334155;">
+                        <div style="color:#dc2626; font-weight:600; margin-bottom:0.5rem;">
+                            <i class="fa-solid fa-xmark-circle"></i> Erreur
+                        </div>
+                        <div style="color:#334155;">
+                            Fichier introuvable ou accès refusé: ${escapeHtml(input)}
+                        </div>
+                        <div style="color:#64748b; font-size:0.9rem; margin-top:1rem;">
+                            Essayez d'utiliser des chemins relatifs pour accéder à des fichiers système.
+                        </div>
+                    </div>
+                `;
             }
         }
 
-        // --- INITIALISATION DE L'APPLICATION ---
-        // C'est la partie qui manquait pour afficher le contenu au démarrage
-        renderNavButtons();
-        updateXPBar();
-        navigateTo('dashboard');
+        // --- INITIALIZATION ---
+        function init() {
+            // Charger l'état depuis localStorage si disponible
+            const savedState = localStorage.getItem('bountyAcademyState');
+            if (savedState) {
+                try {
+                    const parsed = JSON.parse(savedState);
+                    Object.assign(appState, parsed);
+                } catch (e) {
+                    console.error('Erreur lors du chargement de l\'état:', e);
+                }
+            }
+            
+            // Rendre les boutons de navigation
+            renderNavButtons();
+            
+            // Mettre à jour la barre XP
+            updateXPBar();
+            
+            // Naviguer vers la vue demandée dans l'URL ou le tableau de bord par défaut
+            const hash = window.location.hash.replace('#', '');
+            const validViews = ['dashboard', ...modulesData.map(m => 'module-' + m.id)];
+            
+            if (hash && validViews.includes(hash)) {
+                navigateTo(hash);
+            } else {
+                navigateTo('dashboard');
+            }
+            
+            // Sauvegarder l'état périodiquement
+            setInterval(() => {
+                localStorage.setItem('bountyAcademyState', JSON.stringify({
+                    xp: appState.xp,
+                    level: appState.level,
+                    completedModules: appState.completedModules,
+                    raceStock: appState.raceStock,
+                    raceUserMoney: appState.raceUserMoney,
+                    raceInventory: appState.raceInventory
+                }));
+            }, 5000);
+            
+            // Gérer le retour arrière/navigation
+            window.addEventListener('popstate', (event) => {
+                if (event.state && event.state.view) {
+                    navigateTo(event.state.view);
+                }
+            });
+            
+            // Fermer le sidebar en cliquant à l'extérieur sur mobile
+            document.addEventListener('click', (event) => {
+                const sidebar = document.getElementById('sidebar');
+                const mobileHeader = document.querySelector('.mobile-header');
+                
+                if (window.innerWidth <= 768 && 
+                    sidebar.classList.contains('mobile-open') &&
+                    !sidebar.contains(event.target) &&
+                    !mobileHeader.contains(event.target)) {
+                    sidebar.classList.remove('mobile-open');
+                }
+            });
+            
+            // Ajuster la hauteur du contenu sur mobile
+            window.addEventListener('resize', () => {
+                if (window.innerWidth > 768) {
+                    document.getElementById('sidebar').classList.remove('mobile-open');
+                }
+            });
+        }
 
+        // Démarrer l'application
+        document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>

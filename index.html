@@ -2189,34 +2189,27 @@ sync:x:4:65534:sync:/bin:/bin/sync
                 `;
             }
         }
-        // --- INITIALISATION ---
-        // Démarrage immédiat après le chargement
-        (function() {
-            console.log("BountyAcademy - Initialisation...");
+        // --- INITIALISATION DE L'APPLICATION ---
+        // Démarrer immédiatement
+        (function initApp() {
+            console.log("🚀 Lancement de BountyAcademy...");
             try {
                 renderNavButtons();
                 updateXPBar();
                 navigateTo('dashboard');
-                console.log("Application initialisée avec succès");
+                console.log("✅ Application initialisée avec succès");
             } catch (error) {
-                console.error("Erreur lors de l'initialisation:", error);
+                console.error("❌ Erreur d'initialisation:", error);
+                // Fallback manuel
+                document.getElementById('content-area').innerHTML = `
+                    <div style="text-align:center; padding:2rem;">
+                        <h2>Erreur de chargement</h2>
+                        <p>Veuillez recharger la page</p>
+                        <button onclick="window.location.reload()" class="vulnerable-btn">Recharger</button>
+                    </div>
+                `;
             }
         })();
     </script>
-
-</html>
-   
-    // Lancement manuel
-    setTimeout(function() {
-        if (typeof renderNavButtons === 'function') {
-            renderNavButtons();
-            updateXPBar();
-            navigateTo('dashboard');
-        } else {
-            console.error("Fonctions non définies!");
-        }
-    }, 100);
-</script>
- 
 </body>
 </html>

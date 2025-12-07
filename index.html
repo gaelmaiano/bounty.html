@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -88,7 +89,8 @@
                 <div class="xp-info"><span id="current-xp">0 XP</span><span>3000 XP</span></div>
             </div>
             <div class="nav-section" id="nav-buttons">
-                </div>
+                <!-- Navigation buttons will be generated here -->
+            </div>
         </nav>
 
         <main class="main-content">
@@ -128,6 +130,20 @@
             { id: 'rc', title: 'Lab 6: Race Condition', icon: 'gauge-high', color: '#ef4444', xp: 600, level: 'Expert+' },
             { id: 'lfi', title: 'Lab 7: LFI', icon: 'folder-open', color: '#34d399', xp: 600, level: 'Intermédiaire' }
         ];
+
+        // --- FONCTIONS UTILITAIRES ---
+        function getBackButton() {
+            return '<button onclick="navigateTo(\'dashboard\')" class="vulnerable-btn" style="margin-bottom:1rem;"><i class="fa-solid fa-arrow-left"></i> Retour</button>';
+        }
+
+        function getValidateButton(moduleId) {
+            const completed = appState.completedModules.includes(moduleId);
+            return `
+                <button class="action-btn" onclick="validateModule('${moduleId}')" ${completed ? 'disabled' : ''}>
+                    ${completed ? '<i class="fa-solid fa-check"></i> Déjà validé' : 'Valider le lab'}
+                </button>
+            `;
+        }
 
         // --- RENDU DES VUES (HTML) ---
         const views = {
@@ -175,4 +191,292 @@
                 <div class="lab-container">
                     <div style="margin-bottom:0.5rem; color:#94a3b8;">Mission: Accéder au profil ID 1234 (Admin). Votre ID est 1337.</div>
                     <div class="lab-browser">
-                        <div class="browser
+                        <div class="browser-bar"><div class="url-bar">/profile?id=1337</div></div>
+                        <div class="browser-content">
+                            <h3>Profil Utilisateur</h3>
+                            <div style="margin:1rem 0;">
+                                <label>ID Profil à afficher:</label>
+                                <input type="number" id="idor-input" class="vulnerable-input" value="1337" min="1">
+                                <button onclick="loadIDORProfile()" class="vulnerable-btn">Charger</button>
+                            </div>
+                            <div id="idor-profile" class="profile-card">
+                                <!-- Profile content will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                ${getValidateButton('idor')}
+            `,
+            'module-sqli': () => `
+                ${getBackButton()}
+                <h2 style="color:white; margin-bottom:1rem;">Lab 3: SQL Injection</h2>
+                <div class="lab-container">
+                    <div style="margin-bottom:0.5rem; color:#94a3b8;">Mission: Extraire les informations de la table "users".</div>
+                    <div class="lab-browser">
+                        <div class="browser-bar"><div class="url-bar">/login</div></div>
+                        <div class="browser-content">
+                            <h3>Login Admin</h3>
+                            <div style="margin:1rem 0;">
+                                <input type="text" id="sqli-user" class="vulnerable-input" placeholder="Username" value="admin">
+                                <input type="password" id="sqli-pass" class="vulnerable-input" placeholder="Password" style="margin-top:0.5rem;">
+                                <button onclick="runSQLI()" class="vulnerable-btn" style="margin-top:0.5rem;">Login</button>
+                            </div>
+                            <div id="sqli-result" style="text-align:left; font-family:monospace; background:#f1f5f9; padding:1rem; border-radius:4px;"></div>
+                        </div>
+                    </div>
+                </div>
+                ${getValidateButton('sqli')}
+            `,
+            'module-csrf': () => `
+                ${getBackButton()}
+                <h2 style="color:white; margin-bottom:1rem;">Lab 4: CSRF</h2>
+                <div class="lab-container">
+                    <div style="margin-bottom:0.5rem; color:#94a3b8;">Mission: Forger une requête pour changer l'email de l'admin.</div>
+                    <div class="lab-browser">
+                        <div class="browser-bar"><div class="url-bar">/account</div></div>
+                        <div class="browser-content">
+                            <h3>Changer l'Email</h3>
+                            <div style="margin:1rem 0;">
+                                <input type="email" id="csrf-email" class="vulnerable-input" placeholder="nouveau@email.com" value="hacker@evil.com">
+                                <button onclick="submitCSRF()" class="vulnerable-btn">Changer Email</button>
+                            </div>
+                            <div id="csrf-result"></div>
+                            <div style="margin-top:2rem; border-top:1px solid #cbd5e1; padding-top:1rem;">
+                                <h4>Code malveillant à injecter:</h4>
+                                <textarea style="width:100%; height:100px; font-family:monospace; font-size:0.8rem;" readonly>
+<form action="https://victime.com/change-email" method="POST">
+    <input type="hidden" name="email" value="hacker@evil.com">
+</form>
+<script>document.forms[0].submit();</script>
+                                </textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                ${getValidateButton('csrf')}
+            `
+        };
+
+        // --- NAVIGATION ---
+        function navigateTo(view) {
+            appState.currentView = view;
+            renderContent();
+            updateNavButtons();
+            updateXPBar();
+            
+            if (window.innerWidth <= 768) {
+                document.getElementById('sidebar').classList.remove('mobile-open');
+            }
+        }
+
+        function renderContent() {
+            const contentArea = document.getElementById('content-area');
+            const viewFunction = views[appState.currentView];
+            
+            if (viewFunction) {
+                contentArea.innerHTML = viewFunction();
+            } else {
+                contentArea.innerHTML = '<h2>Vue non trouvée</h2>';
+            }
+        }
+
+        function renderNavButtons() {
+            const navContainer = document.getElementById('nav-buttons');
+            let html = '';
+            
+            // Dashboard button
+            html += `<button class="nav-btn ${appState.currentView === 'dashboard' ? 'active' : ''}" onclick="navigateTo('dashboard')">
+                        <i class="fa-solid fa-gauge"></i> Tableau de bord
+                    </button>`;
+            
+            // Module buttons
+            modulesData.forEach(module => {
+                const isCompleted = appState.completedModules.includes(module.id);
+                html += `<button class="nav-btn ${appState.currentView === 'module-' + module.id ? 'active' : ''}" onclick="navigateTo('module-${module.id}')">
+                            <i class="fa-solid fa-${module.icon}" style="color:${module.color}"></i> ${module.title}
+                            ${isCompleted ? '<span class="module-progress"><i class="fa-solid fa-check"></i></span>' : ''}
+                        </button>`;
+            });
+            
+            navContainer.innerHTML = html;
+        }
+
+        function updateNavButtons() {
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            const activeBtn = document.querySelector(`.nav-btn[onclick*="navigateTo('${appState.currentView}')"]`);
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+            }
+        }
+
+        // --- GESTION XP ET NIVEAUX ---
+        function updateXPBar() {
+            const xpPercentage = (appState.xp / 3000) * 100;
+            document.getElementById('xp-bar').style.width = `${Math.min(xpPercentage, 100)}%`;
+            
+            // Mettre à jour le niveau
+            if (appState.xp >= 3000) {
+                appState.level = 5;
+                document.getElementById('user-level').textContent = 'Expert';
+            } else if (appState.xp >= 2000) {
+                appState.level = 4;
+                document.getElementById('user-level').textContent = 'Avancé';
+            } else if (appState.xp >= 1000) {
+                appState.level = 3;
+                document.getElementById('user-level').textContent = 'Intermédiaire';
+            } else if (appState.xp >= 500) {
+                appState.level = 2;
+                document.getElementById('user-level').textContent = 'Débutant';
+            } else {
+                appState.level = 1;
+                document.getElementById('user-level').textContent = 'Novice';
+            }
+            
+            document.getElementById('current-xp').textContent = `${appState.xp} XP`;
+        }
+
+        // --- FONCTIONS DES LABS ---
+        function runXSS() {
+            const input = document.getElementById('xss-input').value;
+            const resultDiv = document.getElementById('xss-result');
+            
+            // Simple XSS simulation
+            if (input.includes('<script>') || input.includes('alert(')) {
+                resultDiv.innerHTML = `Résultat de recherche pour: <strong>${escapeHtml(input)}</strong>`;
+                
+                // Trigger fake alert if XSS payload
+                if (input.includes('alert(1)') || input === '<script>alert(1)</script>') {
+                    showFakeAlert();
+                }
+            } else {
+                resultDiv.innerHTML = `Résultat de recherche pour: <strong>${escapeHtml(input)}</strong>`;
+            }
+        }
+
+        function loadIDORProfile() {
+            const profileId = document.getElementById('idor-input').value;
+            const profileDiv = document.getElementById('idor-profile');
+            
+            // IDOR vulnerability simulation
+            if (profileId === '1234') {
+                profileDiv.innerHTML = `
+                    <h3>Profil Administrateur</h3>
+                    <p><strong>ID:</strong> 1234</p>
+                    <p><strong>Nom:</strong> Admin System</p>
+                    <p><strong>Email:</strong> admin@bountyacademy.com</p>
+                    <p><strong>Rôle:</strong> Super Administrateur</p>
+                    <p><strong>Dernière connexion:</strong> 2024-01-15 14:30</p>
+                    <p style="color:green; font-weight:bold;">✓ Accès administrateur obtenu!</p>
+                `;
+            } else {
+                profileDiv.innerHTML = `
+                    <h3>Profil Utilisateur</h3>
+                    <p><strong>ID:</strong> ${profileId}</p>
+                    <p><strong>Nom:</strong> Utilisateur ${profileId}</p>
+                    <p><strong>Email:</strong> user${profileId}@example.com</p>
+                    <p><strong>Rôle:</strong> Utilisateur standard</p>
+                `;
+            }
+        }
+
+        function runSQLI() {
+            const username = document.getElementById('sqli-user').value;
+            const password = document.getElementById('sqli-pass').value;
+            const resultDiv = document.getElementById('sqli-result');
+            
+            // SQL Injection simulation
+            if (password.includes("' OR '1'='1") || password.includes("' OR 1=1--")) {
+                resultDiv.innerHTML = `
+                    <p style="color:green;">✓ Connexion réussie!</p>
+                    <p>Bienvenue, ${escapeHtml(username)}</p>
+                    <p>Données extraites de la table users:</p>
+                    <ul>
+                        <li>admin:admin123</li>
+                        <li>john:password123</li>
+                        <li>jane:qwerty</li>
+                        <li>root:toor</li>
+                    </ul>
+                `;
+            } else {
+                resultDiv.innerHTML = `<p style="color:red;">✗ Échec de connexion</p>`;
+            }
+        }
+
+        function submitCSRF() {
+            const email = document.getElementById('csrf-email').value;
+            const resultDiv = document.getElementById('csrf-result');
+            
+            resultDiv.innerHTML = `
+                <div style="background:#f0fdf4; border:1px solid #bbf7d0; padding:1rem; border-radius:4px;">
+                    <p style="color:#16a34a; margin:0;">
+                        <i class="fa-solid fa-check"></i> Email changé avec succès!
+                    </p>
+                    <p style="margin-top:0.5rem; color:#334155;">
+                        Nouvel email: <strong>${escapeHtml(email)}</strong>
+                    </p>
+                    <p style="font-size:0.8rem; color:#64748b;">
+                        (Simulation CSRF réussie)
+                    </p>
+                </div>
+            `;
+        }
+
+        function validateModule(moduleId) {
+            if (!appState.completedModules.includes(moduleId)) {
+                const module = modulesData.find(m => m.id === moduleId);
+                if (module) {
+                    appState.completedModules.push(moduleId);
+                    appState.xp += module.xp;
+                    
+                    updateXPBar();
+                    renderNavButtons();
+                    renderContent();
+                    
+                    showToast(`Lab ${moduleId.toUpperCase()} validé! +${module.xp} XP`);
+                }
+            }
+        }
+
+        // --- FONCTIONS UTILITAIRES ---
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
+            
+            toastMessage.textContent = message;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        function showFakeAlert() {
+            document.getElementById('fake-alert-overlay').style.display = 'flex';
+        }
+
+        function closeFakeAlert() {
+            document.getElementById('fake-alert-overlay').style.display = 'none';
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('mobile-open');
+        }
+
+        // --- INITIALISATION ---
+        document.addEventListener('DOMContentLoaded', function() {
+            renderNavButtons();
+            renderContent();
+            updateXPBar();
+        });
+    </script>
+</body>
+</html>

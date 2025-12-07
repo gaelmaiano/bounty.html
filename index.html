@@ -1,6 +1,4 @@
-
-      
-                <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
@@ -65,3 +63,1086 @@
         .vulnerable-btn { padding: 0.75rem 1.5rem; background-color: #3b82f6; color: white; border: none; border-radius: 0.25rem; cursor: pointer; font-size: 1rem; transition: background 0.2s; }
         .vulnerable-btn:hover { background-color: #2563eb; }
         .search-result { margin-top: 2rem; padding: 1rem; border: 1px dashed #94a3b8; background-color: #f1f5f9; border-radius: 0.25rem; display: none; text-align: left; max-width: 80%; margin-left: auto; margin-right: auto; }
+        
+        /* IDOR Styles */
+        .profile-card { border: 1px solid #cbd5e1; border-radius: 8px; padding: 20px; max-width: 400px; margin: 0 auto; background: white; text-align: left; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .profile-header { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; border-bottom: 1px solid #e2e8f0; padding-bottom: 15px; }
+        .profile-avatar { width: 60px; height: 60px; background: #e2e8f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #64748b; }
+        .profile-details p { margin-bottom: 8px; font-size: 0.9rem; }
+        .profile-label { font-weight: bold; color: #475569; width: 80px; display: inline-block; }
+        .api-key { background: #fee2e2; color: #991b1b; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 0.85rem; }
+        .idor-control { margin-top: 20px; padding: 15px; background: #f1f5f9; border-radius: 8px; display: inline-flex; align-items: center; gap: 10px; }
+        
+        /* SQLi/CSRF Styles */
+        .login-box { max-width: 350px; margin: 0 auto; background: white; padding: 2rem; border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .login-input { width: 100%; padding: 10px; margin-bottom: 1rem; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 1rem; }
+        .sql-debug { margin-top: 20px; font-family: monospace; font-size: 0.85rem; background: #1e293b; color: #10b981; padding: 10px; border-radius: 4px; text-align: left; border-left: 3px solid #10b981; min-height: 3.5em; display: flex; align-items: center; }
+
+        /* CSRF Styles */
+        .csrf-panel { max-width: 500px; margin: 0 auto; }
+        .csrf-target { background: white; padding: 1.5rem; border-radius: 8px; border: 1px solid #e2e8f0; text-align: left; color: #334155; }
+        .csrf-attacker { background: #fee2e2; padding: 1rem; border-radius: 8px; border: 1px solid #fca5a5; margin-top: 1rem; text-align: left; color: #991b1b; }
+        .csrf-payload { width: 100%; height: 80px; font-family: monospace; font-size: 0.85rem; padding: 5px; border: 1px solid #fca5a5; margin-top: 0.5rem; resize: vertical; }
+        
+        /* XXE Styles */
+        .xxe-input { width: 100%; height: 150px; font-family: monospace; font-size: 0.9rem; padding: 10px; border: 1px solid #cbd5e1; border-radius: 4px; resize: vertical; }
+        .xxe-output { margin-top: 1.5rem; padding: 1rem; border: 1px solid #e2e8f0; background: #f1f5f9; border-radius: 4px; text-align: left; min-height: 100px; color: #334155; overflow: auto; }
+        .xxe-error { color:#ef4444; font-weight:bold; }
+        .xxe-success { color:#10b981; font-weight:bold; }
+
+        /* Race Condition Styles */
+        .shop-mission-box { background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; border-radius: 10px; padding: 1.5rem; margin: 1rem 0; }
+        .shop-product-card { background: #1e293b; border-radius: 12px; padding: 2rem; border: 1px solid #334155; max-width: 400px; margin: 0 auto 2rem; }
+        .shop-product-image { width: 100%; height: 150px; background: linear-gradient(45deg, #334155, #475569); border-radius: 8px; margin-bottom: 1rem; display: flex; align-items: center; justify-content: center; font-size: 3rem; color: #94a3b8; }
+        .shop-product-price { color: #10b981; font-size: 2rem; font-weight: bold; margin: 1rem 0; }
+        .shop-cart-summary { background: rgba(16, 185, 129, 0.1); border: 1px solid #10b981; border-radius: 10px; padding: 1.5rem; margin: 2rem auto; max-width: 500px; text-align: center; }
+        .shop-cart-value { font-size: 2rem; font-weight: bold; color: #fbbf24; margin: 0.5rem 0; }
+        .shop-amount-paid { font-size: 2rem; font-weight: bold; color: #10b981; margin: 0.5rem 0; }
+        .shop-savings { font-size: 1.5rem; font-weight: bold; color: #ef4444; margin: 0.5rem 0; }
+        .shop-attack-panel { background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; border-radius: 12px; padding: 1.5rem; margin-top: 2rem; max-width: 500px; margin-left: auto; margin-right: auto; }
+        .shop-logs { background: #0f172a; border-radius: 8px; padding: 1.5rem; margin-top: 2rem; max-height: 400px; overflow-y: auto; font-family: 'Courier New', monospace; font-size: 0.9rem; }
+        .shop-products-received { display: flex; justify-content: center; gap: 1rem; margin: 1rem 0; flex-wrap: wrap; }
+        .shop-product-received { background: #334155; padding: 1rem; border-radius: 8px; text-align: center; min-width: 80px; border: 2px solid #475569; }
+        .shop-product-free { border-color: #f59e0b; background: rgba(245, 158, 11, 0.1); }
+        
+        /* LFI Styles (New) */
+        .lfi-file-content {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            text-align: left;
+            min-height: 100px;
+            color: #334155;
+            overflow: auto;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+
+        /* Tutorial and hints */
+        .tutorial-box { background: rgba(59, 130, 246, 0.1); border: 1px solid #3b82f6; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .tutorial-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; color: #3b82f6; }
+        .hint-btn { background: none; border: 1px solid #64748b; color: #64748b; padding: 0.25rem 0.5rem; border-radius: 4px; cursor: pointer; font-size: 0.8rem; margin-left: 0.5rem; }
+        .hint-btn:hover { background: #334155; }
+        .hint-content { margin-top: 0.5rem; padding: 0.75rem; background: rgba(30, 41, 59, 0.5); border-radius: 4px; font-size: 0.9rem; display: none; }
+        
+        /* Feedback Elements */
+        .fake-alert-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 50; backdrop-filter: blur(2px); }
+        .fake-alert-box { background: white; padding: 1.5rem; border-radius: 0.5rem; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); width: 320px; text-align: center; color: #0f172a; animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .alert-btn { margin-top: 1rem; background: #3b82f6; color: white; border: none; padding: 0.5rem 1.5rem; border-radius: 0.25rem; cursor: pointer; }
+        .toast { position: fixed; bottom: 20px; right: 20px; background: #1e293b; border-left: 4px solid #10b981; color: white; padding: 15px 20px; border-radius: 4px; transform: translateX(150%); transition: transform 0.3s; z-index: 100; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3); display: flex; align-items: center; gap: 10px; }
+        .toast.show { transform: translateX(0); }
+        
+        .mobile-header { display: none; }
+        @media (max-width: 768px) {
+            .stats-grid { grid-template-columns: 1fr; }
+            .sidebar { position: fixed; transform: translateX(-100%); height: 100vh; }
+            .sidebar.mobile-open { transform: translateX(0); }
+            .mobile-header { display: flex; padding: 1rem; background: #1e293b; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; }
+            .mobile-menu-btn { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
+            .vulnerable-input { width: 100%; margin-bottom: 0.5rem; }
+            .vulnerable-btn { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <nav id="sidebar" class="sidebar">
+            <div class="sidebar-header">
+                <i class="fa-solid fa-bug"></i>
+                <h1>Bounty<span>Acad</span></h1>
+            </div>
+            <div class="xp-panel">
+                <div class="xp-header">
+                    <span class="xp-label">Rang</span>
+                    <span id="user-level" class="user-level">Novice</span>
+                </div>
+                <div class="xp-bar-container">
+                    <div id="xp-bar" class="xp-bar" style="width: 0%"></div>
+                </div>
+                <div class="xp-info">
+                    <span id="current-xp">0 XP</span>
+                    <span id="next-level-xp">3000 XP (Max)</span>
+                </div>
+            </div>
+            <div class="nav-section">
+                <button class="nav-btn active" onclick="navigateTo('dashboard')" data-view="dashboard">
+                    <i class="fa-solid fa-chart-line"></i> Dashboard
+                </button>
+                <div style="padding: 1rem; font-size: 0.75rem; color: #64748b; font-weight: bold;">MODULES PRATIQUES</div>
+                <button class="nav-btn" onclick="navigateTo('module-xss')" data-view="module-xss">
+                    <i class="fa-solid fa-code"></i> Lab 1: XSS Reflected
+                    <div class="module-progress">
+                        <div class="progress-bar">
+                            <div id="progress-xss" class="progress-fill" style="width: 0%"></div>
+                        </div>
+                        <span id="progress-text-xss" class="progress-text">0%</span>
+                    </div>
+                </button>
+                <button class="nav-btn" onclick="navigateTo('module-idor')" data-view="module-idor">
+                    <i class="fa-solid fa-id-card"></i> Lab 2: IDOR
+                    <div class="module-progress">
+                        <div class="progress-bar">
+                            <div id="progress-idor" class="progress-fill" style="width: 0%"></div>
+                        </div>
+                        <span id="progress-text-idor" class="progress-text">0%</span>
+                    </div>
+                </button>
+                <button class="nav-btn" onclick="navigateTo('module-sqli')" data-view="module-sqli">
+                    <i class="fa-solid fa-database"></i> Lab 3: SQL Injection
+                    <div class="module-progress">
+                        <div class="progress-bar">
+                            <div id="progress-sqli" class="progress-fill" style="width: 0%"></div>
+                        </div>
+                        <span id="progress-text-sqli" class="progress-text">0%</span>
+                    </div>
+                </button>
+                <button class="nav-btn" onclick="navigateTo('module-csrf')" data-view="module-csrf">
+                    <i class="fa-solid fa-hand-pointer"></i> Lab 4: CSRF
+                    <div class="module-progress">
+                        <div class="progress-bar">
+                            <div id="progress-csrf" class="progress-fill" style="width: 0%"></div>
+                        </div>
+                        <span id="progress-text-csrf" class="progress-text">0%</span>
+                    </div>
+                </button>
+                <button class="nav-btn" onclick="navigateTo('module-xxe')" data-view="module-xxe">
+                    <i class="fa-solid fa-file-code"></i> Lab 5: XXE
+                    <div class="module-progress">
+                        <div class="progress-bar">
+                            <div id="progress-xxe" class="progress-fill" style="width: 0%"></div>
+                        </div>
+                        <span id="progress-text-xxe" class="progress-text">0%</span>
+                    </div>
+                </button>
+                <button class="nav-btn" onclick="navigateTo('module-race-condition')" data-view="module-race-condition">
+                    <i class="fa-solid fa-gauge-high"></i> Lab 6: Race Condition
+                    <div class="module-progress">
+                        <div class="progress-bar">
+                            <div id="progress-rc" class="progress-fill" style="width: 0%"></div>
+                        </div>
+                        <span id="progress-text-rc" class="progress-text">0%</span>
+                    </div>
+                </button>
+                 <button class="nav-btn" onclick="navigateTo('module-lfi')" data-view="module-lfi">
+                    <i class="fa-solid fa-folder-open"></i> Lab 7: LFI
+                    <div class="module-progress">
+                        <div class="progress-bar">
+                            <div id="progress-lfi" class="progress-fill" style="width: 0%"></div>
+                        </div>
+                        <span id="progress-text-lfi" class="progress-text">0%</span>
+                    </div>
+                </button>
+            </div>
+            <div class="sidebar-footer">v1.9 | Ajout Lab LFI</div>
+        </nav>
+
+        <main class="main-content">
+            <div class="mobile-header">
+                <span style="font-weight: bold; color:white;">BountyAcademy</span>
+                <button class="mobile-menu-btn" onclick="document.getElementById('sidebar').classList.toggle('mobile-open')">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+            </div>
+            <div id="content-area" class="content-area"></div>
+        </main>
+    </div>
+
+    <div id="toast" class="toast">
+        <i class="fa-solid fa-check-circle" style="color:#34d399"></i> <span id="toast-message">Succès !</span>
+    </div>
+
+    <div id="fake-alert-overlay" class="fake-alert-overlay">
+        <div class="fake-alert-box">
+            <h3 style="margin-bottom: 0.5rem; color: #ef4444; display:flex; align-items:center; justify-content:center; gap:0.5rem;">
+                <i class="fa-solid fa-triangle-exclamation"></i> Alert
+            </h3>
+            <p style="margin-bottom: 1rem; color:#334155;">Le site indique :</p>
+            <p id="alert-content" style="font-family: monospace; font-size:1.2rem; font-weight:bold; background: #f1f5f9; padding: 0.5rem; margin-bottom: 1rem; border-radius: 4px; border:1px solid #cbd5e1;">1</p>
+            <button class="alert-btn" onclick="closeFakeAlert()">OK</button>
+        </div>
+    </div>
+
+    <script>
+        var appState = {
+            xp: 0,
+            level: 1,
+            completedModules: [],
+            currentView: 'dashboard'
+        };
+
+        var modules = {
+            dashboard: {
+                render: function() {
+                    var html = '';
+                    html += '<h2 class="dashboard-title">Tableau de bord</h2>';
+                    html += '<div class="stats-grid">';
+                    html += '<div class="stat-card">';
+                    html += '<div style="color: #94a3b8; font-size: 0.875rem;">XP Total</div>';
+                    html += '<div style="font-size: 1.875rem; font-weight: bold; color: white;">' + appState.xp + '</div>';
+                    html += '</div>';
+                    html += '<div class="stat-card">';
+                    html += '<div style="color: #94a3b8; font-size: 0.875rem;">Modules Terminés</div>';
+                    html += '<div style="font-size: 1.875rem; font-weight: bold; color: white;">' + appState.completedModules.length + '/7</div>';
+                    html += '</div>';
+                    html += '</div>';
+                    html += '<h3 style="color:white; margin-bottom:1rem;">Continuer l\'apprentissage</h3>';
+                    
+                    // CARTE XSS
+                    html += '<div class="module-card" onclick="navigateTo(\'module-xss\')">';
+                    html += '<div style="display:flex; align-items:center; gap:1rem;">';
+                    html += '<div style="width: 3rem; height: 3rem; background: #334155; border-radius: 50%; display:flex; align-items:center; justify-content:center; color: #10b981;">';
+                    html += '<i class="fa-solid fa-code"></i>';
+                    html += '</div>';
+                    html += '<div>';
+                    html += '<h4 style="color: white; font-weight: bold;">Lab 1: XSS Reflected</h4>';
+                    html += '<p style="font-size: 0.75rem; color: #94a3b8;">Niveau: Facile • 200 XP</p>';
+                    html += '</div>';
+                    html += '</div>';
+                    html += '<i class="fa-solid fa-chevron-right" style="color: #475569;"></i>';
+                    html += '</div>';
+                    
+                    // CARTE IDOR
+                    html += '<div class="module-card" onclick="navigateTo(\'module-idor\')">';
+                    html += '<div style="display:flex; align-items:center; gap:1rem;">';
+                    html += '<div style="width: 3rem; height: 3rem; background: #334155; border-radius: 50%; display:flex; align-items:center; justify-content:center; color: #f59e0b;">';
+                    html += '<i class="fa-solid fa-id-card"></i>';
+                    html += '</div>';
+                    html += '<div>';
+                    html += '<h4 style="color: white; font-weight: bold;">Lab 2: IDOR</h4>';
+                    html += '<p style="font-size: 0.75rem; color: #94a3b8;">Niveau: Moyen • 300 XP</p>';
+                    html += '</div>';
+                    html += '</div>';
+                    html += '<i class="fa-solid fa-chevron-right" style="color: #475569;"></i>';
+                    html += '</div>';
+
+                    // CARTE SQLI
+                    html += '<div class="module-card" onclick="navigateTo(\'module-sqli\')">';
+                    html += '<div style="display:flex; align-items:center; gap:1rem;">';
+                    html += '<div style="width: 3rem; height: 3rem; background: #334155; border-radius: 50%; display:flex; align-items:center; justify-content:center; color: #ef4444;">';
+                    html += '<i class="fa-solid fa-database"></i>';
+                    html += '</div>';
+                    html += '<div>';
+                    html += '<h4 style="color: white; font-weight: bold;">Lab 3: SQL Injection</h4>';
+                    html += '<p style="font-size: 0.75rem; color: #94a3b8;">Niveau: Intermédiaire • 400 XP</p>';
+                    html += '</div>';
+                    html += '</div>';
+                    html += '<i class="fa-solid fa-chevron-right" style="color: #475569;"></i>';
+                    html += '</div>';
+
+                    // CARTE CSRF
+                    html += '<div class="module-card" onclick="navigateTo(\'module-csrf\')">';
+                    html += '<div style="display:flex; align-items:center; gap:1rem;">';
+                    html += '<div style="width: 3rem; height: 3rem; background: #334155; border-radius: 50%; display:flex; align-items:center; justify-content:center; color: #3b82f6;">';
+                    html += '<i class="fa-solid fa-hand-pointer"></i>';
+                    html += '</div>';
+                    html += '<div>';
+                    html += '<h4 style="color: white; font-weight: bold;">Lab 4: CSRF (Request Forgery)</h4>';
+                    html += '<p style="font-size: 0.75rem; color: #94a3b8;">Niveau: Avancé • 400 XP</p>';
+                    html += '</div>';
+                    html += '</div>';
+                    html += '<i class="fa-solid fa-chevron-right" style="color: #475569;"></i>';
+                    html += '</div>';
+                    
+                    // CARTE XXE
+                    html += '<div class="module-card" onclick="navigateTo(\'module-xxe\')">';
+                    html += '<div style="display:flex; align-items:center; gap:1rem;">';
+                    html += '<div style="width: 3rem; height: 3rem; background: #334155; border-radius: 50%; display:flex; align-items:center; justify-content:center; color: #fbbf24;">';
+                    html += '<i class="fa-solid fa-file-code"></i>';
+                    html += '</div>';
+                    html += '<div>';
+                    html += '<h4 style="color: white; font-weight: bold;">Lab 5: XXE (External Entity)</h4>';
+                    html += '<p style="font-size: 0.75rem; color: #94a3b8;">Niveau: Expert • 500 XP</p>';
+                    html += '</div>';
+                    html += '</div>';
+                    html += '<i class="fa-solid fa-chevron-right" style="color: #475569;"></i>';
+                    html += '</div>';
+
+                    // CARTE RACE CONDITION
+                    html += '<div class="module-card" onclick="navigateTo(\'module-race-condition\')">';
+                    html += '<div style="display:flex; align-items:center; gap:1rem;">';
+                    html += '<div style="width: 3rem; height: 3rem; background: #334155; border-radius: 50%; display:flex; align-items:center; justify-content:center; color: #ef4444;">';
+                    html += '<i class="fa-solid fa-gauge-high"></i>';
+                    html += '</div>';
+                    html += '<div>';
+                    html += '<h4 style="color: white; font-weight: bold;">Lab 6: Race Condition</h4>';
+                    html += '<p style="font-size: 0.75rem; color: #94a3b8;">Niveau: Expert+ • 600 XP</p>';
+                    html += '</div>';
+                    html += '</div>';
+                    html += '<i class="fa-solid fa-chevron-right" style="color: #475569;"></i>';
+                    html += '</div>';
+                    
+                    // CARTE LFI (NEW)
+                    html += '<div class="module-card" onclick="navigateTo(\'module-lfi\')">';
+                    html += '<div style="display:flex; align-items:center; gap:1rem;">';
+                    html += '<div style="width: 3rem; height: 3rem; background: #334155; border-radius: 50%; display:flex; align-items:center; justify-content:center; color: #34d399;">';
+                    html += '<i class="fa-solid fa-folder-open"></i>';
+                    html += '</div>';
+                    html += '<div>';
+                    html += '<h4 style="color: white; font-weight: bold;">Lab 7: LFI (Local File Inclusion)</h4>';
+                    html += '<p style="font-size: 0.75rem; color: #94a3b8;">Niveau: Intermédiaire • 600 XP</p>';
+                    html += '</div>';
+                    html += '</div>';
+                    html += '<i class="fa-solid fa-chevron-right" style="color: #475569;"></i>';
+                    html += '</div>';
+
+                    return html;
+                }
+            },
+            'module-xss': {
+                xpReward: 200,
+                render: function() {
+                    var isDone = appState.completedModules.indexOf('module-xss') !== -1;
+                    var html = '';
+                    html += '<button onclick="navigateTo(\'dashboard\')" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Retour</button>';
+                    html += '<h2 class="dashboard-title"><i class="fa-solid fa-code" style="color:#10b981"></i> Lab 1: XSS Reflected</h2>';
+                    
+                    // Tutorial Box
+                    html += '<div class="tutorial-box">';
+                    html += '<div class="tutorial-header">';
+                    html += '<i class="fa-solid fa-circle-info"></i>';
+                    html += '<h3>Qu\'est-ce que le XSS Reflected ?</h3>';
+                    html += '<button class="hint-btn" onclick="toggleHint(\'xss-hint\')">Aide</button>';
+                    html += '</div>';
+                    html += '<p>Le XSS Reflected (ou non-persistant) se produit lorsque des données non fiables sont incluses dans la réponse d\'une application sans être correctement validées ou échappées.</p>';
+                    html += '<div id="xss-hint" class="hint-content">';
+                    html += '<p><strong>Indice :</strong> Essayez d\'injecter une balise script qui exécute <code>alert(1)</code>.</p>';
+                    html += '<p><strong>Solution :</strong> <code>&lt;script&gt;alert(1)&lt;/script&gt;</code> ou <code>&lt;img src=x onerror=alert(1)&gt;</code></p>';
+                    html += '</div>';
+                    html += '</div>';
+                    
+                    html += '<div class="stat-card" style="margin-bottom: 2rem;">';
+                    html += '<h3 style="color: white; margin-bottom: 0.5rem;">Mission : Hackez cette recherche</h3>';
+                    html += '<p style="color: #cbd5e1; line-height: 1.6;">Injectez du code JavaScript pour faire apparaître une <code>alert(1)</code>.</p>';
+                    html += '</div>';
+                    html += '<div class="lab-container">';
+                    html += '<div style="margin-bottom: 1rem; color: #cbd5e1;">http://vulnerable-search.com</div>';
+                    html += '<div class="lab-browser"><div class="browser-bar"><div class="browser-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><div class="url-bar">/search</div></div>';
+                    html += '<div class="browser-content"><h2 style="margin-bottom: 1.5rem; color: #1e293b;">Super Search</h2>';
+                    html += '<div style="display: flex; justify-content: center; gap:0.5rem;"><input type="text" id="lab-input-xss" class="vulnerable-input" placeholder="Que cherchez-vous ?"><button onclick="runXSSLab()" class="vulnerable-btn">Go</button></div>';
+                    html += '<div id="lab-result-xss" class="search-result"></div></div></div></div>';
+                    html += '<button id="validate-btn-xss" class="action-btn" onclick="validateLab(\'module-xss\')" disabled>' + (isDone ? 'Validé' : 'À faire') + '</button>';
+                    return html;
+                }
+            },
+            'module-idor': {
+                xpReward: 300,
+                render: function() {
+                    var isDone = appState.completedModules.indexOf('module-idor') !== -1;
+                    var html = '';
+                    html += '<button onclick="navigateTo(\'dashboard\')" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Retour</button>';
+                    html += '<h2 class="dashboard-title"><i class="fa-solid fa-id-card" style="color:#f59e0b"></i> Lab 2: IDOR</h2>';
+                    
+                    // Tutorial Box
+                    html += '<div class="tutorial-box">';
+                    html += '<div class="tutorial-header">';
+                    html += '<i class="fa-solid fa-circle-info"></i>';
+                    html += '<h3>Qu\'est-ce que l\'IDOR ?</h3>';
+                    html += '<button class="hint-btn" onclick="toggleHint(\'idor-hint\')">Aide</button>';
+                    html += '</div>';
+                    html += '<p>Les <strong>Insecure Direct Object References (IDOR)</strong> surviennent lorsqu\'un utilisateur peut accéder directement à des ressources non autorisées en modifiant la valeur d\'un paramètre qui référence directement un objet (comme un ID de profil ou un nom de fichier).</p>';
+                    html += '<div id="idor-hint" class="hint-content">';
+                    html += '<p><strong>Indice :</strong> Vous êtes l\'utilisateur <code>101</code>. L\'API Key de l\'utilisateur <code>100</code> est le drapeau. Comment accédez-vous à <code>/api/v1/profile/100</code> ?</p>';
+                    html += '<p><strong>Solution :</strong> Changez simplement l\'ID dans la barre d\'URL du navigateur simulé pour lire le profil de l\'administrateur.</p>';
+                    html += '</div>';
+                    html += '</div>';
+                    
+                    html += '<div class="stat-card" style="margin-bottom: 2rem;">';
+                    html += '<h3 style="color: white; margin-bottom: 0.5rem;">Mission : Obtenir l\'API Key de l\'Admin (ID 100)</h3>';
+                    html += '<p style="color: #cbd5e1; line-height: 1.6;">L\'URL du profil utilise le paramètre <code>id</code>. Vous êtes l\'utilisateur <code>101</code>.</p>';
+                    html += '</div>';
+                    
+                    html += '<div class="lab-container">';
+                    html += '<div class="lab-browser">';
+                    html += '<div class="browser-bar">';
+                    html += '<div class="browser-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div>';
+                    html += '<div id="idor-url-bar" class="url-bar">/api/v1/profile/101</div>';
+                    html += '</div>';
+                    html += '<div class="browser-content">';
+                    
+                    // Profile Card for User 101
+                    html += '<div id="profile-card" class="profile-card">';
+                    html += '<div class="profile-header">';
+                    html += '<div class="profile-avatar"><i class="fa-solid fa-user"></i></div>';
+                    html += '<div>';
+                    html += '<h4 style="color: #1e293b; margin: 0;">User 101</h4>';
+                    html += '<p style="color: #64748b; margin: 0;">Statut: Standard</p>';
+                    html += '</div>';
+                    html += '</div>';
+                    html += '<div class="profile-details">';
+                    html += '<p><span class="profile-label">ID :</span> 101</p>';
+                    html += '<p><span class="profile-label">Email :</span> user101@example.com</p>';
+                    html += '<p><span class="profile-label">API Key :</span> <span class="api-key">KEY-101-USER</span></p>';
+                    html += '</div>';
+                    html += '</div>';
+
+                    html += '<div class="idor-control">';
+                    html += 'Modifier l\'ID : <input type="number" id="idor-input" value="101" min="100" max="101" style="width:60px;" class="vulnerable-input">';
+                    html += '<button onclick="runIDORLab()" class="vulnerable-btn" style="width: auto;">Voir Profil</button>';
+                    html += '</div>';
+
+                    html += '</div></div></div>';
+                    html += '<button id="validate-btn-idor" class="action-btn" onclick="validateLab(\'module-idor\')" disabled>' + (isDone ? 'Validé' : 'À faire') + '</button>';
+
+                    return html;
+                }
+            },
+            'module-sqli': {
+                xpReward: 400,
+                render: function() {
+                    var isDone = appState.completedModules.indexOf('module-sqli') !== -1;
+                    var html = '';
+                    html += '<button onclick="navigateTo(\'dashboard\')" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Retour</button>';
+                    html += '<h2 class="dashboard-title"><i class="fa-solid fa-database" style="color:#ef4444"></i> Lab 3: SQL Injection</h2>';
+
+                    // Tutorial Box
+                    html += '<div class="tutorial-box">';
+                    html += '<div class="tutorial-header">';
+                    html += '<i class="fa-solid fa-circle-info"></i>';
+                    html += '<h3>Qu\'est-ce que la SQL Injection ?</h3>';
+                    html += '<button class="hint-btn" onclick="toggleHint(\'sqli-hint\')">Aide</button>';
+                    html += '</div>';
+                    html += '<p>La <strong>SQL Injection (SQLi)</strong> se produit lorsqu\'une application construit une requête SQL en utilisant des données fournies par l\'utilisateur sans les valider ou les échapper correctement.</p>';
+                    html += '<div id="sqli-hint" class="hint-content">';
+                    html += '<p><strong>Indice :</strong> Utilisez la clause <code>OR</code> pour rendre la condition de la clause <code>WHERE</code> toujours vraie.</p>';
+                    html += '<p><strong>Solution :</strong> Le payload classique <code>\' OR 1=1 -- </code> fonctionne souvent. Le <code>-- </code> (ou <code>#</code> en MySQL) commente le reste de la requête.</p>';
+                    html += '</div>';
+                    html += '</div>';
+
+                    html += '<div class="stat-card" style="margin-bottom: 2rem;">';
+                    html += '<h3 style="color: white; margin-bottom: 0.5rem;">Mission : Contourner l\'authentification</h3>';
+                    html += '<p style="color: #cbd5e1; line-height: 1.6;">Connectez-vous en tant qu\'Admin (le premier utilisateur de la base) sans connaître le mot de passe.</p>';
+                    html += '</div>';
+
+                    html += '<div class="lab-container">';
+                    html += '<div style="margin-bottom: 1rem; color: #cbd5e1;">http://vulnerable-auth.com</div>';
+                    html += '<div class="lab-browser">';
+                    html += '<div class="browser-bar">';
+                    html += '<div class="browser-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div>';
+                    html += '<div class="url-bar">/login</div>';
+                    html += '</div>';
+                    html += '<div class="browser-content">';
+                    html += '<div class="login-box">';
+                    html += '<h2 style="color: #1e293b; margin-bottom: 1.5rem;">Connexion</h2>';
+                    html += '<input type="text" id="sqli-username" class="login-input" placeholder="Nom d\'utilisateur">';
+                    html += '<input type="password" id="sqli-password" class="login-input" placeholder="Mot de passe">';
+                    html += '<button onclick="runSQLiLab()" class="vulnerable-btn">Se connecter</button>';
+                    html += '<div class="sql-debug" id="sql-debug">Query: SELECT * FROM users WHERE username=\'\' AND password=\'\'</div>';
+                    html += '</div>';
+                    html += '</div></div></div>';
+                    html += '<button id="validate-btn-sqli" class="action-btn" onclick="validateLab(\'module-sqli\')" disabled>' + (isDone ? 'Validé' : 'À faire') + '</button>';
+
+                    return html;
+                }
+            },
+            'module-csrf': {
+                xpReward: 400,
+                render: function() {
+                    var isDone = appState.completedModules.indexOf('module-csrf') !== -1;
+                    var html = '';
+                    html += '<button onclick="navigateTo(\'dashboard\')" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Retour</button>';
+                    html += '<h2 class="dashboard-title"><i class="fa-solid fa-hand-pointer" style="color:#3b82f6"></i> Lab 4: CSRF</h2>';
+                    
+                    // Tutorial Box
+                    html += '<div class="tutorial-box">';
+                    html += '<div class="tutorial-header">';
+                    html += '<i class="fa-solid fa-circle-info"></i>';
+                    html += '<h3>Qu\'est-ce que le CSRF ?</h3>';
+                    html += '<button class="hint-btn" onclick="toggleHint(\'csrf-hint\')">Aide</button>';
+                    html += '</div>';
+                    html += '<p>La <strong>Cross-Site Request Forgery (CSRF)</strong> force un utilisateur authentifié à exécuter des actions non désirées sur une application web à laquelle il est actuellement connecté.</p>';
+                    html += '<div id="csrf-hint" class="hint-content">';
+                    html += '<p><strong>Indice :</strong> La fonction de changement de mot de passe est un simple <code>GET</code>. Un <code>&lt;img&gt;</code> peut déclencher une requête <code>GET</code>.</p>';
+                    html += '<p><strong>Solution :</strong> Intégrez l\'URL de la requête <code>GET</code> malveillante dans une balise <code>&lt;img src="https://www.collinsdictionary.com/dictionary/french-english/malveillant"&gt;</code> sur le site de l\'attaquant.</p>';
+                    html += '</div>';
+                    html += '</div>';
+
+                    html += '<div class="stat-card" style="margin-bottom: 2rem;">';
+                    html += '<h3 style="color: white; margin-bottom: 0.5rem;">Mission : Changer le mot de passe de l\'Admin</h3>';
+                    html += '<p style="color: #cbd5e1; line-height: 1.6;">L\'Admin navigue sur notre site malveillant. Changez son mot de passe pour <code>hacked</code>. L\'URL vulnérable est <code>/change_pass?new_pass=[MOT_DE_PASSE]</code></p>';
+                    html += '</div>';
+
+                    html += '<div class="lab-container csrf-panel">';
+                    
+                    // Target Site Simulation
+                    html += '<h3>Victime (Admin)</h3>';
+                    html += '<div class="csrf-target">';
+                    html += '<h4 style="color: #1e293b; margin-bottom: 0.5rem;"><i class="fa-solid fa-lock" style="color:#64748b"></i> Paramètres de Compte</h4>';
+                    html += '<p style="font-size: 0.9rem;">Votre mot de passe actuel : <span id="admin-pass"><code>AdminPass123</code></span></p>';
+                    html += '<p style="font-size: 0.8rem; color: #64748b;">(Simule une session Admin authentifiée)</p>';
+                    html += '</div>';
+                    
+                    // Attacker Site Simulation
+                    html += '<h3 style="margin-top: 2rem;">Site de l\'Attaquant (Malveillant)</h3>';
+                    html += '<div class="csrf-attacker">';
+                    html += '<h4 style="color: #991b1b; margin-bottom: 0.5rem;"><i class="fa-solid fa-skull" style="color:#ef4444"></i> Page "Image Drôle"</h4>';
+                    html += '<p style="font-size: 0.9rem; color: #991b1b;">Le code de l\'attaque s\'exécutera lorsque l\'Admin chargera cette page. Payload utilisé :</p>';
+                    html += '<textarea id="csrf-payload" class="csrf-payload">&lt;img src="http://vulnerable-site.com/change_pass?new_pass=hacked"&gt;</textarea>';
+                    html += '<button onclick="runCSRFLab()" class="action-btn" style="background-color:#ef4444;">Exécuter l\'Attaque (Charger la page)</button>';
+                    html += '</div>';
+
+                    html += '</div>';
+                    html += '<button id="validate-btn-csrf" class="action-btn" onclick="validateLab(\'module-csrf\')" disabled>' + (isDone ? 'Validé' : 'À faire') + '</button>';
+
+                    return html;
+                }
+            },
+            'module-xxe': {
+                xpReward: 500,
+                render: function() {
+                    var isDone = appState.completedModules.indexOf('module-xxe') !== -1;
+                    var html = '';
+                    html += '<button onclick="navigateTo(\'dashboard\')" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Retour</button>';
+                    html += '<h2 class="dashboard-title"><i class="fa-solid fa-file-code" style="color:#fbbf24"></i> Lab 5: XXE</h2>';
+
+                    // Tutorial Box
+                    html += '<div class="tutorial-box">';
+                    html += '<div class="tutorial-header">';
+                    html += '<i class="fa-solid fa-circle-info"></i>';
+                    html += '<h3>Qu\'est-ce que le XXE ?</h3>';
+                    html += '<button class="hint-btn" onclick="toggleHint(\'xxe-hint\')">Aide</button>';
+                    html += '</div>';
+                    html += '<p>L\'<strong>XML External Entity (XXE)</strong> exploite les vulnérabilités de l\'analyseur (parser) XML, permettant d\'inclure des références à des entités externes, comme des fichiers locaux.</p>';
+                    html += '<div id="xxe-hint" class="hint-content">';
+                    html += '<p><strong>Indice :</strong> Déclarez une entité externe pointant vers un fichier système, puis faites-y référence dans le corps XML.</p>';
+                    html += '<p><strong>Solution :</strong> Utilisez <code>&lt;!DOCTYPE foo [ &lt;!ENTITY xxe SYSTEM "file:///etc/passwd" &gt; ]&gt;&lt;stock&gt;&lt;item&gt;&amp;xxe;&lt;/item&gt;&lt;/stock&gt;</code></p>';
+                    html += '</div>';
+                    html += '</div>';
+
+                    html += '<div class="stat-card" style="margin-bottom: 2rem;">';
+                    html += '<h3 style="color: white; margin-bottom: 0.5rem;">Mission : Lire le fichier <code>/etc/passwd</code></h3>';
+                    html += '<p style="color: #cbd5e1; line-height: 1.6;">Envoyez une requête XML pour inclure et afficher le contenu du fichier système <code>/etc/passwd</code>.</p>';
+                    html += '</div>';
+
+                    html += '<div class="lab-container">';
+                    html += '<h3>Formulaire de commande XML</h3>';
+                    html += '<p style="font-size: 0.9rem; color: #94a3b8; margin-bottom: 0.5rem;">Entrée XML pour la mise à jour des stocks :</p>';
+                    html += '<textarea id="xxe-input" class="xxe-input">&lt;stock&gt;\n  &lt;item&gt;Clé USB 32GB&lt;/item&gt;\n  &lt;quantity&gt;100&lt;/quantity&gt;\n&lt;/stock&gt;</textarea>';
+                    html += '<button onclick="runXXELab()" class="action-btn" style="background-color:#fbbf24; color: #1e293b;">Envoyer XML</button>';
+                    html += '<h3 style="margin-top: 1.5rem; color: #94a3b8;">Réponse du Serveur :</h3>';
+                    html += '<div id="xxe-output" class="xxe-output">Attente de l\'entrée...</div>';
+                    html += '</div>';
+                    html += '<button id="validate-btn-xxe" class="action-btn" onclick="validateLab(\'module-xxe\')" disabled>' + (isDone ? 'Validé' : 'À faire') + '</button>';
+
+                    return html;
+                }
+            },
+            'module-race-condition': {
+                xpReward: 600,
+                render: function() {
+                    var isDone = appState.completedModules.indexOf('module-race-condition') !== -1;
+                    var html = '';
+                    html += '<button onclick="navigateTo(\'dashboard\')" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Retour</button>';
+                    html += '<h2 class="dashboard-title"><i class="fa-solid fa-gauge-high" style="color:#ef4444"></i> Lab 6: Race Condition</h2>';
+
+                    // Tutorial Box
+                    html += '<div class="tutorial-box">';
+                    html += '<div class="tutorial-header">';
+                    html += '<i class="fa-solid fa-circle-info"></i>';
+                    html += '<h3>Qu\'est-ce qu\'une Race Condition ?</h3>';
+                    html += '<button class="hint-btn" onclick="toggleHint(\'rc-hint\')">Aide</button>';
+                    html += '</div>';
+                    html += '<p>Une <strong>Race Condition</strong> se produit lorsque le résultat d\'une opération dépend de la séquence ou du moment où d\'autres événements incontrôlables se produisent. En sécurité, cela permet d\'exécuter plusieurs actions critiques avant que la première ne soit complètement traitée, souvent pour contourner des vérifications (comme la vérification de solde).</p>';
+                    html += '<div id="rc-hint" class="hint-content">';
+                    html += '<p><strong>Indice :</strong> Envoyez les deux requêtes <code>/buy</code> (la vérification du solde et la déduction) en même temps ou en succession extrêmement rapide. Vous devez utiliser un outil pour envoyer <strong>plusieurs requêtes</strong> simultanément (concurrentiellement).</p>';
+                    html += '<p><strong>Solution :</strong> Capturez la requête d\'achat et envoyez <strong>deux</strong> requêtes identiques en même temps. Le serveur vérifiera le solde (500) pour la première, mais avant de déduire, il vérifiera le solde (500) pour la deuxième, permettant deux achats pour le prix d\'un.</p>';
+                    html += '</div>';
+                    html += '</div>';
+
+                    html += '<div class="shop-mission-box">';
+                    html += '<h3 style="color: white; margin-bottom: 0.5rem;">Mission : Achetez un article en double</h3>';
+                    html += '<p style="color: #cbd5e1; line-height: 1.6;">Vous avez un solde de <code>500 crédits</code>. L\'article coûte <code>500 crédits</code>. Exploitez la condition de concurrence pour acheter l\'article <strong>deux fois</strong>. (Solde final attendu: <code>0 crédits</code>. Nombre d\'articles: <code>2</code>).</p>';
+                    html += '</div>';
+
+                    html += '<div class="lab-container">';
+                    html += '<h3 style="text-align:center; margin-bottom: 1.5rem;">Boutique en Ligne Vulnérable</h3>';
+                    
+                    html += '<div class="shop-product-card">';
+                    html += '<div class="shop-product-image"><i class="fa-solid fa-bolt"></i></div>';
+                    html += '<h4 style="color: white; font-weight: bold; margin-bottom: 0.5rem;">Mega-Upgrade</h4>';
+                    html += '<p style="color: #94a3b8; font-size: 0.85rem;">Déverrouille toutes les fonctionnalités Pro.</p>';
+                    html += '<div class="shop-product-price">500 Cr.</div>';
+                    html += '</div>';
+                    
+                    html += '<div class="shop-cart-summary">';
+                    html += '<p style="color: #64748b; font-size: 0.9rem;">Votre Solde Actuel :</p>';
+                    html += '<div id="rc-balance" class="shop-cart-value">500 Cr.</div>';
+                    html += '<button id="rc-buy-btn" onclick="runRCLab()" class="action-btn" style="background-color:#10b981; margin-top: 1rem;">Acheter Mega-Upgrade</button>';
+                    html += '</div>';
+                    
+                    html += '<div class="shop-attack-panel">';
+                    html += '<h4 style="color: #ef4444; margin-bottom: 0.5rem;">Simulateur d\'Attaque (Outil de Hacking)</h4>';
+                    html += '<p style="color: #cbd5e1; font-size: 0.9rem;">Simule l\'envoi de requêtes concurrentielles. **Un seul clic** est nécessaire.</p>';
+                    html += '<button id="rc-attack-btn" onclick="runRCAttack()" class="action-btn" style="background-color:#991b1b; margin-top: 1rem;">Lancer l\'Attaque (x2 Requêtes)</button>';
+                    html += '</div>';
+
+                    html += '<h3 style="margin-top: 2rem; color: #94a3b8; text-align: center;">Articles Reçus :</h3>';
+                    html += '<div id="rc-products-received" class="shop-products-received">';
+                    html += '</div>';
+
+                    html += '</div>';
+                    html += '<button id="validate-btn-rc" class="action-btn" onclick="validateLab(\'module-race-condition\')" disabled>' + (isDone ? 'Validé' : 'À faire') + '</button>';
+
+                    return html;
+                }
+            },
+            'module-lfi': {
+                xpReward: 600,
+                render: function() {
+                    var isDone = appState.completedModules.indexOf('module-lfi') !== -1;
+                    var html = '';
+                    html += '<button onclick="navigateTo(\'dashboard\')" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Retour</button>';
+                    html += '<h2 class="dashboard-title"><i class="fa-solid fa-folder-open" style="color:#34d399"></i> Lab 7: LFI (Local File Inclusion)</h2>';
+
+                    // Tutorial Box
+                    html += '<div class="tutorial-box">';
+                    html += '<div class="tutorial-header">';
+                    html += '<i class="fa-solid fa-circle-info"></i>';
+                    html += '<h3>Qu\'est-ce que la LFI ?</h3>';
+                    html += '<button class="hint-btn" onclick="toggleHint(\'lfi-hint\')">Aide</button>';
+                    html += '</div>';
+                    html += '<p>La <strong>Local File Inclusion (LFI)</strong> se produit lorsqu\'une application inclut un fichier sur le serveur en utilisant une entrée non validée de l\'utilisateur, permettant de lire des fichiers système ou des fichiers source de l\'application.</p>';
+                    html += '<div id="lfi-hint" class="hint-content">';
+                    html += '<p><strong>Indice 1 :</strong> L\'application inclut la page demandée dans le répertoire <code>/pages/</code>. Vous devez naviguer vers le haut. Utilisez <code>../</code>. Le fichier cible est <code>/etc/passwd</code>.</p>';
+                    html += '<p><strong>Indice 2 (Contournement) :</strong> Si l\'application ajoute <code>.php</code> (comme dans le code réel), vous pourriez avoir besoin de contourner cette extension ajoutée.</p>';
+                    html += '<p><strong>Solution :</strong> Un chemin comme <code>../../../../etc/passwd</code> devrait fonctionner si l\'application n\'ajoute pas de suffixe. Le drapeau est le contenu de <code>/etc/passwd</code>.</p>';
+                    html += '</div>';
+                    html += '</div>';
+
+                    html += '<div class="stat-card" style="margin-bottom: 2rem;">';
+                    html += '<h3 style="color: white; margin-bottom: 0.5rem;">Mission : Afficher le fichier <code>/etc/passwd</code></h3>';
+                    html += '<p style="color: #cbd5e1; line-height: 1.6;">Le sélecteur de langue utilise un paramètre non sécurisé. Utilisez-le pour lire le contenu du fichier système <code>/etc/passwd</code>.</p>';
+                    html += '</div>';
+
+                    html += '<div class="lab-container">';
+                    html += '<div style="margin-bottom: 1rem; color: #cbd5e1;">http://vulnerable-site.com/index.php?lang=en</div>';
+                    html += '<div class="lab-browser">';
+                    html += '<div class="browser-bar">';
+                    html += '<div class="browser-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div>';
+                    html += '<div id="lfi-url-bar" class="url-bar">/index.php?lang=en</div>';
+                    html += '</div>';
+                    html += '<div class="browser-content">';
+                    
+                    html += '<h2 style="color: #1e293b; margin-bottom: 1.5rem;">Sélection de Langue</h2>';
+                    html += '<div style="display: flex; justify-content: center; gap:0.5rem;"><input type="text" id="lfi-input" class="vulnerable-input" value="en" placeholder="Nom du fichier de langue (ex: fr, en, de)"><button onclick="runLFILab()" class="vulnerable-btn">Charger</button></div>';
+                    
+                    html += '<h3 style="margin-top: 1.5rem; color: #94a3b8; text-align: left;">Contenu du fichier inclus :</h3>';
+                    html += '<div id="lfi-file-content" class="lfi-file-content">Bienvenue sur la page en Anglais (contenu de pages/en.php)</div>';
+                    
+                    html += '</div></div></div>';
+                    html += '<button id="validate-btn-lfi" class="action-btn" onclick="validateLab(\'module-lfi\')" disabled>' + (isDone ? 'Validé' : 'À faire') + '</button>';
+
+                    return html;
+                }
+            }
+            // Add other modules here
+        };
+
+        // --- Core Functions ---
+        function saveState() {
+            // Dans une application réelle, ceci irait à un serveur
+            localStorage.setItem('bountyAcademyState', JSON.stringify(appState));
+        }
+
+        function loadState() {
+            var savedState = localStorage.getItem('bountyAcademyState');
+            if (savedState) {
+                appState = JSON.parse(savedState);
+            }
+        }
+
+        function updateXPDisplay() {
+            var maxXP = 3000;
+            var xpPercentage = Math.min((appState.xp / maxXP) * 100, 100);
+            document.getElementById('xp-bar').style.width = xpPercentage + '%';
+            document.getElementById('current-xp').textContent = appState.xp + ' XP';
+            
+            // Mettre à jour les indicateurs de progression dans la barre latérale
+            Object.keys(modules).forEach(function(key) {
+                if (key !== 'dashboard' && modules[key].xpReward) {
+                    var progressEl = document.getElementById('progress-' + key.replace('module-', ''));
+                    var progressTextEl = document.getElementById('progress-text-' + key.replace('module-', ''));
+                    var isDone = appState.completedModules.indexOf(key) !== -1;
+                    
+                    if (progressEl) {
+                         if (isDone) {
+                            progressEl.style.width = '100%';
+                            progressTextEl.textContent = 'Terminé';
+                            progressTextEl.style.color = '#10b981';
+                        } else {
+                            progressEl.style.width = '0%';
+                            progressTextEl.textContent = '0%';
+                            progressTextEl.style.color = '#64748b';
+                        }
+                    }
+                }
+            });
+            updateLevel();
+        }
+
+        function updateLevel() {
+            var levels = {
+                1: { name: 'Novice', max: 200 },
+                2: { name: 'Aspirant', max: 500 },
+                3: { name: 'Junior', max: 1000 },
+                4: { name: 'Intermédiaire', max: 1800 },
+                5: { name: 'Expert', max: 3000 }
+            };
+
+            var currentLevel = 1;
+            var nextLevelXP = 3000;
+            
+            for (var level in levels) {
+                if (appState.xp >= levels[level].max) {
+                    currentLevel = parseInt(level) + 1;
+                }
+            }
+            
+            appState.level = Math.min(currentLevel, 5);
+            document.getElementById('user-level').textContent = levels[appState.level].name;
+
+            if (appState.level < 5) {
+                var nextLevel = levels[appState.level + 1];
+                document.getElementById('next-level-xp').textContent = nextLevel.max + ' XP (Prochain)';
+            } else {
+                 document.getElementById('next-level-xp').textContent = 'MAX ATTEINT';
+            }
+        }
+
+        function navigateTo(view) {
+            appState.currentView = view;
+            var contentArea = document.getElementById('content-area');
+            contentArea.innerHTML = modules[view].render();
+            
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.getAttribute('data-view') === view) {
+                    btn.classList.add('active');
+                }
+            });
+            document.getElementById('sidebar').classList.remove('mobile-open');
+            saveState();
+        }
+
+        function showToast(message, isSuccess = true) {
+            var toast = document.getElementById('toast');
+            var toastMessage = document.getElementById('toast-message');
+            var icon = toast.querySelector('i');
+
+            toastMessage.textContent = message;
+            icon.className = isSuccess ? 'fa-solid fa-check-circle' : 'fa-solid fa-xmark-circle';
+            icon.style.color = isSuccess ? '#34d399' : '#ef4444';
+
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        function showFakeAlert(content) {
+            document.getElementById('alert-content').innerHTML = content;
+            document.getElementById('fake-alert-overlay').style.display = 'flex';
+        }
+
+        function closeFakeAlert() {
+            document.getElementById('fake-alert-overlay').style.display = 'none';
+        }
+
+        function toggleHint(id) {
+            var hint = document.getElementById(id);
+            hint.style.display = hint.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function validateLab(moduleName) {
+            if (appState.completedModules.indexOf(moduleName) === -1) {
+                var reward = modules[moduleName].xpReward;
+                appState.xp += reward;
+                appState.completedModules.push(moduleName);
+                
+                showToast('Lab Validé ! +' + reward + ' XP', true);
+                updateXPDisplay();
+                saveState();
+                
+                // Re-render the current module view to show the 'Validé' button
+                navigateTo(moduleName);
+            }
+        }
+
+        // --- Lab Logic ---
+
+        // Lab 1: XSS
+        function runXSSLab() {
+            var input = document.getElementById('lab-input-xss').value;
+            var resultDiv = document.getElementById('lab-result-xss');
+            var validateBtn = document.getElementById('validate-btn-xss');
+
+            // Simuler la sortie non échappée
+            var output = 'Votre recherche pour : ' + input + ' n\'a donné aucun résultat.';
+
+            // Affichage vulnérable (le navigateur exécutera le JS si la balise est valide)
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = output;
+
+            // Simple vérification de la présence d'un payload XSS
+            if (input.includes('alert(1)') || input.includes('onerror')) {
+                // Si le payload XSS est trouvé, on simule l'exécution réussie
+                showFakeAlert(input);
+                validateBtn.disabled = false;
+                validateBtn.textContent = 'Valider la Découverte';
+            } else {
+                validateBtn.disabled = true;
+                validateBtn.textContent = 'À faire';
+            }
+        }
+
+        // Lab 2: IDOR
+        function runIDORLab() {
+            var idInput = document.getElementById('idor-input');
+            var profileCard = document.getElementById('profile-card');
+            var urlBar = document.getElementById('idor-url-bar');
+            var validateBtn = document.getElementById('validate-btn-idor');
+            var id = idInput.value;
+
+            // Mise à jour de l'URL simulée
+            urlBar.textContent = '/api/v1/profile/' + id;
+
+            // Mise à jour de la carte de profil
+            var profileDetails = profileCard.querySelector('.profile-details');
+
+            if (id === '101') {
+                profileDetails.innerHTML = '<p><span class="profile-label">ID :</span> 101</p>' +
+                                           '<p><span class="profile-label">Email :</span> user101@example.com</p>' +
+                                           '<p><span class="profile-label">API Key :</span> <span class="api-key">KEY-101-USER</span></p>';
+                profileCard.querySelector('h4').textContent = 'User 101';
+                profileCard.querySelector('p').textContent = 'Statut: Standard';
+                validateBtn.disabled = true;
+                validateBtn.textContent = 'À faire';
+
+            } else if (id === '100') {
+                // ID Admin
+                profileDetails.innerHTML = '<p><span class="profile-label">ID :</span> 100</p>' +
+                                           '<p><span class="profile-label">Email :</span> admin@corp.com</p>' +
+                                           '<p><span class="profile-label">API Key :</span> <span class="api-key" style="background: #d1fae5; color: #059669; border: 1px solid #10b981;">FLAG-ACCESS-ADMIN-API</span></p>';
+                profileCard.querySelector('h4').textContent = 'Admin 100';
+                profileCard.querySelector('p').textContent = 'Statut: Administrateur';
+                
+                validateBtn.disabled = false;
+                validateBtn.textContent = 'Valider la Découverte';
+
+            } else {
+                profileDetails.innerHTML = '<p style="color: #ef4444;">Erreur : Profil non trouvé.</p>';
+                profileCard.querySelector('h4').textContent = 'Erreur';
+                profileCard.querySelector('p').textContent = 'Statut: Inconnu';
+                validateBtn.disabled = true;
+                validateBtn.textContent = 'À faire';
+            }
+        }
+
+        // Lab 3: SQLi
+        function runSQLiLab() {
+            var username = document.getElementById('sqli-username').value;
+            var password = document.getElementById('sqli-password').value;
+            var debug = document.getElementById('sql-debug');
+            var validateBtn = document.getElementById('validate-btn-sqli');
+
+            var cleanedUsername = username.replace(/'/g, "''");
+            var cleanedPassword = password.replace(/'/g, "''");
+            var query = "SELECT * FROM users WHERE username='" + cleanedUsername + "' AND password='" + cleanedPassword + "'";
+            debug.textContent = "Query: " + query;
+
+            // Logique de vulnérabilité : vérifie si un payload SQLi réussi est utilisé.
+            if (username.includes("' OR 1=1 -- ") || username.includes("' OR 1=1 #")) {
+                showFakeAlert('Connexion réussie en tant que : Admin (Premier utilisateur de la base)');
+                validateBtn.disabled = false;
+                validateBtn.textContent = 'Valider la Découverte';
+            } else {
+                showFakeAlert('Échec de la connexion. Nom d\'utilisateur ou mot de passe incorrect.');
+                validateBtn.disabled = true;
+                validateBtn.textContent = 'À faire';
+            }
+        }
+
+        // Lab 4: CSRF
+        function runCSRFLab() {
+            var payload = document.getElementById('csrf-payload').value;
+            var adminPass = document.getElementById('admin-pass');
+            var validateBtn = document.getElementById('validate-btn-csrf');
+
+            // Vérifie si le payload contient l'URL malveillante avec le nouveau mot de passe 'hacked'
+            if (payload.includes('/change_pass?new_pass=hacked')) {
+                // Simuler l'exécution réussie du CSRF (l'Admin change son propre mot de passe)
+                adminPass.innerHTML = '<code>hacked</code> <span style="color:#ef4444;">(HACKED)</span>';
+                showToast('Le mot de passe de l\'Admin a été changé via CSRF.', true);
+                validateBtn.disabled = false;
+                validateBtn.textContent = 'Valider la Découverte';
+            } else {
+                showToast('Aucun changement de mot de passe réussi.', false);
+                validateBtn.disabled = true;
+                validateBtn.textContent = 'À faire';
+            }
+        }
+
+        // Lab 5: XXE
+        function runXXELab() {
+            var xmlInput = document.getElementById('xxe-input').value;
+            var outputDiv = document.getElementById('xxe-output');
+            var validateBtn = document.getElementById('validate-btn-xxe');
+            var passwdContent = "root:x:0:0:root:/root:/bin/bash\nflag:x:1000:1000:Flag User:/home/flag:/bin/bash\ndaemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin\nFLAG-SYSTEM-FILE-READ-SUCCESS";
+
+            outputDiv.innerHTML = '';
+            validateBtn.disabled = true;
+            validateBtn.textContent = 'À faire';
+
+            // Logique de la vulnérabilité XXE
+            if (xmlInput.includes('!ENTITY') && xmlInput.includes('file:///etc/passwd') && xmlInput.includes('&xxe;')) {
+                outputDiv.classList.add('xxe-success');
+                outputDiv.classList.remove('xxe-error');
+                outputDiv.innerHTML = '<span class="xxe-success">Traitement OK. Stock mis à jour.</span><hr style="margin: 10px 0; border-color:#d1fae5;">' + passwdContent;
+                validateBtn.disabled = false;
+                validateBtn.textContent = 'Valider la Découverte';
+            } else if (xmlInput.includes('!ENTITY')) {
+                 outputDiv.classList.add('xxe-error');
+                 outputDiv.classList.remove('xxe-success');
+                 outputDiv.innerHTML = '<span class="xxe-error">Erreur de traitement XML. Entité non valide ou fichier manquant.</span>';
+            } else {
+                outputDiv.classList.remove('xxe-success', 'xxe-error');
+                outputDiv.innerHTML = 'Commande traitée. Stock mis à jour.';
+            }
+        }
+
+        // Lab 6: Race Condition (RC)
+        var rcBalance = 500;
+        var rcProducts = 0;
+        var rcPrice = 500;
+
+        function updateRCDisplay() {
+            document.getElementById('rc-balance').textContent = rcBalance + ' Cr.';
+            var productsDiv = document.getElementById('rc-products-received');
+            productsDiv.innerHTML = '';
+            for (let i = 0; i < rcProducts; i++) {
+                productsDiv.innerHTML += '<div class="shop-product-received ' + (i >= 2 ? 'shop-product-free' : '') + '">Upgrade ' + (i + 1) + '</div>';
+            }
+        }
+
+        function runRCLab() {
+            // Tentative d'achat normal (doit échouer après le premier achat)
+            if (rcBalance >= rcPrice) {
+                rcBalance -= rcPrice;
+                rcProducts += 1;
+                showToast('Achat réussi ! Solde: ' + rcBalance + ' Cr.', true);
+            } else {
+                showToast('Échec de l\'achat. Solde insuffisant.', false);
+            }
+            updateRCDisplay();
+            document.getElementById('validate-btn-rc').disabled = true;
+        }
+
+        function runRCAttack() {
+            var validateBtn = document.getElementById('validate-btn-rc');
+            
+            // Simuler l'état initial avant les requêtes concurrentes
+            rcBalance = 500;
+            rcProducts = 0;
+
+            // Simuler la Race Condition : Les deux requêtes vérifient le solde (500)
+            // avant que la première ne déduise.
+            
+            // Requete 1
+            if (rcBalance >= rcPrice) {
+                rcProducts++;
+                // Simuler un léger délai avant la déduction (le "trou" dans le temps)
+            }
+            // Requete 2 (arrive pendant le "trou")
+            if (rcBalance >= rcPrice) {
+                rcProducts++;
+                // Déduction Requete 2 (se produit avant la déduction Requete 1)
+                rcBalance -= rcPrice; // rcBalance = 0
+            }
+
+            // Déduction Requete 1 (arrive en dernier)
+            // L'application vérifie *à nouveau* le solde, mais dans cet exemple simple,
+            // nous allons simuler qu'elle ne le fait pas correctement entre la vérification
+            // et la déduction, menant à une double déduction (si on simulait une déduction seule)
+            // OU simuler la vraie vulnérabilité : la première déduction est écrasée/ignorée
+            // On simule le résultat de l'attaque réussie : 2 produits pour 1 paiement.
+            // Si le solde était 500, le solde final doit être 0 pour 2 produits.
+
+            // Reset l'état final pour simuler l'exploit de double achat
+            rcBalance = 0;
+            rcProducts = 2;
+
+
+            if (rcProducts === 2 && rcBalance === 0) {
+                showToast('Attaque de Race Condition R.I.P. réussie ! 2 articles pour le prix de 1.', true);
+                validateBtn.disabled = false;
+                validateBtn.textContent = 'Valider la Découverte';
+            } else {
+                 showToast('L\'attaque a échoué. Réessayez ou vérifiez l\'indice.', false);
+                 rcProducts = 0;
+                 rcBalance = 500;
+            }
+            updateRCDisplay();
+        }
+
+        // Lab 7: LFI (Local File Inclusion)
+        function runLFILab() {
+            var input = document.getElementById('lfi-input').value;
+            var outputDiv = document.getElementById('lfi-file-content');
+            var urlBar = document.getElementById('lfi-url-bar');
+            var validateBtn = document.getElementById('validate-btn-lfi');
+
+            urlBar.textContent = '/index.php?lang=' + input;
+            
+            // Fichier cible simulé pour la validation
+            const targetFile = 'etc/passwd';
+            // Contenu simulé pour le fichier passwd
+            const passwdContent = "root:x:0:0:root:/root:/bin/bash\ndaemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin\nwww-data:x:33:33:www-data:/var/www:/usr/sbin/nologin\nFLAG_LFI_SUCCESS_9001";
+
+            outputDiv.innerHTML = '';
+            validateBtn.disabled = true;
+            validateBtn.textContent = 'À faire';
+
+            // Nettoyer l'entrée pour simuler le Path Traversal
+            var cleanedInput = input.replace(/%00/g, '').replace(/\.php$/i, ''); // Simuler le contournement du null byte ou du suffixe .php
+
+            // Logique de la vulnérabilité LFI
+            if (cleanedInput.includes(targetFile)) {
+                outputDiv.style.backgroundColor = '#d1fae5';
+                outputDiv.style.color = '#059669';
+                outputDiv.innerHTML = passwdContent; // Afficher le contenu du fichier
+                validateBtn.disabled = false;
+                validateBtn.textContent = 'Valider la Découverte';
+            } else if (cleanedInput === 'fr') {
+                outputDiv.style.backgroundColor = '#f1f5f9';
+                outputDiv.style.color = '#334155';
+                outputDiv.innerHTML = 'Bienvenue sur la page en Français (contenu de pages/fr.php)';
+            } else if (cleanedInput === 'en') {
+                 outputDiv.style.backgroundColor = '#f1f5f9';
+                outputDiv.style.color = '#334155';
+                outputDiv.innerHTML = 'Welcome to the English page (content of pages/en.php)';
+            } else {
+                 outputDiv.style.backgroundColor = '#f1f5f9';
+                 outputDiv.style.color = '#ef4444';
+                 outputDiv.innerHTML = 'Erreur: Le fichier de langue ' + cleanedInput + ' est introuvable dans le répertoire /pages.';
+            }
+
+            // Mettre en évidence les tentatives de path traversal
+            if (cleanedInput.includes('../') && !cleanedInput.includes(targetFile)) {
+                 outputDiv.style.backgroundColor = '#fee2e2';
+                 outputDiv.style.color = '#991b1b';
+                 outputDiv.innerHTML = 'Tentative d\'inclusion de fichier détectée. Le fichier n\'est pas accessible, mais vous êtes sur la bonne voie !';
+            }
+        }
+
+
+        // --- Initialisation ---
+        window.onload = function() {
+            loadState();
+            updateXPDisplay();
+            navigateTo(appState.currentView);
+        };
+    </script>
+</body>
+</html>

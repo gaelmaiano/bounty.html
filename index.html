@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -95,8 +94,7 @@
                 <div class="xp-info"><span id="current-xp">0 XP</span><span>3000 XP</span></div>
             </div>
             <div class="nav-section" id="nav-buttons">
-                <!-- Navigation buttons will be generated here -->
-            </div>
+                </div>
         </nav>
 
         <main class="main-content">
@@ -123,7 +121,11 @@
             xp: 0,
             level: 1,
             completedModules: [],
-            currentView: 'dashboard'
+            currentView: 'dashboard',
+            // État pour la Race Condition
+            raceStock: 5,
+            raceUserMoney: 1000,
+            raceInventory: 0
         };
 
         // --- DONNÉES DES MODULES ---
@@ -138,6 +140,16 @@
         ];
 
         // --- FONCTIONS UTILITAIRES ---
+        function escapeHtml(text) {
+            if (!text) return text;
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
         function getBackButton() {
             return '<button onclick="navigateTo(\'dashboard\')" class="vulnerable-btn" style="margin-bottom:1rem;"><i class="fa-solid fa-arrow-left"></i> Retour</button>';
         }
@@ -163,8 +175,10 @@
                     <h3 style="color:white; margin-bottom:1rem;">Modules</h3>`;
                 
                 modulesData.forEach(m => {
+                    const isCompleted = appState.completedModules.includes(m.id);
+                    const borderColor = isCompleted ? '#10b981' : '#475569';
                     html += `
-                    <div class="module-card" onclick="navigateTo('module-${m.id}')">
+                    <div class="module-card" style="border-color:${borderColor}" onclick="navigateTo('module-${m.id}')">
                         <div style="display:flex; align-items:center; gap:1rem;">
                             <div style="width:3rem; height:3rem; background:#334155; border-radius:50%; display:flex; align-items:center; justify-content:center; color:${m.color}"><i class="fa-solid fa-${m.icon}"></i></div>
                             <div><h4 style="color:white; margin:0;">${m.title}</h4><span style="font-size:0.8rem; color:#94a3b8;">${m.level} • ${m.xp} XP</span></div>
@@ -211,8 +225,7 @@
                                 <button onclick="loadIDORProfile()" class="vulnerable-btn">Charger</button>
                             </div>
                             <div id="idor-profile" class="profile-card">
-                                <!-- Profile content will be loaded here -->
-                            </div>
+                                </div>
                             <div style="margin-top:1rem; font-size:0.8rem; color:#64748b;">
                                 <strong>Indice:</strong> Changez l'ID dans l'URL ou le champ de saisie
                             </div>
@@ -294,8 +307,7 @@
                                 <button onclick="parseXXE()" class="vulnerable-btn" style="margin-top:0.5rem;">Parser XML</button>
                             </div>
                             <div id="xxe-result" class="xxe-output">
-                                <!-- XXE output will appear here -->
-                            </div>
+                                </div>
                             <div style="margin-top:1rem; font-size:0.8rem; color:#64748b;">
                                 <strong>Indice:</strong> Essayez une entité externe: <code>&lt;!DOCTYPE foo [&lt;!ENTITY xxe SYSTEM "file:///etc/passwd"&gt;]&gt;</code>
                             </div>
@@ -318,8 +330,9 @@
                                 <div style="background:#f0fdf4; padding:1rem; border-radius:4px;">
                                     <p><strong>Produit:</strong> Clé de licence premium</p>
                                     <p><strong>Prix:</strong> 100€</p>
-                                    <p><strong>Stock:</strong> <span id="stock-count">5</span> unités</p>
-                                    <p><strong>Votre argent:</strong> <span id="user-money">1000</span>€</p>
+                                    <p><strong>Stock:</strong> <span id="stock-count">${appState.raceStock}</span> unités</p>
+                                    <p><strong>Votre argent:</strong> <span id="user-money">${appState.raceUserMoney}</span>€</p>
+                                    <p><strong>Inventaire:</strong> <span id="user-inventory">${appState.raceInventory}</span></p>
                                 </div>
                             </div>
                             
@@ -333,8 +346,7 @@
                             </div>
                             
                             <div id="race-output" class="race-output">
-                                <!-- Race condition output will appear here -->
-                            </div>
+                                </div>
                             
                             <div style="margin-top:1rem; font-size:0.8rem; color:#64748b;">
                                 <strong>Indice:</strong> Envoyez plusieurs requêtes d'achat simultanées avant que le stock ne soit mis à jour
@@ -359,8 +371,7 @@
                                 <button onclick="loadLFI()" class="vulnerable-btn">Afficher</button>
                             </div>
                             <div id="lfi-result" class="lfi-file-content">
-                                <!-- LFI content will appear here -->
-                            </div>
+                                </div>
                             <div style="margin-top:1rem; font-size:0.8rem; color:#64748b;">
                                 <strong>Indice:</strong> Essayez des chemins comme <code>../../../etc/passwd</code> ou <code>../../../../etc/passwd</code>
                             </div>
@@ -393,9 +404,9 @@
                 if (appState.currentView === 'module-idor') {
                     loadIDORProfile();
                 } else if (appState.currentView === 'module-xxe') {
-                    parseXXE();
+                   // Optional auto-run
                 } else if (appState.currentView === 'module-lfi') {
-                    loadLFI();
+                   // Optional auto-run
                 }
             } else {
                 contentArea.innerHTML = '<h2>Vue non trouvée</h2>';
@@ -460,7 +471,43 @@
             document.getElementById('current-xp').textContent = `${appState.xp} XP`;
         }
 
+        // --- VALIDATION MODULE ---
+        function validateModule(moduleId) {
+            if (!appState.completedModules.includes(moduleId)) {
+                appState.completedModules.push(moduleId);
+                const module = modulesData.find(m => m.id === moduleId);
+                if (module) {
+                    appState.xp += module.xp;
+                    showToast(`+${module.xp} XP ! Module validé.`);
+                }
+                updateXPBar();
+                renderNavButtons();
+                renderContent(); // Refresh to disable button
+            }
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
         // --- FONCTIONS DES LABS ---
+        function showFakeAlert() {
+            document.getElementById('fake-alert-overlay').style.display = 'flex';
+        }
+
+        function closeFakeAlert() {
+            document.getElementById('fake-alert-overlay').style.display = 'none';
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('mobile-open');
+        }
+
         function runXSS() {
             const input = document.getElementById('xss-input').value;
             const resultDiv = document.getElementById('xss-result');
@@ -542,6 +589,7 @@
             `;
         }
 
+        // --- Réparation de la fonction XXE coupée ---
         function parseXXE() {
             const xmlInput = document.getElementById('xxe-input').value;
             const resultDiv = document.getElementById('xxe-result');
@@ -556,167 +604,113 @@ root:x:0:0:root:/root:/bin/bash
 daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
 bin:x:2:2:bin:/bin:/usr/sbin/nologin
 sys:x:3:3:sys:/dev:/usr/sbin/nologin
-admin:x:1000:1000:Admin User:/home/admin:/bin/bash
-www-data:x:33:33:www-data:/var/www:/usr/sbin/nologin
-                        </pre>
-                    </div>
-                `;
-            } else {
-                resultDiv.innerHTML = `
-                    <div>XML parsé avec succès</div>
-                    <div style="margin-top:1rem;">
-                        <strong>Contenu extrait:</strong>
-                        <pre style="background:#f8fafc; padding:0.5rem; border-radius:4px; margin-top:0.5rem;">
-${escapeHtml(xmlInput)}
-                        </pre>
-                    </div>
-                `;
-            }
-        }
-
-        // Variables pour la condition de course
-        let stock = 5;
-        let userMoney = 1000;
-        let purchaseInProgress = false;
-
-        function buyProduct() {
-            if (purchaseInProgress) return;
-            
-            purchaseInProgress = true;
-            const outputDiv = document.getElementById('race-output');
-            
-            if (stock > 0 && userMoney >= 100) {
-                // Simuler un délai de traitement
-                setTimeout(() => {
-                    stock--;
-                    userMoney -= 100;
-                    document.getElementById('stock-count').textContent = stock;
-                    document.getElementById('user-money').textContent = userMoney;
-                    
-                    outputDiv.innerHTML += `<p>✓ Achat réussi! Stock restant: ${stock}</p>`;
-                    purchaseInProgress = false;
-                }, 100);
-            } else {
-                outputDiv.innerHTML += `<p style="color:red;">✗ Achat échoué - Stock insuffisant ou fonds insuffisants</p>`;
-                purchaseInProgress = false;
-            }
-        }
-
-        function startRaceCondition() {
-            const outputDiv = document.getElementById('race-output');
-            const progressBar = document.getElementById('race-progress');
-            outputDiv.innerHTML = '<p>Lancement de 10 requêtes simultanées...</p>';
-            
-            let completedRequests = 0;
-            progressBar.style.width = '0%';
-            
-            for (let i = 0; i < 10; i++) {
-                setTimeout(() => {
-                    if (stock > 0 && userMoney >= 100) {
-                        // Ne pas vérifier le stock pendant le traitement (condition de course)
-                        setTimeout(() => {
-                            stock--;
-                            userMoney -= 100;
-                            document.getElementById('stock-count').textContent = stock;
-                            document.getElementById('user-money').textContent = userMoney;
-                            
-                            completedRequests++;
-                            progressBar.style.width = `${(completedRequests / 10) * 100}%`;
-                            
-                            if (completedRequests === 10) {
-                                outputDiv.innerHTML += `<p style="color:green; font-weight:bold;">✓ Condition de course exploitée! Acheté ${10 - stock} produits sur 5 disponibles</p>`;
-                            }
-                        }, Math.random() * 200); // Délai aléatoire
-                    }
-                }, i * 10); // Lancement quasi-simultané
-            }
-        }
-
-        function loadLFI() {
-            const filename = document.getElementById('lfi-input').value;
-            const resultDiv = document.getElementById('lfi-result');
-            
-            if (filename.includes('..') && filename.includes('etc/passwd')) {
-                resultDiv.innerHTML = `
-                    <div style="color:green; font-weight:bold;">✓ LFI réussie!</div>
-                    <div style="margin-top:1rem;">
-                        <strong>Contenu de /etc/passwd:</strong>
-                        <pre style="background:#f8fafc; padding:0.5rem; border-radius:4px; margin-top:0.5rem;">
-root:x:0:0:root:/root:/bin/bash
-daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
-bin:x:2:2:bin:/bin:/usr/sbin/nologin
-sys:x:3:3:sys:/dev:/usr/sbin/nologin
 sync:x:4:65534:sync:/bin:/bin/sync
 games:x:5:60:games:/usr/games:/usr/sbin/nologin
 man:x:6:12:man:/var/cache/man:/usr/sbin/nologin
 lp:x:7:7:lp:/var/spool/lpd:/usr/sbin/nologin
 mail:x:8:8:mail:/var/mail:/usr/sbin/nologin
+news:x:9:9:news:/var/spool/news:/usr/sbin/nologin
                         </pre>
                     </div>
                 `;
-            } else if (filename === 'welcome.txt') {
-                resultDiv.innerHTML = `
-                    <div>Bienvenue sur BountyAcademy!</div>
-                    <div style="margin-top:1rem;">Ceci est un message de bienvenue normal.</div>
-                `;
             } else {
-                resultDiv.innerHTML = `<div style="color:red;">Fichier non trouvé: ${escapeHtml(filename)}</div>`;
+                resultDiv.innerText = "Erreur de parsing XML: Entité invalide ou syntaxe incorrecte.";
             }
         }
 
-        function validateModule(moduleId) {
-            if (!appState.completedModules.includes(moduleId)) {
-                const module = modulesData.find(m => m.id === moduleId);
-                if (module) {
-                    appState.completedModules.push(moduleId);
-                    appState.xp += module.xp;
-                    
-                    updateXPBar();
-                    renderNavButtons();
-                    renderContent();
-                    
-                    showToast(`Lab ${moduleId.toUpperCase()} validé! +${module.xp} XP`);
-                }
+        // --- FONCTIONS MANQUANTES (RACE CONDITION & LFI) ---
+        function updateRaceUI() {
+            const stockEl = document.getElementById('stock-count');
+            const moneyEl = document.getElementById('user-money');
+            const invEl = document.getElementById('user-inventory');
+            if(stockEl) stockEl.innerText = appState.raceStock;
+            if(moneyEl) moneyEl.innerText = appState.raceUserMoney;
+            if(invEl) invEl.innerText = appState.raceInventory;
+        }
+
+        function buyProduct() {
+            if (appState.raceStock > 0 && appState.raceUserMoney >= 100) {
+                appState.raceStock--;
+                appState.raceUserMoney -= 100;
+                appState.raceInventory++;
+                updateRaceUI();
+                document.getElementById('race-output').innerHTML = '<span style="color:green">Achat réussi.</span>';
+            } else {
+                document.getElementById('race-output').innerHTML = '<span style="color:red">Stock épuisé ou fonds insuffisants.</span>';
             }
         }
 
-        // --- FONCTIONS UTILITAIRES ---
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        function showToast(message) {
-            const toast = document.getElementById('toast');
-            const toastMessage = document.getElementById('toast-message');
+        function startRaceCondition() {
+            const output = document.getElementById('race-output');
+            output.innerHTML = "Lancement de 10 requêtes simultanées...";
+            const progressBar = document.getElementById('race-progress');
+            progressBar.style.width = "0%";
             
-            toastMessage.textContent = message;
-            toast.classList.add('show');
+            // Simulation de la faille
+            // On envoie 10 requêtes, mais le check de stock est "lent"
+            let successfulBuys = 0;
+            let initialStock = appState.raceStock;
+            
+            // Simulation visuelle
+            progressBar.style.width = "100%";
             
             setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
+                // Logique de faille: Si on lance 10 requêtes alors qu'il reste du stock
+                // Le serveur mal codé pourrait valider plus d'achats que de stock
+                
+                if (initialStock > 0) {
+                    // Exploit réussi : on achète plus que le stock (ex: 8 réussites sur 5 stocks)
+                    successfulBuys = Math.min(10, initialStock + 3); 
+                    
+                    // Mise à jour de l'état buggé
+                    appState.raceStock = 0; // Stock vide
+                    appState.raceUserMoney -= (successfulBuys * 100);
+                    appState.raceInventory += successfulBuys;
+                    
+                    updateRaceUI();
+                    
+                    output.innerHTML = `
+                        <div style="background:#fee2e2; color:#b91c1c; padding:1rem; border-radius:4px;">
+                            <strong>RACE CONDITION RÉUSSIE !</strong><br>
+                            Requêtes envoyées: 10<br>
+                            Stock initial: ${initialStock}<br>
+                            Achats validés: ${successfulBuys}<br>
+                            <br>
+                            Le système a vendu plus d'objets qu'il n'en avait en stock car les requêtes sont arrivées avant la mise à jour de la base de données.
+                        </div>
+                    `;
+                } else {
+                    output.innerHTML = "Stock déjà à 0, impossible d'exploiter.";
+                }
+            }, 1000);
         }
 
-        function showFakeAlert() {
-            document.getElementById('fake-alert-overlay').style.display = 'flex';
+        function loadLFI() {
+            const input = document.getElementById('lfi-input').value;
+            const result = document.getElementById('lfi-result');
+            
+            if (input === 'welcome.txt') {
+                result.innerText = "Bienvenue sur notre serveur de fichiers sécurisé.";
+            } else if (input.includes('../../../etc/passwd') || input.includes('..%2F..%2F..%2Fetc%2Fpasswd')) {
+                result.innerHTML = `
+<pre style="color:#334155;">
+root:x:0:0:root:/root:/bin/bash
+daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+# ... fichier système lu avec succès
+</pre>
+<div style="color:green; font-weight:bold; margin-top:1rem;">✓ LFI Réussie !</div>
+                `;
+            } else {
+                result.innerText = "Erreur: Fichier introuvable ou accès refusé.";
+            }
         }
 
-        function closeFakeAlert() {
-            document.getElementById('fake-alert-overlay').style.display = 'none';
-        }
+        // --- INITIALISATION DE L'APPLICATION ---
+        // C'est la partie qui manquait pour afficher le contenu au démarrage
+        renderNavButtons();
+        updateXPBar();
+        navigateTo('dashboard');
 
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('mobile-open');
-        }
-
-        // --- INITIALISATION ---
-        document.addEventListener('DOMContentLoaded', function() {
-            renderNavButtons();
-            renderContent();
-            updateXPBar();
-        });
     </script>
 </body>
 </html>

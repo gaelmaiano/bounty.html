@@ -2203,9 +2203,20 @@ sync:x:4:65534:sync:/bin:/bin/sync
             }
         })();
     </script>
-</body>
+
 </html>
-    </script>
+   
+    // Lancement manuel
+    setTimeout(function() {
+        if (typeof renderNavButtons === 'function') {
+            renderNavButtons();
+            updateXPBar();
+            navigateTo('dashboard');
+        } else {
+            console.error("Fonctions non définies!");
+        }
+    }, 100);
+</script>
  
 </body>
 </html>

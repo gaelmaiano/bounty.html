@@ -2190,77 +2190,14 @@ sync:x:4:65534:sync:/bin:/bin/sync
             }
         }
 
-        // --- INITIALIZATION ---
-        function init() {
-            // Charger l'état depuis localStorage si disponible
-            const savedState = localStorage.getItem('bountyAcademyState');
-            if (savedState) {
-                try {
-                    const parsed = JSON.parse(savedState);
-                    Object.assign(appState, parsed);
-                } catch (e) {
-                    console.error('Erreur lors du chargement de l\'état:', e);
-                }
-            }
-            
-            // Rendre les boutons de navigation
+        /        // --- INITIALISATION DE L'APPLICATION ---
+        // Lancer l'init quand la page est prête
+        document.addEventListener('DOMContentLoaded', function() {
             renderNavButtons();
-            
-            // Mettre à jour la barre XP
             updateXPBar();
-            
-            // Naviguer vers la vue demandée dans l'URL ou le tableau de bord par défaut
-            const hash = window.location.hash.replace('#', '');
-            const validViews = ['dashboard', ...modulesData.map(m => 'module-' + m.id)];
-            
-            if (hash && validViews.includes(hash)) {
-                navigateTo(hash);
-            } else {
-                navigateTo('dashboard');
-            }
-            
-            // Sauvegarder l'état périodiquement
-            setInterval(() => {
-                localStorage.setItem('bountyAcademyState', JSON.stringify({
-                    xp: appState.xp,
-                    level: appState.level,
-                    completedModules: appState.completedModules,
-                    raceStock: appState.raceStock,
-                    raceUserMoney: appState.raceUserMoney,
-                    raceInventory: appState.raceInventory
-                }));
-            }, 5000);
-            
-            // Gérer le retour arrière/navigation
-            window.addEventListener('popstate', (event) => {
-                if (event.state && event.state.view) {
-                    navigateTo(event.state.view);
-                }
-            });
-            
-            // Fermer le sidebar en cliquant à l'extérieur sur mobile
-            document.addEventListener('click', (event) => {
-                const sidebar = document.getElementById('sidebar');
-                const mobileHeader = document.querySelector('.mobile-header');
-                
-                if (window.innerWidth <= 768 && 
-                    sidebar.classList.contains('mobile-open') &&
-                    !sidebar.contains(event.target) &&
-                    !mobileHeader.contains(event.target)) {
-                    sidebar.classList.remove('mobile-open');
-                }
-            });
-            
-            // Ajuster la hauteur du contenu sur mobile
-            window.addEventListener('resize', () => {
-                if (window.innerWidth > 768) {
-                    document.getElementById('sidebar').classList.remove('mobile-open');
-                }
-            });
-        }
+            navigateTo('dashboard');
+        });
 
-        // Démarrer l'application
-        document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>

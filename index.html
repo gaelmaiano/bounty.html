@@ -2210,6 +2210,71 @@ sync:x:4:65534:sync:/bin:/bin/sync
                 `;
             }
         })();
+                    // Ajouter cette fonction pour gérer le chargement initial
+function handleInitialRoute() {
+    const hash = window.location.hash.substring(1);
+    if (hash && views[hash]) {
+        navigateTo(hash);
+    } else {
+        navigateTo('dashboard');
+    }
+}
+
+// Modifier l'initialisation
+(function initApp() {
+    console.log("🚀 Lancement de BountyAcademy...");
+    try {
+        renderNavButtons();
+        updateXPBar();
+        
+        // Ajouter la persistance avec localStorage
+        loadSavedProgress();
+        
+        // Gérer le routage initial
+        handleInitialRoute();
+        
+        // Ajouter un gestionnaire pour le bouton back/forward du navigateur
+        window.addEventListener('popstate', function(event) {
+            if (event.state && event.state.view) {
+                navigateTo(event.state.view);
+            }
+        });
+        
+        console.log("✅ Application initialisée avec succès");
+    } catch (error) {
+        console.error("❌ Erreur d'initialisation:", error);
+        // ... code de fallback
+    }
+})();
+
+// Fonctions de persistance
+function saveProgress() {
+    localStorage.setItem('bountyAcademyProgress', JSON.stringify({
+        xp: appState.xp,
+        completedModules: appState.completedModules,
+        raceStock: appState.raceStock,
+        raceUserMoney: appState.raceUserMoney,
+        raceInventory: appState.raceInventory
+    }));
+}
+
+function loadSavedProgress() {
+    const saved = localStorage.getItem('bountyAcademyProgress');
+    if (saved) {
+        const progress = JSON.parse(saved);
+        appState.xp = progress.xp || 0;
+        appState.completedModules = progress.completedModules || [];
+        appState.raceStock = progress.raceStock || 5;
+        appState.raceUserMoney = progress.raceUserMoney || 1000;
+        appState.raceInventory = progress.raceInventory || 0;
+    }
+}
+
+// Appeler saveProgress après chaque validation de module
+function validateModule(moduleId) {
+    // ... code existant
+    saveProgress();
+}
     </script>
 </body>
 </html>

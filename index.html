@@ -531,4 +531,530 @@
                         html += '<div style="display:flex; align-items:center; gap:1rem;">';
                         html += '<div style="width: 3rem; height: 3rem; background: #334155; border-radius: 50%; display:flex; align-items:center; justify-content:center; color: ' + lab.color + ';">';
                         html += '<i class="fa-solid fa-' + lab.icon + '"></i></div>';
-                        html += '<div
+                        html += '<diveading"><i class="fa-solid fa-circle-info"></i><h3>Qu\'est-ce que le CSRF ?</h3>';
+                    html += '<button class="hint-btn" onclick="toggleHint(\'csrf-hint\')">Aide</button></div>';
+                    html += '<p>CSRF (Cross-Site Request Forgery) force un utilisateur authentifié à soumettre une requête non désirée.</p>';
+                    html += '<div id="csrf-hint" class="hint-content"><p><strong>Indice :</strong> La cible utilise la méthode GET pour le changement d\'email.</p>';
+                    html += '<p><strong>Solution :</strong> Un simple tag <code>&lt;img src="...&amp;email=hacked@example.com"&gt;</code> suffit.</p></div></div>';
+                    html += '<div class="stat-card" style="margin-bottom: 2rem;"><h3 style="color: white; margin-bottom: 0.5rem;">Mission : Changez l\'email de l\'utilisateur</h3>';
+                    html += '<p style="color: #cbd5e1; line-height: 1.6;">L\'utilisateur a l\'ID 1337 et l\'email "user@vulnerable.com". Changez son email à "hacked@bounty.com".</p></div>';
+                    html += '<div class="lab-container csrf-panel"><div style="margin-bottom: 1rem; color: #cbd5e1; text-align: center;">http://vulnerable-profile.com</div>';
+                    html += '<div class="csrf-target"><h4 style="margin-bottom: 1rem;">Profile Utilisateur (ID: 1337)</h4>';
+                    html += '<p><span class="profile-label">Email Actuel:</span> <span id="csrf-current-email">user@vulnerable.com</span></p>';
+                    html += '<p style="margin-top: 1rem;"><strong>Action Vulnérable:</strong> <code>/profile/update?id=1337&email=...</code></p></div>';
+                    html += '<div class="csrf-attacker"><h4 style="margin-bottom: 0.5rem;">Page de l\'attaquant (malicieuse)</h4>';
+                    html += '<p style="font-size: 0.85rem;">Insérez le payload CSRF ci-dessous. Il sera exécuté dès le chargement de cette page.</p>';
+                    html += '<textarea id="csrf-payload-input" class="csrf-payload" placeholder="Votre payload HTML/IMG ici"></textarea>';
+                    html += '<button onclick="runCSRFLab()" class="vulnerable-btn" style="width:100%; background-color:#ef4444; margin-top: 0.5rem;">Lancer l\'attaque</button></div>';
+                    html += '<div id="csrf-result" style="margin-top:1rem; text-align:center;"></div>';
+                    html += '</div><button id="validate-btn-csrf" class="action-btn" onclick="validateLab(\'module-csrf\')" disabled>' + (isDone ? 'Validé' : 'À faire') + '</button>';
+                    return html;
+                }
+            },
+            'module-xxe': {
+                xpReward: 500,
+                render: function() {
+                    var isDone = appState.completedModules.indexOf('module-xxe') !== -1;
+                    var html = '<button onclick="navigateTo(\'dashboard\')" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Retour</button>';
+                    html += '<h2 class="dashboard-title"><i class="fa-solid fa-file-code" style="color:#fbbf24"></i> Lab 5: XXE</h2>';
+                    html += '<div class="tutorial-box"><div class="tutorial-header"><i class="fa-solid fa-circle-info"></i><h3>Qu\'est-ce que l\'XXE ?</h3>';
+                    html += '<button class="hint-btn" onclick="toggleHint(\'xxe-hint\')">Aide</button></div>';
+                    html += '<p>XXE (XML External Entity) exploite la capacité d\'un parseur XML à traiter des entités externes.</p>';
+                    html += '<div id="xxe-hint" class="hint-content"><p><strong>Indice :</strong> Essayez de lire le fichier système <code>/etc/passwd</code>.</p>';
+                    html += '<p><strong>Solution :</strong> <code>&lt;!DOCTYPE foo [ &lt;!ENTITY xxe SYSTEM "file:///etc/passwd"&gt; ]&gt;&lt;user&gt;&lt;name&gt;&amp;xxe;&lt;/name&gt;&lt;/user&gt;</code></p></div></div>';
+                    html += '<div class="stat-card" style="margin-bottom: 2rem;"><h3 style="color: white; margin-bottom: 0.5rem;">Mission : Lisez le fichier système</h3>';
+                    html += '<p style="color: #cbd5e1; line-height: 1.6;">Soumettez un XML qui vous permet d\'accéder et d\'afficher le contenu du fichier <code>/etc/passwd</code>.</p></div>';
+                    html += '<div class="lab-container"><div style="margin-bottom: 1rem; color: #cbd5e1;">http://vulnerable-api.com/xml-processor</div>';
+                    html += '<div class="lab-browser"><div class="browser-bar"><div class="browser-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div>';
+                    html += '<div class="url-bar">/submit-xml</div></div><div class="browser-content" style="text-align: left;"><h3 style="margin-bottom: 1rem; color: #1e293b;">Service d\'Import XML</h3>';
+                    html += '<p style="color:#475569; margin-bottom: 0.5rem;">Entrez le XML à traiter :</p>';
+                    html += '<textarea id="xxe-input-xml" class="xxe-input" placeholder="&lt;user&gt;&lt;name&gt;John Doe&lt;/name&gt;&lt;/user&gt;"></textarea>';
+                    html += '<button onclick="runXXELab()" class="vulnerable-btn" style="width:100%; margin-top: 1rem;">Envoyer le XML</button>';
+                    html += '<div id="xxe-output" class="xxe-output"><span style="color:#3b82f6;">Résultat de la validation : En attente...</span></div>';
+                    html += '</div></div></div><button id="validate-btn-xxe" class="action-btn" onclick="validateLab(\'module-xxe\')" disabled>' + (isDone ? 'Validé' : 'À faire') + '</button>';
+                    return html;
+                }
+            },
+            'module-race-condition': {
+                xpReward: 600,
+                render: function() {
+                    var isDone = appState.completedModules.indexOf('module-race-condition') !== -1;
+                    var html = '<button onclick="navigateTo(\'dashboard\')" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Retour</button>';
+                    html += '<h2 class="dashboard-title"><i class="fa-solid fa-gauge-high" style="color:#ef4444"></i> Lab 6: Race Condition</h2>';
+                    html += '<div class="tutorial-box"><div class="tutorial-header"><i class="fa-solid fa-circle-info"></i><h3>Qu\'est-ce que le Race Condition ?</h3>';
+                    html += '<button class="hint-btn" onclick="toggleHint(\'rc-hint\')">Aide</button></div>';
+                    html += '<p>Une Race Condition exploite les failles de synchronisation pour exécuter plusieurs actions avant la mise à jour des états.</p>';
+                    html += '<div id="rc-hint" class="hint-content"><p><strong>Indice :</strong> Il y a un produit GRATUIT avec un stock limité.</p>';
+                    html += '<p><strong>Solution :</strong> Tentez d\'acheter le produit gratuit avec 100 requêtes en même temps.</p></div></div>';
+                    html += '<div class="stat-card" style="margin-bottom: 2rem;"><h3 style="color: white; margin-bottom: 0.5rem;">Mission : Obtenez 10 produits gratuits avec un seul stock</h3>';
+                    html += '<p style="color: #cbd5e1; line-height: 1.6;">Le "Bounty Key" est gratuit mais en un seul stock. Tentez d\'en obtenir 10.</p></div>';
+                    html += '<div class="lab-container csrf-panel"><div style="margin-bottom: 1rem; color: #cbd5e1; text-align: center;">http://vulnerable-shop.com/product/1</div>';
+                    html += '<div class="shop-mission-box"><h4 style="color:#ef4444; margin-bottom:0.5rem;"><i class="fa-solid fa-fire"></i> Offre Limitée</h4>';
+                    html += '<p style="color:#fca5a5; font-size: 0.9rem;"><strong>Bounty Key (ID: 1)</strong> - Prix: 0€ - Stock: <span id="shop-stock">1</span></p></div>';
+                    html += '<div class="shop-product-card"><div class="shop-product-image"><i class="fa-solid fa-key"></i></div>';
+                    html += '<h4 style="color:white; margin-bottom:0.5rem;">Bounty Key</h4><p style="color:#94a3b8; font-size:0.9rem;">Clé d\'accès gratuite mais extrêmement limitée.</p>';
+                    html += '<div class="shop-product-price">0.00€</div>';
+                    html += '<button onclick="runRaceConditionLab()" class="vulnerable-btn" style="background-color:#10b981;">Tenter l\'achat (x100 requêtes)</button></div>';
+                    html += '<div class="shop-cart-summary"><div style="font-size: 0.8rem; color: #94a3b8;">Total Réussi</div>';
+                    html += '<div id="shop-items-received" class="shop-amount-paid">0/10</div>';
+                    html += '<div style="margin-top: 1rem; font-size: 0.8rem; color: #94a3b8;">Produits Obtenus</div>';
+                    html += '<div id="shop-products-display" class="shop-products-received"></div></div>';
+                    html += '</div><button id="validate-btn-rc" class="action-btn" onclick="validateLab(\'module-race-condition\')" disabled>' + (isDone ? 'Validé' : 'À faire') + '</button>';
+                    return html;
+                }
+            },
+            'module-lfi': {
+                xpReward: 600,
+                render: function() {
+                    var isDone = appState.completedModules.indexOf('module-lfi') !== -1;
+                    var html = '<button onclick="navigateTo(\'dashboard\')" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Retour</button>';
+                    html += '<h2 class="dashboard-title"><i class="fa-solid fa-folder-open" style="color:#34d399"></i> Lab 7: LFI</h2>';
+                    html += '<div class="tutorial-box"><div class="tutorial-header"><i class="fa-solid fa-circle-info"></i><h3>Qu\'est-ce que la LFI ?</h3>';
+                    html += '<button class="hint-btn" onclick="toggleHint(\'lfi-hint\')">Aide</button></div>';
+                    html += '<p>LFI (Local File Inclusion) permet d\'inclure des fichiers locaux arbitraires sur le serveur.</p>';
+                    html += '<div id="lfi-hint" class="hint-content"><p><strong>Indice :</strong> Essayez de remonter dans l\'arborescence avec <code>../</code> pour atteindre <code>/etc/passwd</code>.</p>';
+                    html += '<p><strong>Solution :</strong> <code>../../../../etc/passwd</code> (ajustez le nombre de <code>../</code>)</p></div></div>';
+                    html += '<div class="stat-card" style="margin-bottom: 2rem;"><h3 style="color: white; margin-bottom: 0.5rem;">Mission : Lisez un fichier hors répertoire</h3>';
+                    html += '<p style="color: #cbd5e1; line-height: 1.6;">Le site affiche des fichiers de configuration. Lisez le contenu de <code>/etc/passwd</code>.</p></div>';
+                    html += '<div class="lab-container"><div style="margin-bottom: 1rem; color: #cbd5e1;">http://vulnerable-cms.com</div>';
+                    html += '<div class="lab-browser"><div class="browser-bar"><div class="browser-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div>';
+                    html += '<div class="url-bar">/config?file=<span id="lfi-current-file">config.php</span></div></div><div class="browser-content" style="text-align: left;"><h3 style="margin-bottom: 1rem; color: #1e293b;">Visualiseur de Fichiers</h3>';
+                    html += '<p style="color:#475569; margin-bottom: 0.5rem;">Entrez le nom du fichier (Ex: <code>config.php</code>)</p>';
+                    html += '<div class="search-form-container" style="flex-direction: row; justify-content: start;"><input type="text" id="lfi-file-input" class="vulnerable-input" placeholder="Nom du fichier">';
+                    html += '<button onclick="runLFILab()" class="vulnerable-btn">Afficher</button></div>';
+                    html += '<div id="lfi-file-content" class="lfi-file-content">Chargement de <code>config.php</code>...<br>... contenu du fichier ...</div>';
+                    html += '</div></div></div><button id="validate-btn-lfi" class="action-btn" onclick="validateLab(\'module-lfi\')" disabled>' + (isDone ? 'Validé' : 'À faire') + '</button>';
+                    return html;
+                }
+            }
+        };
+
+        function updateUI() {
+            // Mettre à jour la barre d'XP
+            var maxXP = 3000;
+            var xpPercent = Math.min(100, (appState.xp / maxXP) * 100);
+            document.getElementById('xp-bar').style.width = xpPercent + '%';
+            document.getElementById('current-xp').textContent = appState.xp + ' XP';
+            document.getElementById('user-level').textContent = appState.level >= 7 ? 'Hacker Élite' : (appState.level === 1 ? 'Novice' : 'Niv. ' + appState.level);
+
+            // Mettre à jour la progression des modules dans la barre latérale
+            for (var moduleName in modules) {
+                if (moduleName.startsWith('module-')) {
+                    var isCompleted = appState.completedModules.indexOf(moduleName) !== -1;
+                    var progressId = 'progress-' + moduleName.split('-')[1];
+                    var progressTextId = 'progress-text-' + moduleName.split('-')[1];
+                    var fill = isCompleted ? '100%' : '0%';
+                    var text = isCompleted ? '100%' : '0%';
+                    if (document.getElementById(progressId)) {
+                        document.getElementById(progressId).style.width = fill;
+                        document.getElementById(progressTextId).textContent = text;
+                    }
+                }
+            }
+
+            // Mettre à jour l'état actif des boutons de navigation
+            document.querySelectorAll('.nav-btn').forEach(function(btn) {
+                btn.classList.remove('active');
+                if (btn.getAttribute('data-view') === appState.currentView) {
+                    btn.classList.add('active');
+                }
+            });
+        }
+
+        function saveState() {
+            localStorage.setItem('bountyAcademyState', JSON.stringify(appState));
+        }
+
+        function loadState() {
+            var savedState = localStorage.getItem('bountyAcademyState');
+            if (savedState) {
+                try {
+                    appState = JSON.parse(savedState);
+                } catch (e) {
+                    console.error("Erreur lors du chargement de l'état :", e);
+                    // Utiliser l'état initial en cas d'erreur
+                }
+            }
+            updateUI();
+            navigateTo(appState.currentView, false);
+        }
+
+        function navigateTo(viewName, updateHistory = true) {
+            if (modules[viewName]) {
+                appState.currentView = viewName;
+                var contentArea = document.getElementById('content-area');
+                contentArea.innerHTML = modules[viewName].render();
+                
+                // Logique spécifique après le rendu
+                if (viewName === 'module-idor') {
+                    loadIDORProfile(1337); // Charger le profil par défaut
+                } else if (viewName === 'module-lfi') {
+                    runLFILab('config.php'); // Charger le fichier par défaut
+                } else if (viewName === 'module-xss') {
+                    // Réinitialiser le lab XSS
+                    document.getElementById('lab-result-xss').style.display = 'none';
+                    document.getElementById('lab-result-xss').innerHTML = '';
+                    document.getElementById('lab-input-xss').value = '';
+                } else if (viewName === 'module-csrf') {
+                    document.getElementById('csrf-current-email').textContent = 'user@vulnerable.com';
+                } else if (viewName === 'module-race-condition') {
+                    window.rc_stock = 1;
+                    window.rc_items_received = 0;
+                    document.getElementById('shop-stock').textContent = window.rc_stock;
+                    document.getElementById('shop-items-received').textContent = '0/10';
+                    document.getElementById('shop-products-display').innerHTML = '';
+                }
+                
+                updateUI();
+                saveState();
+
+                // Fermer la sidebar sur mobile
+                if (window.innerWidth <= 768) {
+                    document.getElementById('sidebar').classList.remove('mobile-open');
+                }
+            } else {
+                console.error('Vue non trouvée:', viewName);
+            }
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('mobile-open');
+        }
+
+        function showToast(message) {
+            var toast = document.getElementById('toast');
+            document.getElementById('toast-message').textContent = message;
+            toast.classList.add('show');
+            setTimeout(function() {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        function showFakeAlert(content) {
+            document.getElementById('alert-content').textContent = content;
+            document.getElementById('fake-alert-overlay').style.display = 'flex';
+            // Activer le bouton de validation XSS si l'exploit a réussi
+            if (appState.currentView === 'module-xss') {
+                document.getElementById('validate-btn-xss').disabled = false;
+                document.getElementById('validate-btn-xss').textContent = 'Valider Lab';
+            }
+        }
+
+        function closeFakeAlert() {
+            document.getElementById('fake-alert-overlay').style.display = 'none';
+        }
+
+        function toggleHint(id) {
+            var hint = document.getElementById(id);
+            if (hint.style.display === 'block') {
+                hint.style.display = 'none';
+            } else {
+                hint.style.display = 'block';
+            }
+        }
+
+        function runXSSLab() {
+            var input = document.getElementById('lab-input-xss').value;
+            var resultDiv = document.getElementById('lab-result-xss');
+            var urlBar = document.querySelector('#module-xss .url-bar');
+            
+            // Mise à jour de l'URL simulée
+            urlBar.textContent = '/search?q=' + encodeURIComponent(input).substring(0, 50) + '...';
+
+            // Logique de vulnérabilité (aucune désinfection)
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '<p style="color:#1e293b;">Résultat de la recherche pour : <strong>' + input + '</strong></p>';
+
+            // Évaluation du payload XSS pour l'alert(1)
+            if (input.toLowerCase().includes('<script>alert(1)</script>') || input.toLowerCase().includes('onerror=alert(1)')) {
+                // Simuler l'exécution du script par le navigateur
+                var tempDiv = document.createElement('div');
+                tempDiv.innerHTML = input;
+                
+                // Recherche de <script>alert(1)</script>
+                var scripts = tempDiv.getElementsByTagName('script');
+                for (var i = 0; i < scripts.length; i++) {
+                    if (scripts[i].innerHTML.includes('alert(1)')) {
+                        return showFakeAlert('1');
+                    }
+                }
+
+                // Recherche d'événements onerror (simulé)
+                if (input.toLowerCase().includes('onerror=alert(1)')) {
+                    return showFakeAlert('1');
+                }
+            }
+        }
+
+        function runCSRFLab() {
+            var payload = document.getElementById('csrf-payload-input').value;
+            var resultDiv = document.getElementById('csrf-result');
+            var currentEmailSpan = document.getElementById('csrf-current-email');
+            var validateBtn = document.getElementById('validate-btn-csrf');
+            resultDiv.innerHTML = '<p style="color:#ef4444;">Tentative de lancement d\'attaque...</p>';
+
+            // Simuler l'exécution du payload
+            var attackerImgMatch = payload.match(/<img[^>]+src=["']?\/profile\/update\?id=1337&email=hacked@bounty.com[^>]*>/i);
+            var attackerFormMatch = payload.match(/<form[^>]+action=["']?\/profile\/update[^>]*>[\s\S]*<input[^>]+name=["']?id["']?[^>]+value=["']?1337["']?[\s\S]*<input[^>]+name=["']?email["']?[^>]+value=["']?hacked@bounty.com["']?[\s\S]*<\/form>/i);
+
+            if (attackerImgMatch || attackerFormMatch) {
+                // Attaque réussie
+                currentEmailSpan.textContent = 'hacked@bounty.com';
+                resultDiv.innerHTML = '<p style="color:#10b981; font-weight:bold;">Succès! L\'email est maintenant: hacked@bounty.com</p>';
+                showToast('CSRF réussi ! Email changé.');
+                validateBtn.disabled = false;
+                validateBtn.textContent = 'Valider Lab';
+            } else {
+                resultDiv.innerHTML = '<p style="color:#ef4444;">Échec de l\'attaque. Vérifiez le payload.</p>';
+                validateBtn.disabled = true;
+            }
+        }
+
+        function attemptSQLLogin() {
+            var username = document.getElementById('sqli-username').value;
+            var password = document.getElementById('sqli-password').value;
+            var sqlDebug = document.getElementById('sql-debug');
+            var validateBtn = document.getElementById('validate-btn-sqli');
+
+            var injectedQuery = "SELECT * FROM users WHERE username='" + username + "' AND password='" + password + "'";
+            sqlDebug.innerHTML = 'Requête SQL: ' + injectedQuery;
+
+            // Logique de vulnérabilité (Union-Based, Error-Based, Tautology)
+            // Attaque de Tautologie classique pour contournement de login: ' OR '1'='1
+            // Attaque de commentaire pour cibler le premier utilisateur (souvent admin)
+            if (username.includes("' OR '1'='1") || username.includes("' OR 1=1 --") || username.includes("' OR 1=1 #") || username.includes("' --") || username.includes("' #")) {
+                // Simuler une connexion réussie en tant qu'administrateur
+                sqlDebug.innerHTML += '<br><span style="color:#ef4444;">Login Bypassed!</span> Connexion réussie en tant que: <strong style="color:white;">admin</strong>';
+                showToast('SQL Injection réussie ! Connecté en tant qu\'admin.');
+                validateBtn.disabled = false;
+                validateBtn.textContent = 'Valider Lab';
+            } else {
+                sqlDebug.innerHTML += '<br><span style="color:#94a3b8;">Échec de la connexion.</span> Nom d\'utilisateur ou mot de passe incorrect.';
+                validateBtn.disabled = true;
+            }
+        }
+
+        function loadIDORProfile(id = null) {
+            var userId = id || document.getElementById('idor-user-id').value;
+            var profileDisplay = document.getElementById('profile-display');
+            var urlUserId = document.getElementById('url-user-id');
+            var validateBtn = document.getElementById('validate-btn-idor');
+
+            urlUserId.textContent = userId;
+
+            var profileData;
+            var role = 'Utilisateur Standard';
+            var apiKey = 'N/A';
+            var avatar = 'U';
+
+            if (userId === '1337' || userId === 1337) {
+                profileData = { name: 'Alice Smith', email: 'alice.smith@user.com', role: role };
+                avatar = 'A';
+                validateBtn.disabled = true;
+            } else if (userId === '1234' || userId === 1234) {
+                role = 'Administrateur';
+                apiKey = 'SECRET_API_KEY_1234_IDOR_WINNER';
+                profileData = { name: 'Bob Admin', email: 'bob.admin@corp.com', role: role, apiKey: apiKey };
+                avatar = 'B';
+                showToast('IDOR réussi ! Profil Admin découvert.');
+                validateBtn.disabled = false;
+                validateBtn.textContent = 'Valider Lab';
+            } else {
+                profileData = { name: 'Utilisateur Inconnu', email: 'inconnu@domain.com', role: 'Visiteur' };
+                avatar = '?';
+                validateBtn.disabled = true;
+            }
+
+            var html = '<div class="profile-card"><div class="profile-header">';
+            html += '<div class="profile-avatar">' + avatar + '</div>';
+            html += '<h3 style="color:#1e293b; font-weight:bold;">' + profileData.name + '</h3></div>';
+            html += '<div class="profile-details">';
+            html += '<p><span class="profile-label">ID:</span> ' + userId + '</p>';
+            html += '<p><span class="profile-label">Email:</span> ' + profileData.email + '</p>';
+            html += '<p><span class="profile-label">Rôle:</span> ' + profileData.role + '</p>';
+            if (profileData.apiKey) {
+                html += '<p><span class="profile-label">API Key:</span> <span class="api-key">' + profileData.apiKey + '</span></p>';
+            }
+            html += '</div></div>';
+            
+            profileDisplay.innerHTML = html;
+        }
+
+        function runXXELab() {
+            var xmlInput = document.getElementById('xxe-input-xml').value;
+            var xxeOutput = document.getElementById('xxe-output');
+            var validateBtn = document.getElementById('validate-btn-xxe');
+            
+            var isSuccessful = false;
+            var outputText = '';
+
+            // Regex simple pour détecter une tentative de XXE avec une entité SYSTEM et /etc/passwd
+            var xxePayloadRegex = /<!ENTITY\s+[^>]*\s+SYSTEM\s+["']file:\/\/\/etc\/passwd["'][^>]*>/i;
+            var entityReferenceRegex = /&[^;]+;/; // Simple check for an entity reference in the data
+
+            if (xxePayloadRegex.test(xmlInput) && entityReferenceRegex.test(xmlInput)) {
+                // Simuler la lecture réussie de /etc/passwd
+                var passwdContent = 
+                    'root:x:0:0:root:/root:/bin/bash\n' +
+                    'daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin\n' +
+                    'bin:x:2:2:bin:/bin:/usr/sbin/nologin\n' +
+                    'sys:x:3:3:sys:/dev:/usr/sbin/nologin\n' +
+                    'hacker:x:1000:1000:Hacker,,,:/home/hacker:/bin/bash';
+
+                outputText = '<span class="xxe-success">Exploit XXE Réussi ! Contenu de /etc/passwd :</span>\n\n' + passwdContent;
+                isSuccessful = true;
+                showToast('XXE réussi ! Fichier système lu.');
+
+            } else if (xmlInput.trim() === '') {
+                outputText = '<span style="color:#3b82f6;">Résultat de la validation : XML vide soumis.</span>';
+                validateBtn.disabled = true;
+            } else {
+                // Simuler le traitement normal (ou une erreur si le XML est malformé sans être un exploit)
+                outputText = '<span style="color:#3b82f6;">Résultat de la validation : XML traité. Non-vulnérable.</span>';
+                validateBtn.disabled = true;
+            }
+
+            xxeOutput.innerHTML = outputText;
+
+            if (isSuccessful) {
+                validateBtn.disabled = false;
+                validateBtn.textContent = 'Valider Lab';
+            }
+        }
+
+        // --- Fonctions de Race Condition ---
+        var rc_stock = 1;
+        var rc_items_received = 0;
+        
+        function buyProduct() {
+            return new Promise(resolve => {
+                // Simuler une latence réseau/base de données
+                setTimeout(() => {
+                    if (rc_stock > 0) {
+                        // Manque de synchronisation : le stock n'est pas vérifié/mis à jour atomiquement
+                        rc_stock--;
+                        rc_items_received++;
+                        document.getElementById('shop-stock').textContent = rc_stock;
+                        resolve(true); // Achat réussi
+                    } else {
+                        resolve(false); // Échec, rupture de stock (normal après la première fois)
+                    }
+                }, Math.random() * 50); // Temps de réponse variable
+            });
+        }
+
+        function updateRaceConditionDisplay(success) {
+            var productsDisplay = document.getElementById('shop-products-display');
+            var itemsReceivedSpan = document.getElementById('shop-items-received');
+            var validateBtn = document.getElementById('validate-btn-rc');
+            
+            itemsReceivedSpan.textContent = rc_items_received + '/10';
+
+            if (success) {
+                var newProduct = document.createElement('div');
+                newProduct.className = 'shop-product-received shop-product-free';
+                newProduct.innerHTML = '<i class="fa-solid fa-key"></i>';
+                productsDisplay.appendChild(newProduct);
+            }
+
+            if (rc_items_received >= 10) {
+                showToast('Race Condition réussie ! 10 clés obtenues.');
+                validateBtn.disabled = false;
+                validateBtn.textContent = 'Valider Lab';
+            } else if (rc_items_received > 1) {
+                validateBtn.disabled = true;
+            }
+        }
+
+        async function runRaceConditionLab() {
+            document.getElementById('shop-stock').textContent = '1';
+            document.getElementById('shop-products-display').innerHTML = '';
+            window.rc_stock = 1;
+            window.rc_items_received = 0;
+            document.getElementById('validate-btn-rc').disabled = true;
+            document.getElementById('validate-btn-rc').textContent = 'À faire';
+
+            var numRequests = 100;
+            var promises = [];
+            
+            for (let i = 0; i < numRequests; i++) {
+                promises.push(buyProduct());
+            }
+
+            await Promise.all(promises);
+
+            updateRaceConditionDisplay(true); // Mise à jour finale (le display est aussi mis à jour dans buyProduct)
+            document.getElementById('shop-stock').textContent = window.rc_stock;
+            document.getElementById('shop-items-received').textContent = window.rc_items_received + '/10';
+            
+            if (window.rc_items_received >= 10) {
+                document.getElementById('validate-btn-rc').disabled = false;
+                document.getElementById('validate-btn-rc').textContent = 'Valider Lab';
+            } else {
+                showToast('Race Condition manquée. Seulement ' + window.rc_items_received + ' obtenus. Réessayez.');
+            }
+        }
+        // --- Fin Fonctions de Race Condition ---
+
+        function runLFILab(fileName = null) {
+            var fileInput = fileName || document.getElementById('lfi-file-input').value;
+            var lfiFileContent = document.getElementById('lfi-file-content');
+            var urlFileSpan = document.getElementById('lfi-current-file');
+            var validateBtn = document.getElementById('validate-btn-lfi');
+            
+            urlFileSpan.textContent = fileInput;
+            
+            var isSuccessful = false;
+            var content = '';
+
+            // Logique de vulnérabilité LFI
+            if (fileInput.toLowerCase().includes('config.php')) {
+                content = '<?php\n// config.php - Fichier normal\n$db_host = "localhost";\n$db_user = "vulnerable_user";\n$db_pass = "weakpassword123";\n?>';
+                validateBtn.disabled = true;
+            } else if (fileInput.toLowerCase().includes('etc/passwd')) {
+                content = 'root:x:0:0:root:/root:/bin/bash\n...\nhacker:x:1000:1000:Hacker,,,:/home/hacker:/bin/bash\n... (Contenu complet de /etc/passwd)';
+                isSuccessful = true;
+            } else {
+                content = 'ERREUR: Fichier ' + fileInput + ' non trouvé.';
+                validateBtn.disabled = true;
+            }
+
+            lfiFileContent.innerHTML = content;
+
+            if (isSuccessful) {
+                showToast('LFI réussi ! Fichier système lu.');
+                validateBtn.disabled = false;
+                validateBtn.textContent = 'Valider Lab';
+            }
+        }
+
+        function validateLab(moduleName) {
+            if (appState.completedModules.indexOf(moduleName) === -1) {
+                appState.completedModules.push(moduleName);
+                var xpReward = modules[moduleName].xpReward || 100;
+                appState.xp += xpReward;
+                
+                // Logique de niveau très simplifiée
+                if (appState.xp < 300) appState.level = 1;
+                else if (appState.xp < 600) appState.level = 2;
+                else if (appState.xp < 1000) appState.level = 3;
+                else if (appState.xp < 1500) appState.level = 4;
+                else if (appState.xp < 2100) appState.level = 5;
+                else if (appState.xp < 2700) appState.level = 6;
+                else appState.level = 7;
+                
+                saveState();
+                updateUI();
+                
+                showToast('Module ' + moduleName.split('-')[1].toUpperCase() + ' validé ! +' + xpReward + ' XP !');
+                
+                // Re-render la vue pour mettre à jour l'état du bouton
+                navigateTo(moduleName, false);
+            }
+        }
+
+        // Initialisation
+        window.onload = loadState;
+    </script>
+</body>
+</html>
